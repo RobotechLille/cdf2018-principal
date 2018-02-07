@@ -1,0 +1,11 @@
+WPASSID="MySSID"
+WPAKEYMGMT="WPA-PSK"
+WPAPSK=mypassword
+ADDRESS=192.168.1.42
+NETMASK=255.255.255.0
+GATEWAY=192.168.1.1
+SSHCPUB="ecdsa-sha2-nistp256 ... principal@robotech"
+SSHCPRV="-----BEGIN EC PRIVATE KEY-----
+...
+-----END EC PRIVATE KEY-----"
+SSHSPRV="..."

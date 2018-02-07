@@ -1,0 +1,7 @@
+config BR2_PACKAGE_MERCPCL
+    bool "mercpcl"
+    select BR2_PACKAGE_LIBUSB
+    select BR2_PACKAGE_LIBFTDI
+    help
+        Command-line utility that can be used to program
+        Mercury FPGA development boards.

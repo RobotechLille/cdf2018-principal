@@ -1,0 +1,2 @@
+source "$BR2_EXTERNAL_CDF_PATH/package/robotech/Config.in"
+source "$BR2_EXTERNAL_CDF_PATH/package/cr1901/Config.in"

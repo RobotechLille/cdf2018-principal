@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Connect to Wi-Fi network
+#
+
+start() {
+	printf "Starting Wi-Fi connection: "
+	# modprobe brcmfmac
+	modprobe r8188eu
+	ip link set wlan0 up
+	wpa_supplicant -D wext -B -iwlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf -P /var/run/wpa_supplicant.pid
+	ifup wlan0
+	echo "OK"
+}
+
+stop() {
+	printf "Stopping Wi-Fi connection: "
+	start-stop-daemon -K -q -p /var/run/wpa_supplicant.pid
+	ifdown wlan0
+	# rmmod brcmfmac
+	rmmod r8188eu
+	echo "OK"
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart|reload)
+		stop
+		start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+
+exit $?

@@ -1,0 +1,6 @@
+config BR2_PACKAGE_CHEF
+    bool "chef"
+    select BR2_PACKAGE_WIRINGPI
+    help
+        Cerveau du robot principal pour la Coupe de France
+        de Robotique, équipe Robotech Lille (Polytech Lille).

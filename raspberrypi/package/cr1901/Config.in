@@ -1,0 +1,1 @@
+source "$BR2_EXTERNAL_CDF_PATH/package/cr1901/mercpcl/Config.in"

@@ -1,0 +1,6 @@
+Host principal p
+    User root
+    Hostname 192.168.43.72
+    PreferredAuthentications publickey
+    PubkeyAuthentication yes
+    IdentityFile "/home/geoffrey/CdF/cdf2018-principal/root/sshkey"

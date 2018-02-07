@@ -1,0 +1,15 @@
+[submodule "root/buildroot"]
+        path = root/buildroot
+        url = git://git.buildroot.net/buildroot
+[submodule "ardPince/Arduino-Makefile"]
+	path = ardPince/Arduino-Makefile
+	url = https://github.com/sudar/Arduino-Makefile
+[submodule "ardMoteur/Arduino-Makefile"]
+	path = ardMoteur/Arduino-Makefile
+	url = https://github.com/sudar/Arduino-Makefile
+[submodule "fpga/uart"]
+	path = fpga/uart
+	url = https://github.com/pabennett/uart.git
+[submodule "raspberrypi/buildroot"]
+	path = raspberrypi/buildroot
+	url = /home/geoffrey/buildroot

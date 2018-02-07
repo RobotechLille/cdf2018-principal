@@ -1,0 +1,16 @@
+FreeRTOSv9.0.0/*
+*.zip
+
+*.o
+*.lst
+*.d
+*.hex
+*.eep
+*.obj
+*.elf
+*.map
+*.obj
+*.a90
+*.sym
+*.lnk
+*.lss
