@@ -80,6 +80,11 @@
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
 
+// GF: added
+#define configUSE_MUTEXES 1
+#define INCLUDE_xQueueGetMutexHolder    1
+// -- done
+
 // JF: added
 #define configUSE_TIMERS                        1
 #define configTIMER_TASK_PRIORITY               3

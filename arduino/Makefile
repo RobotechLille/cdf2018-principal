@@ -29,9 +29,11 @@ FORMAT = ihex
 
 # Target file name (without extension).
 TARGET = principal
+OBJS = serial
 
 # Custom
 NAME = $(TARGET).c
+OBJSC = $(addsuffix .c,$(OBJS))
 
 # List C source files here. (C dependencies are automatically generated.)
 INSTALL_DIR=./FreeRTOSv9.0.0/FreeRTOS
@@ -41,6 +43,7 @@ PORT_DIR = .
 
 SRC	= \
 $(NAME) \
+$(OBJSC) \
 $(SOURCE_DIR)/tasks.c \
 $(SOURCE_DIR)/queue.c \
 $(SOURCE_DIR)/list.c \

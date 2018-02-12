@@ -1,25 +1,30 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
 #include <FreeRTOS.h>
 #include <task.h>
-#include <avr/io.h>
 
-void TaskBlink(void *pvParameters)
-{
+#include "serial.h"
+
+unsigned char speed = 200;
+
+void TaskBlink(void *pvParameters) {
     (void) pvParameters;
     TickType_t xLastWakeTime;
-    const TickType_t xFrequency = 200 / portTICK_PERIOD_MS;
+    TickType_t xFrequency = speed / portTICK_PERIOD_MS;
 
     DDRB = 0xFF;
 
     xLastWakeTime = xTaskGetTickCount();
-    for (;;)
-    {
+    for (;;) {
         PORTB = PINB ^ 0xFF;
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
 
-int main(void)
-{
+int main(void) {
+    configureAC();
+    sei();
+
     xTaskCreate(TaskBlink, "Blink", 128, NULL, 2, NULL);
     vTaskStartScheduler();
     return 0;
