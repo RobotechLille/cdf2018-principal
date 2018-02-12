@@ -37,7 +37,7 @@ endif
 default: bin/testpin bin/premier
 
 # Binaires (dont il faut spécifier les objets explicitement)
-bin/premier: obj/common.o
+bin/premier: obj/common.o obj/serial.o
 bin/testPin: obj/testPin.o
 	$(CC) $(LDFLAGS) $^ -lwiringPi -o $@
 
