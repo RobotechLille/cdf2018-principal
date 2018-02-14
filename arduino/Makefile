@@ -29,7 +29,7 @@ FORMAT = ihex
 
 # Target file name (without extension).
 TARGET = principal
-OBJS = serial
+OBJS = AC position movement
 
 # Custom
 NAME = $(TARGET).c

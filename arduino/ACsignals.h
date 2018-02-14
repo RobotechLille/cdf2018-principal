@@ -1,5 +1,6 @@
-// Définition des signaux échagés entre l'Arduino et le chef
-//
+/*
+ * Définition des signaux échagés entre l'Arduino et le chef
+ */
 
 #ifndef __ACSIGNALS_H_
 #define __ACSIGNALS_H_
@@ -21,17 +22,41 @@
 // Chef → Arduino
 
 // Pour le debug
-#define C2AD_PING 0
+#define C2AD_PING 'P'
+struct C2AD_PINGs {
+};
+
 // Arrête tous les actionneurs
-#define C2AD_STOP 1
+#define C2AD_STOP 'S'
+struct C2ADD_STOPs {
+};
+
 // Donne une destination
-#define C2AD_GOTO 2
-// Donne une rotation
-#define C2AD_ROTATE 3
+#define C2AD_GOTO 'G'
+struct C2AD_GOTOs {
+    float x;
+    float y;
+    float o; // Peut-être NaN ou autre valeur spécifique si indifférent
+};
 
 // Arduino → Chef
 
-// Envoie la position actuelle
-#define A2CI_POS
+// Erreur quelconque
+#define A2CD_ERR 'E'
+struct A2CI_ERRs {
+    unsigned char code;
+};
+
+#define ERR_UNKNOWN_CODE 'C'
+
+// Envoie les infos de debug
+#define A2CI_DBG 'D'
+struct A2CI_DBGs {
+    float x;
+    float y;
+    float o;
+    // ...
+};
+
 
 #endif

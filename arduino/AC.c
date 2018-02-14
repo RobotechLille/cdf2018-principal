@@ -1,12 +1,13 @@
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include <FreeRTOS.h>
-#include <queue.h>
+#include "AC.h"
 
-#include "serial.h"
-#include "ACsignals.h"
+void registerRxHandler(unsigned char code, rxHandler handler)
+{
+    rxHandlers[code] = handler;
+}
 
-ISR(USART0_UDRE_vect) {
+
+ISR(USART0_UDRE_vect)
+{
     // When a transmit is ready to be done again
     TaskHandle_t holder = xSemaphoreGetMutexHolder(sSendAC);
     if (holder != NULL) {
@@ -14,14 +15,16 @@ ISR(USART0_UDRE_vect) {
     }
 }
 
-void sendByteAC(unsigned char data) {
+void sendByteAC(unsigned char data)
+{
     while (!bit_is_set(UCSR0A, UDRE0)) {
         vTaskSuspend(xSemaphoreGetMutexHolder(sSendAC));
     }
     UDR0 = data;
 }
 
-void sendAC(unsigned char code, void* data, size_t size) {
+void sendAC(unsigned char code, void* data, size_t size)
+{
     xSemaphoreTake(sSendAC, 0);
     sendByteAC(code);
     unsigned char* p = data;
@@ -31,31 +34,48 @@ void sendAC(unsigned char code, void* data, size_t size) {
     xSemaphoreGive(sSendAC);
 }
 
-ISR(USART0_RX_vect) {
+ISR(USART0_RX_vect)
+{
     // When a character is received
     vTaskResume(tReaderAC);
 }
 
-
-unsigned char readAC() {
+unsigned char readByteAC()
+{
     while (!bit_is_set(UCSR0A, RXC0)) {
         vTaskSuspend(tReaderAC);
     }
     return UDR0;
 }
 
-void TaskReaderAC(void *pvParameters) {
-    (void) pvParameters;
-    unsigned char code;
-    for (;;) {
-        code = readAC();
-
-        char* sending = "Bonjour ! Comment va ?";
-        sendAC('@', sending, 22);
+void readAC(void* data, size_t size)
+{
+    unsigned char* p = data;
+    for (int i = 0; i < size; i++) {
+        *p = readByteAC();
+        p++;
     }
 }
 
-void configureAC() {
+void TaskReaderAC(void* pvParameters)
+{
+    (void)pvParameters;
+    unsigned char code;
+    for (;;) {
+        code = readByteAC();
+
+        rxHandler handler = rxHandlers[code];
+        if (handler != NULL) {
+            handler();
+        } else {
+            struct A2CI_ERRs err = { ERR_UNKNOWN_CODE };
+            sendAC(A2CD_ERR, &err, sizeof(err));
+        }
+    }
+}
+
+void configureAC()
+{
     /* Set baud rate */
     UBRR0 = AC_PRESCALER;
 
@@ -68,7 +88,9 @@ void configureAC() {
     /* Set 8 bits character and 1 stop bit */
     UCSR0C = (1 << UCSZ01 | 1 << UCSZ00);
 
+    for (int i = 0; i < 256; i++) {
+        rxHandlers[i] = NULL;
+    }
     sSendAC = xSemaphoreCreateMutex();
     xTaskCreate(TaskReaderAC, "TaskReaderAC", 128, NULL, 2, &tReaderAC);
 }
-

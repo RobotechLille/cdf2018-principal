@@ -3,7 +3,9 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include "serial.h"
+#include "AC.h"
+#include "position.h"
+#include "movement.h"
 
 unsigned char speed = 200;
 
@@ -23,9 +25,12 @@ void TaskBlink(void *pvParameters) {
 
 int main(void) {
     configureAC();
-    sei();
+    configureMovement();
+    configurePosition();
 
     xTaskCreate(TaskBlink, "Blink", 128, NULL, 2, NULL);
+    sei();
+
     vTaskStartScheduler();
     return 0;
 }
