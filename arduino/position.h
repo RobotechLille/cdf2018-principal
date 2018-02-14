@@ -8,11 +8,9 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-struct position {
-    float x;
-    float y;
-    float o;
-};
+#include "ACsignals.h"
+
+struct position actuel;
 
 TaskHandle_t tPosition;
 

@@ -29,7 +29,7 @@ FORMAT = ihex
 
 # Target file name (without extension).
 TARGET = principal
-OBJS = AC position movement
+OBJS = AC position movement debug
 
 # Custom
 NAME = $(TARGET).c

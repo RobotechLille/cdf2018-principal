@@ -1,3 +1,7 @@
+/*
+ * Définition des fonctions utilisées pour échager entre l'Arduino et le chef
+ */
+
 #ifndef __SERIAL_H_
 #define __SERIAL_H_
 

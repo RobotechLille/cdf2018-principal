@@ -6,6 +6,7 @@
 #include "AC.h"
 #include "position.h"
 #include "movement.h"
+#include "debug.h"
 
 unsigned char speed = 200;
 
@@ -24,9 +25,10 @@ void TaskBlink(void *pvParameters) {
 }
 
 int main(void) {
-    configureAC();
+    configureAC(); // Doit rester en premier :)
     configureMovement();
     configurePosition();
+    configureDebug();
 
     xTaskCreate(TaskBlink, "Blink", 128, NULL, 2, NULL);
     sei();

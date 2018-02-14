@@ -7,6 +7,13 @@
 
 #define AC_BAUDRATE 9600UL
 
+// Structures used everywhere
+struct position {
+    float x;
+    float y;
+    float o;
+};
+
 // D: Direct
 // Sens naturel : Envoi de donnée
 // Sens inverse : Accusé de réception
@@ -33,11 +40,8 @@ struct C2ADD_STOPs {
 
 // Donne une destination
 #define C2AD_GOTO 'G'
-struct C2AD_GOTOs {
-    float x;
-    float y;
-    float o; // Peut-être NaN ou autre valeur spécifique si indifférent
-};
+#define C2AD_GOTOs position
+// Peut-être o à NaN ou autre valeur spécifique si indifférent
 
 // Arduino → Chef
 
@@ -52,9 +56,9 @@ struct A2CI_ERRs {
 // Envoie les infos de debug
 #define A2CI_DBG 'D'
 struct A2CI_DBGs {
-    float x;
-    float y;
-    float o;
+    struct position actuel;
+    struct position destination;
+    unsigned char movement;
     // ...
 };
 
