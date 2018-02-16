@@ -4,6 +4,7 @@
 #include <sys/ioctl.h>
 #include <pthread.h>
 #include <termios.h> // baudrates
+#include <stdbool.h>
 
 #include "ACsignals.h"
 
@@ -17,6 +18,7 @@ pthread_t tReaderAC;
 
 typedef void (*rxHandler)(void);
 rxHandler rxHandlersAC[256];
+bool pret;
 
 void registerRxHandler(unsigned char code, rxHandler handler); // À utiliser après configureCA();
 void sendByteCA(unsigned char data); // Privé

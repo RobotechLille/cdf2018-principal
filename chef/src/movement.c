@@ -8,13 +8,14 @@ void onC2AD_STOP()
 {
     // On considère que l'arrêt se fait très rapidement pour ne pas
     // avoir à attendre le signal de retour de C2AD_STOP
+    registerRxHandler(C2AD_STOP, NULL);
 }
 
 void stop()
 {
     printf("→ Arrêt\n");
-    sendCA(C2AD_STOP, NULL, 0);
     registerRxHandler(C2AD_STOP, onC2AD_STOP);
+    sendCA(C2AD_STOP, NULL, 0);
 }
 
 // Inspiré de https://stackoverflow.com/a/1760819

@@ -25,6 +25,7 @@ void configureArduino()
 {
     // Connection au port série
     printf("Connexion à %s... ", ARDUINO_PORTNAME);
+    fflush(stdout);
     arduino = open(ARDUINO_PORTNAME, O_RDWR | O_NOCTTY | O_NDELAY);
     if (arduino < 0) {
         printf("Échec !\n");
@@ -93,6 +94,16 @@ void onA2CD_ERR()
     printf("Erreur reçue : %c (%2x)\n", s.code, s.code);
 }
 
+void setPret()
+{
+    pret = true;
+}
+
+void doNothing()
+{
+
+}
+
 void configureCA()
 {
     configureArduino();
@@ -102,6 +113,36 @@ void configureCA()
 
     pthread_mutex_init(&sSendCA, NULL);
     pthread_create(&tReaderAC, NULL, TaskReaderAC, NULL);
+
+    printf("Attente de réponse de l'Arduino... ");
+    fflush(stdout);
+    struct timespec tim;
+    tim.tv_sec = 0;
+    tim.tv_nsec = 100000000L;
+    // Dans le cas où on aurait laissé l'Arduino en attente de donnée,
+    // on envoie des pings en boucle jusqu'à ce qu'il nous réponde.
+    pret = false;
+    registerRxHandler(C2AD_PING, setPret);
+    while (!pret) {
+        sendCA(C2AD_PING, NULL, 0);
+        nanosleep(&tim, NULL);
+    }
+    registerRxHandler(C2AD_PING, doNothing);
+
+    // Dans le cas où les données de ping complèteraient une commande de déplacement,
+    // on envoie un STOP en préventif. Ça permet aussi d'attendre que les PING
+    // en trop aient été absorbés
+    pret = false;
+    registerRxHandler(C2AD_STOP, setPret);
+    sendCA(C2AD_STOP, NULL, 0);
+    while (!pret) {
+        nanosleep(&tim, NULL);
+    }
+
+    registerRxHandler(C2AD_STOP, NULL);
+    registerRxHandler(C2AD_PING, NULL);
+    printf("OK !\n");
+
     registerRxHandler(A2CD_ERR, onA2CD_ERR);
 }
 
