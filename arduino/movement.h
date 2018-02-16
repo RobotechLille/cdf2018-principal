@@ -17,6 +17,11 @@ TaskHandle_t tMovement;
 unsigned char movement;
 struct C2AD_GOTOs destination;
 
+// Mouvements qui ne dérangent pas la liaison série
+void brake();
+void freewheel();
+void stop();
+
 void TaskMovement();
 void configureMovement();
 

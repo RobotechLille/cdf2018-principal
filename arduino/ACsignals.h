@@ -34,6 +34,12 @@ struct __attribute__ ((packed)) position {
 // Arrête tous les actionneurs
 #define C2AD_STOP 'S'
 
+// Stoppe les roues
+#define C2AD_BRAKE 'B'
+
+// Laisse les roues libres
+#define C2AD_FREE 'F'
+
 // Donne une destination
 #define C2AD_GOTO 'G'
 #define C2AD_GOTOs position

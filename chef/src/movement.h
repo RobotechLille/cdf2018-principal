@@ -3,7 +3,7 @@
 
 #include "CA.h"
 
-void stop();
+void brake();
 void aller(struct position* pos);
 
 #endif

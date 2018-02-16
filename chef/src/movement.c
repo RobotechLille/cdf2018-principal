@@ -18,6 +18,20 @@ void stop()
     sendCA(C2AD_STOP, NULL, 0);
 }
 
+void onC2AD_BRAKE()
+{
+    // On considère que l'arrêt se fait très rapidement pour ne pas
+    // avoir à attendre le signal de retour de C2AD_BRAKE
+    registerRxHandler(C2AD_BRAKE, NULL);
+}
+
+void brake()
+{
+    printf("→ Frein\n");
+    registerRxHandler(C2AD_BRAKE, onC2AD_BRAKE);
+    sendCA(C2AD_BRAKE, NULL, 0);
+}
+
 // Inspiré de https://stackoverflow.com/a/1760819
 pthread_mutex_t reponseMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t reponseCond = PTHREAD_COND_INITIALIZER;

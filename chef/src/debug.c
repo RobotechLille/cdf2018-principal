@@ -23,8 +23,10 @@ void printDebugInfos(struct A2CI_DBGs* debug)
 {
     printf("← Position actuelle (%f; %f) (%f°)", debug->actuel.x, debug->actuel.y, debug->actuel.o);
     printf(", destination : ");
-    if (debug->movement == C2AD_STOP) {
-        printf("aucune\n");
+    if (debug->movement == C2AD_BRAKE) {
+        printf("ne pas bouger\n");
+    } else if (debug->movement == C2AD_FREE) {
+        printf("là où le vent l'emporte\n");
     } else {
         printf("(%f; %f) (%f°)\n", debug->destination.x, debug->destination.y, debug->destination.o);
     }

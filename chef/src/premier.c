@@ -21,7 +21,7 @@ void* TaskParcours(void *pdata)
         pos.o = (int) (rand()*360.0/RAND_MAX);
         aller(&pos);
         sleep(1);
-        stop();
+        brake();
         sleep(2);
     }
 
@@ -51,8 +51,8 @@ int main()
     /* pthread_cancel(tParcours); */
 
 
-    /* stop(); */
-    /*  */
+    stop();
+
     deconfigureDebug();
     deconfigureCA();
     return EXIT_SUCCESS;

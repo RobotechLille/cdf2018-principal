@@ -23,6 +23,7 @@ void TaskBlink(void *pvParameters) {
     }
 }
 
+
 int main(void) {
     configureAC(); // Doit rester en premier :)
     configureAF(); // Doit rester en premier :)
