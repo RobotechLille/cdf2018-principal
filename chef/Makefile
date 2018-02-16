@@ -5,7 +5,7 @@ CC=gcc
 # Bibliothèques
 LIBS=
 ## Drapeaux pour le linker
-LDFLAGS=
+LDFLAGS=-lpthread
 ## Drapeaux pour le compilateur
 CFLAGS=
 ## Générateurs de drapeaux pour les bibliothèques
@@ -37,7 +37,7 @@ endif
 default: bin/testpin bin/premier
 
 # Binaires (dont il faut spécifier les objets explicitement)
-bin/premier: obj/common.o obj/serial.o
+bin/premier: obj/CA.o obj/debug.o obj/movement.o
 bin/testPin: obj/testPin.o
 	$(CC) $(LDFLAGS) $^ -lwiringPi -o $@
 

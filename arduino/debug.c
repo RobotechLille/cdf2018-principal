@@ -8,7 +8,7 @@
 void TaskDebug(void *pvParameters) {
     (void) pvParameters;
     for (;;) {
-        vTaskSuspend(tDebug);
+        ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
 
         // Copie des valeurs à envoyer en debug
         memcpy((void*) &debug.actuel, (const void*) &actuel, (unsigned long) sizeof(actuel));
@@ -21,12 +21,12 @@ void TaskDebug(void *pvParameters) {
 }
 
 void onA2CI_DBG() {
-    vTaskResume(tDebug);
+    vTaskNotifyGiveFromISR(tDebug, NULL);
 }
 
 
 void configureDebug() {
-    registerRxHandler(A2CI_DBG, onA2CI_DBG);
+    registerRxHandlerAC(A2CI_DBG, onA2CI_DBG);
     xTaskCreate(TaskDebug, "Debug", 128, NULL, 10, &tDebug);;
 }
 

@@ -8,7 +8,7 @@
 #define AC_BAUDRATE 9600UL
 
 // Structures used everywhere
-struct position {
+struct __attribute__ ((packed)) position {
     float x;
     float y;
     float o;
@@ -30,13 +30,9 @@ struct position {
 
 // Pour le debug
 #define C2AD_PING 'P'
-struct C2AD_PINGs {
-};
 
 // Arrête tous les actionneurs
 #define C2AD_STOP 'S'
-struct C2ADD_STOPs {
-};
 
 // Donne une destination
 #define C2AD_GOTO 'G'
@@ -47,15 +43,16 @@ struct C2ADD_STOPs {
 
 // Erreur quelconque
 #define A2CD_ERR 'E'
-struct A2CI_ERRs {
+struct __attribute__ ((packed)) A2CD_ERRs {
     unsigned char code;
 };
 
 #define ERR_UNKNOWN_CODE 'C'
+#define ERR_UNKNOWN_CODE_FPGA 'c'
 
 // Envoie les infos de debug
 #define A2CI_DBG 'D'
-struct A2CI_DBGs {
+struct __attribute__ ((packed)) A2CI_DBGs {
     struct position actuel;
     struct position destination;
     unsigned char movement;

@@ -2,8 +2,8 @@
  * Définition des fonctions utilisées pour échager entre l'Arduino et le chef
  */
 
-#ifndef __SERIAL_H_
-#define __SERIAL_H_
+#ifndef __AC_H_
+#define __AC_H_
 
 #include <FreeRTOS.h>
 #include <avr/interrupt.h>
@@ -19,16 +19,17 @@
 
 TaskHandle_t tReaderAC;
 SemaphoreHandle_t sSendAC;
+unsigned char* toSendAC;
+size_t toSendSizeAC;
 
 typedef void (*rxHandler)(void);
-rxHandler rxHandlers[256];
+rxHandler rxHandlersAC[256];
 
-void registerRxHandler(unsigned char code, rxHandler handler);
-void sendByteAC(unsigned char data);
+void registerRxHandlerAC(unsigned char code, rxHandler handler); // À utiliser après configureAC();
 void sendAC(unsigned char code, void* data, size_t size);
 unsigned char readByteAC(); // À utiliser uniquement depuis un rxHandler
 void readAC(void* data, size_t size); // À utiliser uniquement depuis un rxHandler
-void TaskReaderAC(void* pvParameters);
+void TaskReaderAC(void* pvParameters); // Privé
 void configureAC();
 
 #endif

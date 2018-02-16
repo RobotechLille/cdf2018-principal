@@ -4,16 +4,15 @@
 #include <task.h>
 
 #include "AC.h"
+#include "AF.h"
 #include "position.h"
 #include "movement.h"
 #include "debug.h"
 
-unsigned char speed = 200;
-
 void TaskBlink(void *pvParameters) {
     (void) pvParameters;
     TickType_t xLastWakeTime;
-    TickType_t xFrequency = speed / portTICK_PERIOD_MS;
+    TickType_t xFrequency = 200 / portTICK_PERIOD_MS;
 
     DDRB = 0xFF;
 
@@ -26,6 +25,7 @@ void TaskBlink(void *pvParameters) {
 
 int main(void) {
     configureAC(); // Doit rester en premier :)
+    configureAF(); // Doit rester en premier :)
     configureMovement();
     configurePosition();
     configureDebug();

@@ -6,7 +6,7 @@ void TaskPosition(void *pvParameters) {
     TickType_t xLastWakeTime;
     TickType_t xFrequency = 100 / portTICK_PERIOD_MS;
 
-    vTaskSuspend(tPosition); // TODO Dummy
+    ulTaskNotifyTake(pdFALSE, portMAX_DELAY); // TODO Dummy
     xLastWakeTime = xTaskGetTickCount();
     for (;;) {
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -16,6 +16,10 @@ void TaskPosition(void *pvParameters) {
 
 
 void configurePosition() {
+    actuel.x = 0;
+    actuel.y = 0;
+    actuel.o = 90;
+
     xTaskCreate(TaskPosition, "Position", 128, NULL, 2, &tPosition);;
 }
 

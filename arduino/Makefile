@@ -29,7 +29,7 @@ FORMAT = ihex
 
 # Target file name (without extension).
 TARGET = principal
-OBJS = AC position movement debug
+OBJS = AC AF position movement debug
 
 # Custom
 NAME = $(TARGET).c
@@ -78,7 +78,7 @@ LDFLAGS = -Wl,-Map=$(TARGET).map,--cref
 # Type: avrdude -c ?
 # to get a full listing.
 #
-AVRDUDE_PROGRAMMER = stk500
+AVRDUDE_PROGRAMMER = wiring
 
 AVRDUDE_PORT = /dev/ttyACM0	   # programmer connected to serial device
 
