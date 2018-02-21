@@ -13,7 +13,7 @@ entity hedm is
              clk : in STD_LOGIC; -- Horloge, la fréquence n'importe pas
              chA : in STD_LOGIC; -- Canal A
              chB : in STD_LOGIC; -- Canal B
-             counts : out -- Integer;
+             counts : out integer
          );
 end hedm;
 
@@ -29,8 +29,8 @@ begin
             Ap <= An;
             Bp <= Bn;
 
-            An <= A;
-            Bn <= B;
+            An <= chA;
+            Bn <= chB;
 
             -- On pourrait optimiser la logique avec un tableau de Karnaugh ou autres méthodes
             -- de simplification d'algèbre de Boole, mais le "compilateur" pour FPGA fera un
