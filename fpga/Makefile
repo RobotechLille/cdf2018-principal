@@ -87,7 +87,7 @@ export XILINX
 default: $(BITFILE)
 
 clean:
-	rm -rf build
+	rm -rf build/*
 
 build/$(PROJECT).prj: project.cfg
 	@echo "Updating $@"
@@ -159,6 +159,24 @@ isimgui: build/isim_$(TB)$(EXE)
 	@echo "run all" >> build/isim_$(TB).cmd
 	cd build ; ./isim_$(TB)$(EXE) -gui -tclbatch isim_$(TB).cmd
 
+###########################################################################
+# Testing (using ghdl and gtkwave)
+###########################################################################
+
+%_syntax: %.vhd
+	ghdl -s --mb-comments "$<"
+
+build/%.o: %.vhd
+	ghdl -a --mb-comments --workdir="$(shell dirname "$@")" "$<"
+
+build/%_tb: build/%_tb.o $(addprefix build/,$(subst .vhd,.o,$(VHDSOURCE)))
+	ghdl -e --workdir="$(shell dirname "$@")" -o "$@" "$(basename $(notdir $<))"
+
+build/%_tb.vcd: build/%_tb
+	(cd "$(shell dirname "$<")"; ghdl -r "$(basename $(notdir $<))" --vcd="../$@" )
+
+%_wave: build/%_tb.vcd
+	gtkwave --save "$(notdir $(basename $<)).gtkw" "$<"
 
 ###########################################################################
 # Programming

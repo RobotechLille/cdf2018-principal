@@ -13,18 +13,25 @@ entity hedm is
              clk : in STD_LOGIC; -- Horloge, la fréquence n'importe pas
              chA : in STD_LOGIC; -- Canal A
              chB : in STD_LOGIC; -- Canal B
+             reset : in STD_LOGIC;
              counts : out integer
          );
 end hedm;
 
 architecture Behavioral of hedm is
-    signal counter : integer;
-    signal An, Bn : STD_LOGIC; -- Nouvelles valeurs de A et B stockées pour que les entrées soient lues une seule fois en début de cycle
-    signal Ap, Bp : STD_LOGIC; -- Précédentes valeurs de A et B pour détecter les front montant
+    signal counter : integer := 0;
+    signal An, Bn : STD_LOGIC := '0'; -- Nouvelles valeurs de A et B stockées pour que les entrées soient lues une seule fois en début de cycle
+    signal Ap, Bp : STD_LOGIC := '0'; -- Précédentes valeurs de A et B pour détecter les front montant
 begin
-    processInput : process(clk)
+    processInput : process(clk, reset)
     begin
-        if rising_edge(clk) then
+        if reset = '1' then
+            counter <= 0;
+            An <= '0';
+            Bn <= '0';
+            Ap <= '0';
+            Bp <= '0';
+        elsif rising_edge(clk) then
 
             Ap <= An;
             Bp <= Bn;
@@ -32,9 +39,9 @@ begin
             An <= chA;
             Bn <= chB;
 
-            -- On pourrait optimiser la logique avec un tableau de Karnaugh ou autres méthodes
-            -- de simplification d'algèbre de Boole, mais le "compilateur" pour FPGA fera un
-            -- tout aussi bon travail, on garde donc le code suivant pour la lisibilité
+                -- On pourrait optimiser la logique avec un tableau de Karnaugh ou autres méthodes
+                -- de simplification d'algèbre de Boole, mais le "compilateur" pour FPGA fera un
+                -- tout aussi bon travail, on garde donc le code suivant pour la lisibilité
 
             if (Ap = '0' and An = '1') then -- Front montant A
                 if (Bn = '0') then
