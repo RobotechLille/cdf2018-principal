@@ -39,9 +39,9 @@ begin
             An <= chA;
             Bn <= chB;
 
-                -- On pourrait optimiser la logique avec un tableau de Karnaugh ou autres méthodes
-                -- de simplification d'algèbre de Boole, mais le "compilateur" pour FPGA fera un
-                -- tout aussi bon travail, on garde donc le code suivant pour la lisibilité
+            -- On pourrait optimiser la logique avec un tableau de Karnaugh ou autres méthodes
+            -- de simplification d'algèbre de Boole, mais le synthétiseur pour FPGA fera un
+            -- tout aussi bon travail, on garde donc le code suivant pour la lisibilité
 
             if (Ap = '0' and An = '1') then -- Front montant A
                 if (Bn = '0') then

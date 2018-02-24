@@ -1,0 +1,62 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sun Feb 25 14:12:54 2018
+[*]
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/Principal_tb.vcd"
+[dumpfile_mtime] "Sun Feb 25 14:10:51 2018"
+[dumpfile_size] 38271255
+[savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/Principal_tb.gtkw"
+[timestart] 0
+[size] 1680 1012
+[pos] -1 -1
+*-40.000000 3481820000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dut.
+[sst_width] 213
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 296
+@28
+[color] 4
+clk
+dut.reset
+[color] 2
+dut.fa.rx_baud_tick
+[color] 2
+dut.fa.rx
+@8028
+[color] 2
+dut.fa.uart_rx_count[2:0]
+@22
+[color] 2
+dut.fa.uart_rx_data_vec[7:0]
+dut.rxdata[7:0]
+@820
+dut.rxdata[7:0]
+@28
+dut.rxstb
+@420
+[color] 5
+dut.com.readoffset
+[color] 5
+dut.com.sendoffset
+@22
+[color] 4
+dut.txdata[7:0]
+@820
+[color] 4
+dut.txdata[7:0]
+@28
+dut.txstb
+dut.txack
+[color] 2
+dut.fa.tx
+[color] 2
+dut.fa.tx_baud_tick
+@8028
+[color] 2
+dut.fa.uart_tx_count[2:0]
+@22
+[color] 2
+dut.fa.uart_tx_data_vec[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

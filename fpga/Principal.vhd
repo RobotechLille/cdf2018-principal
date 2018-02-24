@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 
 entity Principal is
@@ -17,8 +18,8 @@ end Principal;
 
 architecture Behavioral of Principal is
     -- Blink led
-    signal pulse : std_logic := '0';
     signal count : integer := 0;
+    signal theled: std_logic_vector(3 downto 0) := "0000";
 
     -- General
     signal reset : std_logic := '0';
@@ -30,8 +31,6 @@ architecture Behavioral of Principal is
     -- Sensors
     signal front : integer;
     signal back : integer;
-    signal frontTrigger : integer := 0;
-    signal backTrigger : integer := 0;
 
     -- AF
     component uart is
@@ -61,16 +60,22 @@ architecture Behavioral of Principal is
     signal rxData : std_logic_vector(7 downto 0);
     signal rxStb : std_logic := '0';
 
-    constant A2FD_PING : std_logic_vector := x"50"; -- 'P'
-
-    type readStates is (readIdle);
-    signal readState : readStates := readIdle;
-
-    type sendMessages is (none, A2FD_PINGs);
-    signal resetSendMessageRead : std_logic := '0';
-    signal resetSendMessageSend : std_logic := '0';
-    signal sendMessage : sendMessages := none;
-    signal sendOffset : integer := 0;
+    -- Handling
+    component communication is
+        Port (
+                 clock : in  std_logic;
+                 reset : in std_logic;
+                 left : in integer;
+                 right : in integer;
+                 front : in integer;
+                 back : in integer;
+                 txData : out std_logic_vector(7 downto 0);
+                 txStb : out std_logic;
+                 txAck : in std_logic;
+                 rxData : in std_logic_vector(7 downto 0);
+                 rxStb : in std_logic
+             );
+    end component;
 
     -- Debug
     component sevenseg is
@@ -100,63 +105,41 @@ begin
                          rx                  => IO(20)
                      );
 
-    readsendFA : process(reset, rxStb, txAck)
-    begin
-        if reset = '1' then
-            readState <= readIdle;
-            sendMessage <= none;
-            txStb <= '0';
-            sendOffset <= 0;
-        else
-            -- If read something
-            if rxStb = '1' then
-                if readState = readIdle then
-                    case rxData is
-                        when A2FD_PING => -- 'P'
-                            sendMessage <= A2FD_PINGs; -- TODO Not so brutal
-                        when others =>
-                    end case;
-                end if;
-            end if;
+    com: communication port map(
+                                   clock => CLK,
+                                   reset  => reset,
+                                   left  => left,
+                                   right  => right,
+                                   front  => front,
+                                   back  => back,
+                                   txData  => txData,
+                                   txStb  => txStb,
+                                   txAck  => txAck,
+                                   rxData  => rxData,
+                                   rxStb  => rxStb
+                               );
 
-            -- Reset sending if UART module  has begun sending (and has a copy of the byte)
-            if txAck = '1' then
-                txStb <= '0';
-            end if;
-
-            -- If what was sent is acknowledged and there is still something to send
-            if txStb = '0' then
-                case sendMessage is
-                    when none =>
-                    when A2FD_PINGs =>
-                        txData <= A2FD_PING;
-                        txStb <= '1';
-                        sendMessage <= none;
-                end case;
-            end if;
-        end if;
-    end process;
 
     -- Debug
     blinkled : process(CLK, reset)
     begin
         if reset = '1' then
             count <= 0;
-            pulse <= '0';
+            theled <= "0000";
         elsif CLK'event and CLK = '1' then
             if count = 9999999 then
                 count <= 0;
-                pulse <= not pulse;
+                theled(3) <= not theled(3);
+                theled(2 downto 0) <= "000";
             else
                 count <= count + 1;
+                theled(2 downto 0)  <= theled(2 downto 0) or (txStb & rxStb & txAck);
             end if;
+
         end if;
     end process;
-    LED(3) <= pulse;
 
-    LED(2) <= txStb;
-    LED(1) <= rxStb;
-    LED(0) <= txAck;
+    LED <= theled;
 
     debugSeg: sevenseg port map(
                                    data => sevensegdata,
