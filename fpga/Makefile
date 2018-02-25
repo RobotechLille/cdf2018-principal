@@ -170,7 +170,7 @@ build/%.o: %.vhd
 	ghdl -a --mb-comments --workdir="$(shell dirname "$@")" "$<"
 
 build/%_tb: build/%_tb.o $(addprefix build/,$(subst .vhd,.o,$(VHDSOURCE)))
-	ghdl -e --workdir="$(shell dirname "$@")" -o "$@" "$(basename $(notdir $<))"
+	ghdl -e --workdir="$(shell dirname "$@")" -o "$(shell echo "$@" | tr A-Z a-z)" "$(basename $(notdir $<))"
 
 build/%_tb.vcd: build/%_tb
 	(cd "$(shell dirname "$<")"; ghdl -r "$(basename $(notdir $<))" --vcd="../$@" )

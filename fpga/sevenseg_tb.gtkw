@@ -1,0 +1,38 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sun Feb 25 12:47:52 2018
+[*]
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/sevenseg_tb.vcd"
+[dumpfile_mtime] "Sun Feb 25 12:44:56 2018"
+[dumpfile_size] 111992791
+[savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/sevenseg_tb.gtkw"
+[timestart] 0
+[size] 1680 1012
+[pos] -1 -1
+*-42.000000 2550000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 213
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 296
+@23
+dut.data[15:0]
+@28
+dut.clock
+@8420
+[color] 2
+dut.counter
+@420
+[color] 2
+dut.selector
+@22
+[color] 2
+dut.digit[3:0]
+[color] 1
+dut.anode[3:0]
+@28
+[color] 1
+dut.segment[6:0]
+[color] 1
+dut.dot
+[pattern_trace] 1
+[pattern_trace] 0

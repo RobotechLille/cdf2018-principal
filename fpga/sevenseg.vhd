@@ -14,8 +14,8 @@ end sevenseg;
 architecture structural of sevenseg is
 
     signal digit: std_logic_vector(3 downto 0);
-    signal selector: integer range 0 to 3 := 0;
-    signal counter : integer range 0 to 199999 := 0;
+    signal selector: integer := 0;
+    signal counter : integer := 0;
 
 begin
     with selector select
@@ -56,10 +56,14 @@ begin
     alternateur : process(clock)
     begin
         if clock'event and clock = '1' then
-            if counter = 0 then
-                selector <= selector + 1;
-            end if;
             counter <= counter + 1;
+            if counter >= 199999 then
+                selector <= selector + 1;
+                if selector >= 3 then
+                    selector <= 0;
+                end if;
+                counter <= 0;
+            end if;
         end if;
     end process;
 
