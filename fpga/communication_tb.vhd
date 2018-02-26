@@ -4,6 +4,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use IEEE.NUMERIC_STD.ALL;
 
 entity communication_tb is
     end communication_tb;
@@ -40,6 +41,8 @@ architecture tb of communication_tb is
     signal TbClock : std_logic := '0';
     signal TbSimEnded : std_logic := '0';
 
+    type multipleChar is array (0 to 15) of std_logic_vector(7 downto 0);
+
 begin
 
     dut : communication
@@ -61,6 +64,7 @@ begin
     clock <= TbClock;
 
     stimuli : process
+        variable shouldReceive : multipleChar;
     begin
         left <= 0;
         right <= 0;
@@ -156,8 +160,31 @@ begin
         wait for 100 ns;
         assert txStb = '0' report "Not stopping send" severity error;
 
-        wait for 100 ns; -- Margin
+        -- Test captor
+        front <= 1152;
+        back <= 11614;
 
+        report "TEST Receiving 'C'" severity note;
+        rxData <= x"43";
+        rxStb <= '1';
+        wait for TbPeriod;
+        rxStb <= '0';
+
+        shouldReceive(0 to 4) := (x"43", x"80", x"04", x"5E", x"2D");
+        for I in 0 to 4 loop
+            wait for 100 ns;
+            assert txData = shouldReceive(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(shouldReceive(I))))severity error;
+            assert txStb = '1' report "Not sending" severity error;
+
+            report "Acknowledging send" severity note;
+            wait for 100 ns;
+            txAck <= '1';
+            wait for TbPeriod;
+            txAck <= '0';
+        end loop;
+
+
+        wait for 100 ns; -- Margin
 
         TbSimEnded <= '1';
         wait;

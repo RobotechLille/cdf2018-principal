@@ -163,11 +163,13 @@ isimgui: build/isim_$(TB)$(EXE)
 # Testing (using ghdl and gtkwave)
 ###########################################################################
 
+GHDL_FLAGS=--mb-comments
+
 %_syntax: %.vhd
 	ghdl -s --mb-comments "$<"
 
 build/%.o: %.vhd
-	ghdl -a --mb-comments --workdir="$(shell dirname "$@")" "$<"
+	ghdl -a $(GHDL_FLAGS) --workdir="$(shell dirname "$@")" "$<"
 
 build/%_tb: build/%_tb.o $(addprefix build/,$(subst .vhd,.o,$(VHDSOURCE)))
 	ghdl -e --workdir="$(shell dirname "$@")" -o "$(shell echo "$@" | tr A-Z a-z)" "$(basename $(notdir $<))"

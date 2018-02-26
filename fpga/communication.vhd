@@ -33,9 +33,9 @@ architecture Behavioral of communication is
     signal readState : readStates := readIdle;
     signal readOffset : integer := 0;
 
-    type sendMessages is (none, A2FD_PINGs, F2AD_ERR_UNKNOWN_CODEs);
+    type sendMessages is (none, A2FD_PINGs, F2AI_CODERs, F2AI_CAPTs, F2AD_ERR_UNKNOWN_CODEs);
 
-    constant SENDQUEUE_SIZE : integer := 4;
+    constant SENDQUEUE_SIZE : integer := 16;
     type sendQueueMemorya is array (0 to SENDQUEUE_SIZE - 1) of sendMessages;
 
     signal frontTrigger : integer := 0;
@@ -47,11 +47,12 @@ begin
 
     txStb <= txStbs;
 
-
     readsendFA : process(clock, reset)
 
         variable sendMessage : sendMessages := none;
         variable sendOffset : integer := 0;
+        variable sendSize : integer := 0;
+        variable sendData : std_logic_vector(63 downto 0); -- Max message size (will be trimmed down by the synthetizer)
 
         -- Send queue
         variable sendQueueMemory : sendQueueMemorya;
@@ -98,37 +99,50 @@ begin
                         case rxData is
                             when A2FD_PING =>
                                 pushSend(A2FD_PINGs);
+                            when F2AI_CODER =>
+                                pushSend(F2AI_CODERs);
+                            when F2AI_CAPT =>
+                                pushSend(F2AI_CAPTs);
                             when others =>
                                 pushSend(F2AD_ERR_UNKNOWN_CODEs);
                         end case;
                     end if;
                 end if;
 
-                -- If what was sent is acknowledged and there is still something to send
+                -- If what was sent is acknowledged or nothing is being sent atm
                 if txStbs = '0' or txAck = '1' then
-                    if sendMessage = none then -- Reads a message if none is currently being sent
-                        sendOffset := 0;
-                        popSend(sendMessage);
-                    else
-                        sendOffset := sendOffset + 1;
+                    if sendSize = 0 then -- If no data to be sent
+                        popSend(sendMessage); -- See if there a message in the message queue
+                        case sendMessage is
+                            when none => -- No message available, do nothing
+                            when A2FD_PINGs =>
+                                sendData(7 downto 0) := A2FD_PING;
+                                sendSize := 1;
+                            when F2AI_CAPTs =>
+                                sendData(7 downto 0) := F2AI_CAPT;
+                                sendData(23 downto 8) := std_logic_vector(to_unsigned(front, 16));
+                                sendData(39 downto 24) := std_logic_vector(to_unsigned(back, 16));
+                                sendSize := 5;
+                            when others => -- Including F2AD_ERR_UNKNOWN_CODEs
+                                sendData(7 downto 0) := F2AD_ERR;
+                                sendData(15 downto 8) := ERR_UNKNOWN_CODE;
+                                sendSize := 2;
+                        end case;
                     end if;
 
-                    txStbs <= '1';
-                    case sendMessage is
-                        when none => -- If no message available: don't send anything
-                            txStbs <= '0';
-                        when A2FD_PINGs =>
-                            txData <= A2FD_PING;
-                            sendMessage := none;
-                        when F2AD_ERR_UNKNOWN_CODEs =>
-                            case sendOffset is
-                                when 0 =>
-                                    txData <= F2AD_ERR;
-                                when others =>
-                                    txData <= ERR_UNKNOWN_CODE;
-                                    sendMessage := none;
-                            end case;
-                    end case;
+                    if sendSize > 0 then -- If data to be sent
+                        txData <= sendData((sendOffset + 1) * 8 - 1 downto sendOffset * 8);
+                        txStbs <= '1';
+
+                        if sendOffset = sendSize - 1 then -- If it was the last character sent
+                            sendSize := 0; -- Make next iteration check for send queue
+                            sendOffset := 0;
+                        else -- Still data to be sent after that
+                            sendOffset := sendOffset + 1;
+                        end if;
+                    else -- If really no data to be sent
+                        txStbs <= '0';
+                    end if;
                 end if;
             end if;
         end if;
