@@ -1,41 +1,52 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Sun Feb 25 17:14:08 2018
+[*] Mon Feb 26 17:06:42 2018
 [*]
-[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/communication_tb.vcd"
-[dumpfile_mtime] "Sun Feb 25 17:12:53 2018"
-[dumpfile_size] 4479
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/communication_tb.ghw"
+[dumpfile_mtime] "Mon Feb 26 17:03:51 2018"
+[dumpfile_size] 3315
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/communication_tb.gtkw"
 [timestart] 0
 [size] 1680 1012
 [pos] -1 -1
-*-27.785210 1133000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-28.533670 586000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.communication_tb.
+[treeopen] top.communication_tb.dut.
 [sst_width] 213
 [signals_width] 118
 [sst_expanded] 1
-[sst_vpaned_height] 244
+[sst_vpaned_height] 200
 @28
-clock
-reset
-@820
-[color] 2
-rxdata[7:0]
-@22
-[color] 2
-rxdata[7:0]
-@28
-[color] 2
-rxstb
-@820
-[color] 5
-txdata[7:0]
+top.communication_tb.clock
+top.communication_tb.reset
 @22
 [color] 5
-txdata[7:0]
+#{top.communication_tb.rxdata[7:0]} top.communication_tb.rxdata[7] top.communication_tb.rxdata[6] top.communication_tb.rxdata[5] top.communication_tb.rxdata[4] top.communication_tb.rxdata[3] top.communication_tb.rxdata[2] top.communication_tb.rxdata[1] top.communication_tb.rxdata[0]
+@820
+[color] 5
+#{top.communication_tb.rxdata[7:0]} top.communication_tb.rxdata[7] top.communication_tb.rxdata[6] top.communication_tb.rxdata[5] top.communication_tb.rxdata[4] top.communication_tb.rxdata[3] top.communication_tb.rxdata[2] top.communication_tb.rxdata[1] top.communication_tb.rxdata[0]
 @28
 [color] 5
-txstb
-[color] 5
-txack
+top.communication_tb.dut.rxstb
+@420
+[color] 6
+top.communication_tb.dut.readstate
+[color] 6
+top.communication_tb.dut.readoffset
+@421
+[color] 2
+top.communication_tb.dut.a
+@22
+[color] 1
+#{top.communication_tb.txdata[7:0]} top.communication_tb.txdata[7] top.communication_tb.txdata[6] top.communication_tb.txdata[5] top.communication_tb.txdata[4] top.communication_tb.txdata[3] top.communication_tb.txdata[2] top.communication_tb.txdata[1] top.communication_tb.txdata[0]
+@820
+[color] 1
+#{top.communication_tb.txdata[7:0]} top.communication_tb.txdata[7] top.communication_tb.txdata[6] top.communication_tb.txdata[5] top.communication_tb.txdata[4] top.communication_tb.txdata[3] top.communication_tb.txdata[2] top.communication_tb.txdata[1] top.communication_tb.txdata[0]
+@28
+[color] 1
+top.communication_tb.dut.txstb
+[color] 1
+top.communication_tb.dut.txack
 [pattern_trace] 1
 [pattern_trace] 0

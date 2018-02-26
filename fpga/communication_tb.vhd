@@ -6,7 +6,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity communication_tb is
-end communication_tb;
+    end communication_tb;
 
 architecture tb of communication_tb is
 
@@ -78,7 +78,7 @@ begin
 
 
         -- Test Ping
-        report "Receiving 'P'" severity note;
+        report "TEST Receiving 'P'" severity note;
         rxData <= x"50";
         rxStb <= '1';
         wait for TbPeriod;
@@ -101,7 +101,7 @@ begin
 
 
         -- Test unknown char
-        report "Receiving '?'" severity note;
+        report "TEST Receiving '?'" severity note;
         rxData <= x"3F";
         rxStb <= '1';
         wait for TbPeriod;
@@ -129,6 +129,33 @@ begin
 
         wait for 100 ns;
         assert txStb = '0' report "Not stopping send" severity error;
+        wait for 100 ns; -- Margin
+
+        -- Test queue
+        report "TEST Receiving 'P' three times" severity note;
+        rxData <= x"50";
+        for I in 0 to 2 loop
+            rxStb <= '1';
+            wait for TbPeriod;
+            rxStb <= '0';
+            wait for 100 ns;
+        end loop;
+
+        for I in 0 to 2 loop
+            wait for 100 ns;
+            assert txData = x"50" report "Not sent 'P'" severity error;
+            assert txStb = '1' report "Not sending" severity error;
+
+            report "Acknowledging send" severity note;
+            wait for 100 ns;
+            txAck <= '1';
+            wait for TbPeriod;
+            txAck <= '0';
+        end loop;
+
+        wait for 100 ns;
+        assert txStb = '0' report "Not stopping send" severity error;
+
         wait for 100 ns; -- Margin
 
 

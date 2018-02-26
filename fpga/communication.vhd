@@ -34,8 +34,9 @@ architecture Behavioral of communication is
     signal readOffset : integer := 0;
 
     type sendMessages is (none, A2FD_PINGs, F2AD_ERR_UNKNOWN_CODEs);
-    signal sendMessage : sendMessages := none;
-    signal sendOffset : integer := 0;
+
+    constant SENDQUEUE_SIZE : integer := 4;
+    type sendQueueMemorya is array (0 to SENDQUEUE_SIZE - 1) of sendMessages;
 
     signal frontTrigger : integer := 0;
     signal backTrigger : integer := 0;
@@ -46,13 +47,49 @@ begin
 
     txStb <= txStbs;
 
+
     readsendFA : process(clock, reset)
+
+        variable sendMessage : sendMessages := none;
+        variable sendOffset : integer := 0;
+
+        -- Send queue
+        variable sendQueueMemory : sendQueueMemorya;
+        variable sendTail : integer := 0;
+        variable sendHead : integer := 0;
+        variable sendLooped : boolean := false;
+
+        procedure pushSend
+        (message : in sendMessages) is
+        begin
+            sendQueueMemory(sendHead) := message;
+            if sendHead < SENDQUEUE_SIZE - 1 then
+                sendHead := sendHead + 1;
+            else
+                sendHead := 0;
+                sendLooped := true;
+            end if;
+        end pushSend;
+
+        procedure popSend
+        (message : out sendMessages) is
+        begin
+            if sendTail < sendHead or sendLooped then
+                message := sendQueueMemory(sendTail);
+                if sendTail < SENDQUEUE_SIZE - 1 then
+                    sendTail := sendTail + 1;
+                else
+                    sendTail := 0;
+                    sendLooped := false;
+                end if;
+            else
+                message := none;
+            end if;
+        end popSend;
+
     begin
         if reset = '1' then
             readState <= readIdle;
-            txStbs <= '0';
-            sendMessage <= none;
-            sendOffset <= 0;
         else
             if rising_edge(clock) then
                 -- If read something
@@ -60,31 +97,36 @@ begin
                     if readState = readIdle then
                         case rxData is
                             when A2FD_PING =>
-                                sendMessage <= A2FD_PINGs; -- TODO Not so brutal
+                                pushSend(A2FD_PINGs);
                             when others =>
-                                sendMessage <= F2AD_ERR_UNKNOWN_CODEs;
+                                pushSend(F2AD_ERR_UNKNOWN_CODEs);
                         end case;
                     end if;
                 end if;
 
                 -- If what was sent is acknowledged and there is still something to send
                 if txStbs = '0' or txAck = '1' then
+                    if sendMessage = none then -- Reads a message if none is currently being sent
+                        sendOffset := 0;
+                        popSend(sendMessage);
+                    else
+                        sendOffset := sendOffset + 1;
+                    end if;
+
                     txStbs <= '1';
-                    sendOffset <= sendOffset + 1;
                     case sendMessage is
-                        when none =>
+                        when none => -- If no message available: don't send anything
                             txStbs <= '0';
-                            sendOffset <= 0;
                         when A2FD_PINGs =>
                             txData <= A2FD_PING;
-                            sendMessage <= none;
+                            sendMessage := none;
                         when F2AD_ERR_UNKNOWN_CODEs =>
                             case sendOffset is
                                 when 0 =>
                                     txData <= F2AD_ERR;
                                 when others =>
                                     txData <= ERR_UNKNOWN_CODE;
-                                    sendMessage <= none;
+                                    sendMessage := none;
                             end case;
                     end case;
                 end if;

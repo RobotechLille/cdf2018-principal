@@ -175,7 +175,10 @@ build/%_tb: build/%_tb.o $(addprefix build/,$(subst .vhd,.o,$(VHDSOURCE)))
 build/%_tb.vcd: build/%_tb
 	(cd "$(shell dirname "$<")"; ghdl -r "$(basename $(notdir $<))" --vcd="../$@" )
 
-%_wave: build/%_tb.vcd
+build/%_tb.ghw: build/%_tb
+	(cd "$(shell dirname "$<")"; ghdl -r "$(basename $(notdir $<))" --wave="../$@" )
+
+%_wave: build/%_tb.ghw
 	gtkwave --save "$(notdir $(basename $<)).gtkw" "$<"
 
 ###########################################################################
