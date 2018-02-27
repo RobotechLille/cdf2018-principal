@@ -67,7 +67,7 @@ begin
     clock <= TbClock;
 
     stimuli : process
-        variable shouldReceive : multipleChar;
+        variable tampon : multipleChar;
     begin
         left <= 0;
         right <= 0;
@@ -169,10 +169,10 @@ begin
         wait for TbPeriod;
         rxStb <= '0';
 
-        shouldReceive(0 to 4) := (x"43", x"80", x"04", x"5E", x"2D");
+        tampon(0 to 4) := (x"43", x"80", x"04", x"5E", x"2D");
         for I in 0 to 4 loop
             wait for 100 ns;
-            assert txData = shouldReceive(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(shouldReceive(I))))severity error;
+            assert txData = tampon(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(tampon(I))))severity error;
             assert txStb = '1' report "Not sending" severity error;
 
             wait for 100 ns;
@@ -199,10 +199,10 @@ begin
         wait for TbPeriod;
         assert zerocoder = '0' report "Not stopping reseting coder values" severity error;
 
-        shouldReceive(0 to 4) := (x"44", x"80", x"04", x"5E", x"2D");
+        tampon(0 to 4) := (x"44", x"80", x"04", x"5E", x"2D");
         for I in 0 to 4 loop
             wait for 100 ns;
-            assert txData = shouldReceive(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(shouldReceive(I))))severity error;
+            assert txData = tampon(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(tampon(I))))severity error;
             assert txStb = '1' report "Not sending" severity error;
 
             wait for 100 ns;
@@ -211,8 +211,41 @@ begin
             txAck <= '0';
         end loop;
 
+        wait for 100 ns;
+        assert txStb = '0' report "Not stopping send" severity error;
 
-        wait for 100 ns; -- Margin
+
+        -- Test capt trigger
+        report "TEST Receiving 'c'" severity note;
+
+        tampon(0 to 4) := (x"63", x"80", x"04", x"5E", x"2D");
+        for I in 0 to 4 loop
+            rxData <= tampon(I);
+            rxStb <= '1';
+            wait for TbPeriod;
+            rxStb <= '0';
+            wait for TbPeriod;
+        end loop;
+
+        wait for 100 ns;
+
+        front <= 11614;
+        back <= 11614;
+
+        tampon(0 to 4) := (x"43", x"5E", x"2D", x"5E", x"2D");
+        for I in 0 to 4 loop
+            wait for 100 ns;
+            assert txData = tampon(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(tampon(I))))severity error;
+            assert txStb = '1' report "Not sending" severity error;
+
+            wait for 100 ns;
+            txAck <= '1';
+            wait for TbPeriod;
+            txAck <= '0';
+        end loop;
+
+        wait for 100 ns;
+
 
         TbSimEnded <= '1';
         wait;

@@ -30,10 +30,7 @@ architecture Behavioral of communication is
     constant F2AI_CAPT : std_logic_vector(7 downto 0) := x"43"; -- 'C'
     constant F2AT_CAPT : std_logic_vector(7 downto 0) := x"63"; -- 'c'
 
-    type readStates is (readIdle);
-    signal readState : readStates := readIdle; -- TODO Make sure is correctly reset when reworking this
-    signal readOffset : integer := 0;
-
+    type readMessages is (none, F2AT_CAPTs);
     type sendMessages is (none, A2FD_PINGs, F2AI_CODERs, F2AI_CAPTs, F2AD_ERR_UNKNOWN_CODEs);
 
     constant SENDQUEUE_SIZE : integer := 16;
@@ -41,6 +38,7 @@ architecture Behavioral of communication is
 
     signal frontTrigger : integer := 0;
     signal backTrigger : integer := 0;
+    signal triggerSet : std_logic := '0';
 
     signal txStbs : std_logic := '0';
 
@@ -49,6 +47,11 @@ begin
     txStb <= txStbs;
 
     readsendFA : process(clock, reset)
+
+        variable readMessage : readMessages := none;
+        variable readSize : integer := 0;
+        variable readOffset : integer := 0;
+        variable readData : std_logic_vector(63 downto 0); -- Max message size (will be trimmed down by the synthetizer)
 
         variable sendMessage : sendMessages := none;
         variable sendOffset : integer := 0;
@@ -91,24 +94,31 @@ begin
 
     begin
         if reset = '1' then
-            readState <= readIdle;
+            readMessage := none;
+            readOffset := 0;
+            readSize := 0;
+
             sendMessage := none;
             sendOffset := 0;
             sendSize := 0;
+
             sendTail := 0;
             sendHead := 0;
             sendLooped := false;
+
             frontTrigger <= 0;
             backTrigger <= 0;
             zerocoder <= '0';
             txData <= x"00";
+            triggerSet <= '0';
         else
             if rising_edge(clock) then
                 zerocoder <= '0';
 
                 -- If read something
                 if rxStb = '1' then
-                    if readState = readIdle then
+                    if readSize = 0 then
+                        readSize := 0;
                         case rxData is
                             when A2FD_PING =>
                                 pushSend(A2FD_PINGs);
@@ -116,10 +126,36 @@ begin
                                 pushSend(F2AI_CODERs);
                             when F2AI_CAPT =>
                                 pushSend(F2AI_CAPTs);
+                            when F2AT_CAPT =>
+                                readMessage := F2AT_CAPTs;
+                                readSize := 4;
                             when others =>
                                 pushSend(F2AD_ERR_UNKNOWN_CODEs);
                         end case;
+                    else
+                        readData((readOffset + 1) * 8 - 1 downto readOffset * 8) := rxData;
+                        if readOffset = readSize - 1 then
+                            case readMessage is
+                                when F2AT_CAPTs =>
+                                    frontTrigger <= to_integer(unsigned(readData(15 downto 0)));
+                                    backTrigger <= to_integer(unsigned(readData(31 downto 16)));
+                                    triggerSet <= '1';
+                                when others =>
+                                    pushSend(F2AD_ERR_UNKNOWN_CODEs);
+                            end case;
+                            readMessage := none;
+                            readOffset := 0;
+                            readSize := 0;
+                        else
+                            readOffset := readOffset + 1;
+                        end if;
+
                     end if;
+                end if;
+
+                if (triggerSet = '1' and ((front > frontTrigger) or (back > backTrigger))) then
+                    pushSend(F2AI_CAPTs);
+                    triggerSet <= '0';
                 end if;
 
                 -- If what was sent is acknowledged or nothing is being sent atm
