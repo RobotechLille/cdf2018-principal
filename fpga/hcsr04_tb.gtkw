@@ -1,0 +1,48 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Tue Feb 27 14:49:24 2018
+[*]
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/hcsr04_tb.ghw"
+[dumpfile_mtime] "Tue Feb 27 14:48:30 2018"
+[dumpfile_size] 5884923
+[savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/hcsr04_tb.gtkw"
+[timestart] 0
+[size] 1600 862
+[pos] -1 -1
+*-44.256817 34900000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.hcsr04_tb.
+[sst_width] 213
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 243
+@28
+top.hcsr04_tb.dut.clk
+top.hcsr04_tb.dut.reset
+@8420
+top.hcsr04_tb.dut.fpgacounter
+@28
+top.hcsr04_tb.dut.usclk
+[color] 5
+top.hcsr04_tb.dut.start
+[color] 2
+top.hcsr04_tb.dut.startus
+[color] 1
+top.hcsr04_tb.dut.trigger
+@8420
+[color] 2
+top.hcsr04_tb.dut.measurementcounter
+@28
+[color] 1
+top.hcsr04_tb.dut.echo
+@8420
+[color] 2
+top.hcsr04_tb.dut.distancecounter
+@28
+[color] 5
+top.hcsr04_tb.dut.finished
+@420
+[color] 5
+top.hcsr04_tb.distance
+[pattern_trace] 1
+[pattern_trace] 0

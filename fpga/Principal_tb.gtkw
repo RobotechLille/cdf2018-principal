@@ -1,19 +1,18 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Tue Feb 27 09:39:06 2018
+[*] Tue Feb 27 18:30:48 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/Principal_tb.ghw"
-[dumpfile_mtime] "Tue Feb 27 09:38:56 2018"
-[dumpfile_size] 32911228
+[dumpfile_mtime] "Tue Feb 27 18:29:45 2018"
+[dumpfile_size] 4891772
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/Principal_tb.gtkw"
 [timestart] 0
 [size] 1600 862
 [pos] -1 -1
-*-41.636795 7980000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-43.418156 1760000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.principal_tb.
 [treeopen] top.principal_tb.dut.
-[treeopen] top.principal_tb.dut.fa.
 [sst_width] 213
 [signals_width] 198
 [sst_expanded] 1
@@ -73,8 +72,34 @@ top.principal_tb.dut.left
 top.principal_tb.dut.rightcoder.cha
 [color] 6
 top.principal_tb.dut.rightcoder.chb
-@8421
+@8420
 [color] 6
 top.principal_tb.dut.right
+@28
+[color] 3
+top.principal_tb.dut.frontcapt.start
+[color] 3
+top.principal_tb.dut.frontcapt.trigger
+[color] 3
+top.principal_tb.dut.frontcapt.echo
+@8420
+[color] 3
+top.principal_tb.dut.frontcapt.distancecounter
+@420
+[color] 3
+top.principal_tb.dut.front
+@28
+[color] 3
+top.principal_tb.dut.backcapt.start
+[color] 3
+top.principal_tb.dut.backcapt.trigger
+[color] 3
+top.principal_tb.dut.backcapt.echo
+@8421
+[color] 3
+top.principal_tb.dut.backcapt.distancecounter
+@420
+[color] 3
+top.principal_tb.dut.back
 [pattern_trace] 1
 [pattern_trace] 0

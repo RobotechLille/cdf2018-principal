@@ -10,63 +10,84 @@ entity Principal_tb is
 
 architecture tb of Principal_tb is
 
-    component Principal
-        port (CLK    : in std_logic;
-              BTN    : in std_logic;
-              IO     : inout std_logic_vector (21 downto 16);
-              LED    : out std_logic_vector (3 downto 0);
-              AN     : out std_logic_vector (3 downto 0);
-              A_TO_G : out std_logic_vector (6 downto 0);
-              DOT    : out std_logic);
+    constant fFpga : INTEGER := 2_000_000;
+    constant fBaud : INTEGER := 9600;
+
+    component Principal is
+        Generic(
+                   fFpga : INTEGER := fFpga;
+                   fBaud : INTEGER := fBaud
+               );
+        Port (
+                 CLK : in  std_logic;
+                 BTN: in std_logic;
+                 RX: in std_logic;
+                 TX: out std_logic;
+                 LEFTCHA: in std_logic;
+                 LEFTCHB: in std_logic;
+                 RIGHTCHA: in std_logic;
+                 RIGHTCHB: in std_logic;
+                 FRONTTRIGGER: out std_logic;
+                 FRONTECHO: in std_logic;
+                 BACKTRIGGER: out std_logic;
+                 BACKECHO: in std_logic
+             );
     end component;
 
-    signal CLK    : std_logic;
-    signal BTN    : std_logic;
-    signal IO     : std_logic_vector (21 downto 16);
-    signal LED    : std_logic_vector (3 downto 0);
-    signal AN     : std_logic_vector (3 downto 0);
-    signal A_TO_G : std_logic_vector (6 downto 0);
-    signal DOT    : std_logic;
+    signal CLK          : std_logic;
+    signal BTN          : std_logic;
+    signal RX           : std_logic;
+    signal TX           : std_logic;
+    signal LEFTCHA      : std_logic;
+    signal LEFTCHB      : std_logic;
+    signal RIGHTCHA     : std_logic;
+    signal RIGHTCHB     : std_logic;
+    signal FRONTTRIGGER : std_logic;
+    signal FRONTECHO    : std_logic;
+    signal BACKTRIGGER  : std_logic;
+    signal BACKECHO     : std_logic;
 
-    constant TbPeriod : time := 20 ns;
+    constant TbPeriod : time := 500 ns;
     signal TbClock : std_logic := '0';
     signal TbSimEnded : std_logic := '0';
 
-    constant BaudPeriod : time := 104167 ns; -- 9600 baud
-    constant CharacterPeriod : time := 10 * BaudPeriod;
-    signal rx : std_logic;
-    signal tx : std_logic;
+    signal TbDoneWithCapt : std_logic := '0';
 
-    constant CoderPeriod : time := 27611 ns;
+    constant BaudPeriod : time := 1E9 ns / fBaud;
+    constant CharacterPeriod : time := 10 * BaudPeriod;
+
+    constant CoderPeriod : time := 27611 ns; -- 10 km/h
 begin
 
     dut : Principal
-    port map (CLK    => CLK,
-              BTN    => BTN,
-              IO     => IO,
-              LED    => LED,
-              AN     => AN,
-              A_TO_G => A_TO_G,
-              DOT    => DOT);
+    port map (CLK          => CLK,
+              BTN          => BTN,
+              RX           => RX,
+              TX           => TX,
+              LEFTCHA      => LEFTCHA,
+              LEFTCHB      => LEFTCHB,
+              RIGHTCHA     => RIGHTCHA,
+              RIGHTCHB     => RIGHTCHB,
+              FRONTTRIGGER => FRONTTRIGGER,
+              FRONTECHO    => FRONTECHO,
+              BACKTRIGGER  => BACKTRIGGER,
+              BACKECHO     => BACKECHO);
 
     -- Clock generation
     TbClock <= not TbClock after TbPeriod/2 when TbSimEnded /= '1' else '0';
 
     CLK <= TbClock;
 
-    IO(20) <= rx;
-    tx <= IO(21);
-
     leftCoder : process
     begin
         while TbSimEnded = '0' loop
-            IO(19) <= '1';
+            LEFTCHA <= '1';
             wait for CoderPeriod;
-            IO(18) <= '1';
+            LEFTCHB <= '1';
             wait for CoderPeriod;
-            IO(19) <= '0';
+            LEFTCHA <= '0';
             wait for CoderPeriod;
-            IO(18) <= '0';
+            LEFTCHB <= '0';
             wait for CoderPeriod;
         end loop;
         wait;
@@ -75,15 +96,33 @@ begin
     rightCoder : process
     begin
         while TbSimEnded = '0' loop
-            IO(16) <= '0';
+            RIGHTCHA <= '0';
             wait for CoderPeriod;
-            IO(17) <= '0';
+            RIGHTCHB <= '0';
             wait for CoderPeriod;
-            IO(16) <= '1';
+            RIGHTCHA <= '1';
             wait for CoderPeriod;
-            IO(17) <= '1';
+            RIGHTCHB <= '1';
             wait for CoderPeriod;
         end loop;
+        wait;
+    end process;
+
+    frontCapt: process
+    begin
+        FRONTECHO <= '0';
+
+        wait on FRONTTRIGGER until FRONTTRIGGER = '1';
+        wait on FRONTTRIGGER until FRONTTRIGGER = '0';
+
+        wait for 10 ms;
+        FRONTECHO <= '1';
+        wait for 15 ms;
+        FRONTECHO <= '0';
+        wait for 35 ms;
+
+        TbDoneWithCapt <= '1';
+
         wait;
     end process;
 
@@ -101,7 +140,9 @@ begin
             wait for BaudPeriod;
         end procedure;
     begin
-        rx <= '1';
+        BTN <= '0';
+        RX <= '1';
+        BACKECHO <= '0';
 
         -- Reset generation
         BTN <= '1';
@@ -128,21 +169,18 @@ begin
         wait for 2 * BaudPeriod;
 
 
-        -- Send 'C'
-        send(x"43"); -- '?'
-        wait for 5 * CharacterPeriod;
-
-        -- Wait margin
-        wait for 5 * BaudPeriod;
-
-
         -- Send 'D'
-        send(x"44"); -- '?'
+        send(x"44");
+        wait for 5 * CharacterPeriod;
+
+        wait on TbDoneWithCapt until TbDoneWithCapt = '1';
+
+        -- Send 'C'
+        send(x"43");
         wait for 5 * CharacterPeriod;
 
         -- Wait margin
         wait for 5 * BaudPeriod;
-
 
         -- Stop the clock and hence terminate the simulation
         TbSimEnded <= '1';
