@@ -28,9 +28,6 @@
 // Pour le debug
 #define A2FD_PING 'P'
 
-// Réinitialise la valeur des codeuses
-#define A2FD_RESETCODER 'R'
-
 // FPGA → Arduino
 
 // Erreur quelconque

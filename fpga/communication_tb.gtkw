@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Mon Feb 26 19:15:08 2018
+[*] Tue Feb 27 08:58:38 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/communication_tb.ghw"
-[dumpfile_mtime] "Mon Feb 26 19:15:01 2018"
-[dumpfile_size] 4519
+[dumpfile_mtime] "Tue Feb 27 08:58:14 2018"
+[dumpfile_size] 5411
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/communication_tb.gtkw"
 [timestart] 0
 [size] 1600 862
 [pos] -1 -1
-*-29.277596 1395000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-29.549107 930000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.communication_tb.
 [treeopen] top.communication_tb.dut.
@@ -45,5 +45,8 @@ top.communication_tb.dut.readoffset
 top.communication_tb.dut.txstb
 [color] 1
 top.communication_tb.dut.txack
+@29
+[color] 2
+top.communication_tb.dut.zerocoder
 [pattern_trace] 1
 [pattern_trace] 0

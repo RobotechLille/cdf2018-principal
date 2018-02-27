@@ -9,6 +9,7 @@ entity communication is
              reset : in std_logic;
              left : in integer;
              right : in integer;
+             zerocoder : out std_logic;
              front : in integer;
              back : in integer;
              txData : out std_logic_vector(7 downto 0);
@@ -30,7 +31,7 @@ architecture Behavioral of communication is
     constant F2AT_CAPT : std_logic_vector(7 downto 0) := x"63"; -- 'c'
 
     type readStates is (readIdle);
-    signal readState : readStates := readIdle;
+    signal readState : readStates := readIdle; -- TODO Make sure is correctly reset when reworking this
     signal readOffset : integer := 0;
 
     type sendMessages is (none, A2FD_PINGs, F2AI_CODERs, F2AI_CAPTs, F2AD_ERR_UNKNOWN_CODEs);
@@ -91,8 +92,20 @@ begin
     begin
         if reset = '1' then
             readState <= readIdle;
+            sendMessage := none;
+            sendOffset := 0;
+            sendSize := 0;
+            sendTail := 0;
+            sendHead := 0;
+            sendLooped := false;
+            frontTrigger <= 0;
+            backTrigger <= 0;
+            zerocoder <= '0';
+            txData <= x"00";
         else
             if rising_edge(clock) then
+                zerocoder <= '0';
+
                 -- If read something
                 if rxStb = '1' then
                     if readState = readIdle then
@@ -120,8 +133,14 @@ begin
                                 sendSize := 1;
                             when F2AI_CAPTs =>
                                 sendData(7 downto 0) := F2AI_CAPT;
-                                sendData(23 downto 8) := std_logic_vector(to_unsigned(front, 16));
+                                sendData(23 downto 8) := std_logic_vector(to_signed(front, 16));
                                 sendData(39 downto 24) := std_logic_vector(to_unsigned(back, 16));
+                                sendSize := 5;
+                            when F2AI_CODERs =>
+                                zerocoder <= '1';
+                                sendData(7 downto 0) := F2AI_CODER;
+                                sendData(23 downto 8) := std_logic_vector(to_signed(left, 16));
+                                sendData(39 downto 24) := std_logic_vector(to_signed(right, 16));
                                 sendSize := 5;
                             when others => -- Including F2AD_ERR_UNKNOWN_CODEs
                                 sendData(7 downto 0) := F2AD_ERR;

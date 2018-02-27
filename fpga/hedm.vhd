@@ -13,20 +13,22 @@ entity hedm is
              clk : in STD_LOGIC; -- Horloge, la fréquence n'importe pas
              chA : in STD_LOGIC; -- Canal A
              chB : in STD_LOGIC; -- Canal B
-             reset : in STD_LOGIC;
+             reset : in STD_LOGIC; -- Hard reset
+             zero : in STD_LOGIC; -- Force la valeur à zéro sans réinitialiser le fonctionnement
              counts : out integer
          );
 end hedm;
 
 architecture Behavioral of hedm is
-    signal counter : integer := 0;
     signal An, Bn : STD_LOGIC := '0'; -- Nouvelles valeurs de A et B stockées pour que les entrées soient lues une seule fois en début de cycle
     signal Ap, Bp : STD_LOGIC := '0'; -- Précédentes valeurs de A et B pour détecter les front montant
 begin
     processInput : process(clk, reset)
+        variable counter : integer := 0;
     begin
         if reset = '1' then
-            counter <= 0;
+            counter := 0;
+            counts <= 0;
             An <= '0';
             Bn <= '0';
             Ap <= '0';
@@ -39,39 +41,44 @@ begin
             An <= chA;
             Bn <= chB;
 
+            if zero = '1' then
+                counter := 0;
+            end if;
+
             -- On pourrait optimiser la logique avec un tableau de Karnaugh ou autres méthodes
             -- de simplification d'algèbre de Boole, mais le synthétiseur pour FPGA fera un
             -- tout aussi bon travail, on garde donc le code suivant pour la lisibilité
 
             if (Ap = '0' and An = '1') then -- Front montant A
                 if (Bn = '0') then
-                    counter <= counter + 1;
+                    counter := counter + 1;
                 else
-                    counter <= counter - 1;
+                    counter := counter - 1;
                 end if;
             elsif (Ap = '1' and An = '0') then -- Front descendant A
                 if (Bn = '1') then
-                    counter <= counter + 1;
+                    counter := counter + 1;
                 else
-                    counter <= counter - 1;
+                    counter := counter - 1;
                 end if;
             elsif (Bp = '0' and Bn = '1') then -- Front montant B
                 if (An = '1') then
-                    counter <= counter + 1;
+                    counter := counter + 1;
                 else
-                    counter <= counter - 1;
+                    counter := counter - 1;
                 end if;
             elsif (Bp = '1' and Bn = '0') then -- Front descendant B
                 if (An = '0') then
-                    counter <= counter + 1;
+                    counter := counter + 1;
                 else
-                    counter <= counter - 1;
+                    counter := counter - 1;
                 end if;
             end if;
+
+            counts <= counter;
+
         end if;
     end process;
-
-    counts <= counter;
 
 end Behavioral;
 

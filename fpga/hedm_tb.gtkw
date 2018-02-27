@@ -1,25 +1,43 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Sat Feb 24 16:20:02 2018
+[*] Tue Feb 27 08:32:01 2018
 [*]
-[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/hedm_tb.vcd"
-[dumpfile_mtime] "Sat Feb 24 16:19:31 2018"
-[dumpfile_size] 10717
-[savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/hedm_tb.gtkw"
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/hedm_tb.ghw"
+[dumpfile_mtime] "Tue Feb 27 08:31:12 2018"
+[dumpfile_size] 4287
+[savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/hedm_tb.gtkw"
 [timestart] 0
 [size] 1600 862
 [pos] -1 -1
-*-28.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-28.781492 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.hedm_tb.
 [sst_width] 213
 [signals_width] 78
 [sst_expanded] 1
 [sst_vpaned_height] 244
 @28
-clk
-reset
-cha
-chb
-@421
-counts
+top.hedm_tb.dut.clk
+top.hedm_tb.dut.reset
+[color] 4
+top.hedm_tb.dut.zero
+[color] 5
+top.hedm_tb.dut.cha
+[color] 5
+top.hedm_tb.dut.chb
+[color] 2
+top.hedm_tb.dut.ap
+[color] 2
+top.hedm_tb.dut.bp
+[color] 2
+top.hedm_tb.dut.an
+[color] 2
+top.hedm_tb.dut.bn
+@420
+[color] 1
+top.hedm_tb.dut.counts
+@8421
+[color] 1
+top.hedm_tb.dut.counts
 [pattern_trace] 1
 [pattern_trace] 0

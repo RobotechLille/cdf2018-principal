@@ -17,6 +17,7 @@ architecture tb of communication_tb is
               left   : in integer;
               right  : in integer;
               front  : in integer;
+              zerocoder  : out std_logic;
               back   : in integer;
               txData : out std_logic_vector (7 downto 0);
               txStb  : out std_logic;
@@ -33,6 +34,7 @@ architecture tb of communication_tb is
     signal back   : integer;
     signal txData : std_logic_vector (7 downto 0);
     signal txStb  : std_logic;
+    signal zerocoder : std_logic;
     signal txAck  : std_logic;
     signal rxData : std_logic_vector (7 downto 0);
     signal rxStb  : std_logic;
@@ -54,6 +56,7 @@ begin
               back   => back,
               txData => txData,
               txStb  => txStb,
+              zerocoder  => zerocoder,
               txAck  => txAck,
               rxData => rxData,
               rxStb  => rxStb);
@@ -92,7 +95,6 @@ begin
         assert txData = x"50" report "Not sent 'P'" severity error;
         assert txStb = '1' report "Not sending" severity error;
 
-        report "Acknowledging send" severity note;
         wait for 100 ns;
         txAck <= '1';
         wait for TbPeriod;
@@ -115,7 +117,6 @@ begin
         assert txData = x"45" report "Not sent 'E'" severity error;
         assert txStb = '1' report "Not sending" severity error;
 
-        report "Acknowledging send" severity note;
         wait for 100 ns;
         txAck <= '1';
         wait for TbPeriod;
@@ -125,7 +126,6 @@ begin
         assert txData = x"43" report "Not sent 'C'" severity error;
         assert txStb = '1' report "Not sending" severity error;
 
-        report "Acknowledging send" severity note;
         wait for 100 ns;
         txAck <= '1';
         wait for TbPeriod;
@@ -150,7 +150,6 @@ begin
             assert txData = x"50" report "Not sent 'P'" severity error;
             assert txStb = '1' report "Not sending" severity error;
 
-            report "Acknowledging send" severity note;
             wait for 100 ns;
             txAck <= '1';
             wait for TbPeriod;
@@ -176,7 +175,36 @@ begin
             assert txData = shouldReceive(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(shouldReceive(I))))severity error;
             assert txStb = '1' report "Not sending" severity error;
 
-            report "Acknowledging send" severity note;
+            wait for 100 ns;
+            txAck <= '1';
+            wait for TbPeriod;
+            txAck <= '0';
+        end loop;
+
+        wait for 100 ns;
+        assert txStb = '0' report "Not stopping send" severity error;
+
+        -- Test encoder
+        left <= 1152;
+        right <= 11614;
+
+        report "TEST Receiving 'D'" severity note;
+        rxData <= x"44";
+        rxStb <= '1';
+        wait for TbPeriod;
+        assert zerocoder = '1' report "Not reseting coder values" severity error;
+        left <= 0;
+        right <= 0;
+        rxStb <= '0';
+        wait for TbPeriod;
+        assert zerocoder = '0' report "Not stopping reseting coder values" severity error;
+
+        shouldReceive(0 to 4) := (x"44", x"80", x"04", x"5E", x"2D");
+        for I in 0 to 4 loop
+            wait for 100 ns;
+            assert txData = shouldReceive(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(shouldReceive(I))))severity error;
+            assert txStb = '1' report "Not sending" severity error;
+
             wait for 100 ns;
             txAck <= '1';
             wait for TbPeriod;

@@ -1,62 +1,80 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Sun Feb 25 14:12:54 2018
+[*] Tue Feb 27 09:39:06 2018
 [*]
-[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/Principal_tb.vcd"
-[dumpfile_mtime] "Sun Feb 25 14:10:51 2018"
-[dumpfile_size] 38271255
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/Principal_tb.ghw"
+[dumpfile_mtime] "Tue Feb 27 09:38:56 2018"
+[dumpfile_size] 32911228
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/Principal_tb.gtkw"
 [timestart] 0
-[size] 1680 1012
+[size] 1600 862
 [pos] -1 -1
-*-40.000000 3481820000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
-[treeopen] dut.
+*-41.636795 7980000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.principal_tb.
+[treeopen] top.principal_tb.dut.
+[treeopen] top.principal_tb.dut.fa.
 [sst_width] 213
 [signals_width] 198
 [sst_expanded] 1
 [sst_vpaned_height] 296
 @28
-[color] 4
-clk
-dut.reset
+top.principal_tb.dut.clk
+top.principal_tb.dut.reset
 [color] 2
-dut.fa.rx_baud_tick
+top.principal_tb.dut.fa.rx_baud_tick
 [color] 2
-dut.fa.rx
+top.principal_tb.dut.fa.rx
 @8028
 [color] 2
-dut.fa.uart_rx_count[2:0]
+#{top.principal_tb.dut.fa.uart_rx_count[2:0]} top.principal_tb.dut.fa.uart_rx_count[2] top.principal_tb.dut.fa.uart_rx_count[1] top.principal_tb.dut.fa.uart_rx_count[0]
 @22
-[color] 2
-dut.fa.uart_rx_data_vec[7:0]
-dut.rxdata[7:0]
+[color] 1
+#{top.principal_tb.dut.rxdata[7:0]} top.principal_tb.dut.rxdata[7] top.principal_tb.dut.rxdata[6] top.principal_tb.dut.rxdata[5] top.principal_tb.dut.rxdata[4] top.principal_tb.dut.rxdata[3] top.principal_tb.dut.rxdata[2] top.principal_tb.dut.rxdata[1] top.principal_tb.dut.rxdata[0]
 @820
-dut.rxdata[7:0]
+[color] 1
+#{top.principal_tb.dut.rxdata[7:0]} top.principal_tb.dut.rxdata[7] top.principal_tb.dut.rxdata[6] top.principal_tb.dut.rxdata[5] top.principal_tb.dut.rxdata[4] top.principal_tb.dut.rxdata[3] top.principal_tb.dut.rxdata[2] top.principal_tb.dut.rxdata[1] top.principal_tb.dut.rxdata[0]
 @28
-dut.rxstb
-@420
-[color] 5
-dut.com.readoffset
-[color] 5
-dut.com.sendoffset
+[color] 1
+top.principal_tb.dut.com.rxstb
 @22
-[color] 4
-dut.txdata[7:0]
+[color] 1
+#{top.principal_tb.dut.txdata[7:0]} top.principal_tb.dut.txdata[7] top.principal_tb.dut.txdata[6] top.principal_tb.dut.txdata[5] top.principal_tb.dut.txdata[4] top.principal_tb.dut.txdata[3] top.principal_tb.dut.txdata[2] top.principal_tb.dut.txdata[1] top.principal_tb.dut.txdata[0]
 @820
-[color] 4
-dut.txdata[7:0]
+[color] 1
+#{top.principal_tb.dut.txdata[7:0]} top.principal_tb.dut.txdata[7] top.principal_tb.dut.txdata[6] top.principal_tb.dut.txdata[5] top.principal_tb.dut.txdata[4] top.principal_tb.dut.txdata[3] top.principal_tb.dut.txdata[2] top.principal_tb.dut.txdata[1] top.principal_tb.dut.txdata[0]
 @28
-dut.txstb
-dut.txack
+[color] 1
+top.principal_tb.dut.txstb
+[color] 1
+top.principal_tb.dut.txack
 [color] 2
-dut.fa.tx
-[color] 2
-dut.fa.tx_baud_tick
+top.principal_tb.dut.fa.tx_baud_tick
 @8028
 [color] 2
-dut.fa.uart_tx_count[2:0]
+#{top.principal_tb.dut.fa.uart_tx_count[2:0]} top.principal_tb.dut.fa.uart_tx_count[2] top.principal_tb.dut.fa.uart_tx_count[1] top.principal_tb.dut.fa.uart_tx_count[0]
 @22
 [color] 2
-dut.fa.uart_tx_data_vec[7:0]
+#{top.principal_tb.dut.fa.uart_tx_data_vec[7:0]} top.principal_tb.dut.fa.uart_tx_data_vec[7] top.principal_tb.dut.fa.uart_tx_data_vec[6] top.principal_tb.dut.fa.uart_tx_data_vec[5] top.principal_tb.dut.fa.uart_tx_data_vec[4] top.principal_tb.dut.fa.uart_tx_data_vec[3] top.principal_tb.dut.fa.uart_tx_data_vec[2] top.principal_tb.dut.fa.uart_tx_data_vec[1] top.principal_tb.dut.fa.uart_tx_data_vec[0]
+@28
+[color] 2
+top.principal_tb.dut.fa.tx
+[color] 6
+top.principal_tb.dut.zerocoder
+[color] 6
+top.principal_tb.dut.leftcoder.cha
+[color] 6
+top.principal_tb.dut.leftcoder.chb
+@8420
+[color] 6
+top.principal_tb.dut.left
+@28
+[color] 6
+top.principal_tb.dut.rightcoder.cha
+[color] 6
+top.principal_tb.dut.rightcoder.chb
+@8421
+[color] 6
+top.principal_tb.dut.right
 [pattern_trace] 1
 [pattern_trace] 0

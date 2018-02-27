@@ -15,6 +15,7 @@ architecture tb of hedm_tb is
               chA    : in std_logic;
               chB    : in std_logic;
               reset  : in std_logic;
+              zero   : in std_logic;
               counts : out integer);
     end component;
 
@@ -22,6 +23,7 @@ architecture tb of hedm_tb is
     signal chA    : std_logic;
     signal chB    : std_logic;
     signal reset  : std_logic;
+    signal zero   : std_logic;
     signal counts : integer;
 
     constant TbPeriod : time := 20 ns;
@@ -35,6 +37,7 @@ begin
               chA    => chA,
               chB    => chB,
               reset  => reset,
+              zero  => zero,
               counts => counts);
 
     -- Clock generation
@@ -48,6 +51,7 @@ begin
     begin
         chA <= '0';
         chB <= '0';
+        zero <= '0';
 
         -- Reset generation
         reset <= '1';
@@ -70,8 +74,17 @@ begin
         wait for 5 * TbPeriod;
         assert counts = nbTours * 4 report "Sens avant faux, reçu " & integer'image(counts) severity error;
 
+        -- Test zero
+        zero <= '1';
+        wait for TbPeriod;
+        zero <= '0';
+        wait for TbPeriod;
 
-        -- Test sens avant
+        wait for 5 * TbPeriod;
+        assert counts = 0 report "Zero faux, reçu " & integer'image(counts) severity error;
+
+
+        -- Test sens arrière
         for I in 0 to nbTours-1 loop
             chB <= '1';
             wait for TbPeriod;
@@ -84,7 +97,27 @@ begin
         end loop;
 
         wait for 5 * TbPeriod;
-        assert counts = 0 report "Sens arrière faux, reçu " & integer'image(counts) severity error;
+        assert counts = -40 report "Sens arrière faux, reçu " & integer'image(counts) severity error;
+
+        -- Test zero en éxecution
+        chA <= '1';
+        wait for TbPeriod;
+        chB <= '1';
+        wait for TbPeriod;
+        chA <= '0';
+        zero <= '1';
+        wait for TbPeriod;
+        chB <= '0';
+        zero <= '0';
+        wait for TbPeriod;
+
+        wait for 5 * TbPeriod;
+        assert counts = 3 report "Zero en éxecution faux, reçu " & integer'image(counts) severity error;
+
+        zero <= '1';
+        wait for TbPeriod;
+        zero <= '0';
+        wait for TbPeriod;
 
         -- Test aller-retours
         for I in 0 to nbTours-1 loop
@@ -100,6 +133,7 @@ begin
 
         wait for 5 * TbPeriod;
         assert counts = 0 report "Aller-retours faux, reçu " & integer'image(counts) severity error;
+
 
 
         -- Stop the clock and hence terminate the simulation

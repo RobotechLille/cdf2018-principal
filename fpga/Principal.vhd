@@ -6,8 +6,9 @@ use IEEE.NUMERIC_STD.ALL;
 entity Principal is
     Port ( CLK : in  STD_LOGIC; -- Clock
            BTN : in  STD_LOGIC; -- Reset
-                                -- FA
-           IO : inout  STD_LOGIC_VECTOR (21 downto 20);
+
+           -- FA & Encoder
+           IO : inout  STD_LOGIC_VECTOR (21 downto 16);
            -- Debug
            LED : out  STD_LOGIC_VECTOR (3 downto 0);
            AN : out  STD_LOGIC_VECTOR (3 downto 0);
@@ -27,10 +28,22 @@ architecture Behavioral of Principal is
     -- Encoder
     signal left : integer;
     signal right : integer;
+    signal zerocoder : std_logic;
+
+    component hedm is
+        Port (
+                 clk : in STD_LOGIC;
+                 chA : in STD_LOGIC;
+                 chB : in STD_LOGIC;
+                 reset : in STD_LOGIC;
+                 zero : in STD_LOGIC;
+                 counts : out integer
+             );
+    end component;
 
     -- Sensors
-    signal front : integer;
-    signal back : integer;
+    signal front : integer := 0;
+    signal back : integer := 0;
 
     -- AF
     component uart is
@@ -67,6 +80,7 @@ architecture Behavioral of Principal is
                  reset : in std_logic;
                  left : in integer;
                  right : in integer;
+                 zerocoder : out std_logic;
                  front : in integer;
                  back : in integer;
                  txData : out std_logic_vector(7 downto 0);
@@ -93,6 +107,24 @@ begin
 
     reset <= BTN;
 
+    leftCoder: hedm port map (
+                 clk => CLK,
+                 chA => IO(19),
+                 chB => IO(18),
+                 reset => reset,
+                 zero => zerocoder,
+                 counts => left
+             );
+
+    rightCoder: hedm port map (
+                 clk => CLK,
+                 chA => IO(17),
+                 chB => IO(16),
+                 reset => reset,
+                 zero => zerocoder,
+                 counts => right
+             );
+
     FA: uart port map(
                          clock               => CLK,
                          reset               => reset,
@@ -110,6 +142,7 @@ begin
                                    reset  => reset,
                                    left  => left,
                                    right  => right,
+                                   zerocoder  => zerocoder,
                                    front  => front,
                                    back  => back,
                                    txData  => txData,
@@ -126,6 +159,8 @@ begin
         if reset = '1' then
             count <= 0;
             theled <= "0000";
+            front <= 0;
+            back <= 0;
         elsif CLK'event and CLK = '1' then
             if count = 9999999 then
                 count <= 0;
