@@ -166,13 +166,13 @@ isimgui: build/isim_$(TB)$(EXE)
 GHDL_FLAGS=--mb-comments
 
 %_syntax: %.vhd
-	ghdl -s --mb-comments "$<"
+	ghdl -s $(GHDL_FLAGS) "$<"
 
 build/%.o: %.vhd
 	ghdl -a $(GHDL_FLAGS) --workdir="$(shell dirname "$@")" "$<"
 
 build/%_tb: build/%_tb.o $(addprefix build/,$(subst .vhd,.o,$(VHDSOURCE)))
-	ghdl -e --workdir="$(shell dirname "$@")" -o "$(shell echo "$@" | tr A-Z a-z)" "$(basename $(notdir $<))"
+	ghdl -e $(GHDL_FLAGS) --workdir="$(shell dirname "$@")" -o "$(shell echo "$@" | tr A-Z a-z)" "$(basename $(notdir $<))"
 
 build/%_tb.vcd: build/%_tb
 	(cd "$(shell dirname "$<")"; time ghdl -r "$(basename $(notdir $<))" --vcd="../$@" )

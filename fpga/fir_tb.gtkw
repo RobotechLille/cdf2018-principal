@@ -1,0 +1,43 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Wed Feb 28 09:53:14 2018
+[*]
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/fir_tb.ghw"
+[dumpfile_mtime] "Wed Feb 28 09:53:10 2018"
+[dumpfile_size] 595494
+[savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/fir_tb.gtkw"
+[timestart] 0
+[size] 1600 862
+[pos] -1 -1
+*-36.330536 375700000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.fir_tb.
+[sst_width] 213
+[signals_width] 177
+[sst_expanded] 1
+[sst_vpaned_height] 244
+@28
+top.fir_tb.clock
+top.fir_tb.reset
+[color] 1
+top.fir_tb.start
+@8420
+[color] 1
+top.fir_tb.signalin
+@420
+[color] 2
+top.fir_tb.dut.state
+@8420
+[color] 2
+top.fir_tb.dut.k
+@8421
+[color] 2
+top.fir_tb.dut.somme
+@28
+[color] 1
+top.fir_tb.done
+@8420
+[color] 1
+top.fir_tb.signalout
+[pattern_trace] 1
+[pattern_trace] 0

@@ -44,9 +44,13 @@ architecture Behavioral of Principal is
              );
     end component;
 
-    -- Sensors
+    -- Distance sensors
     signal front : integer := 0;
+    signal frontRaw : integer := 0;
+    signal frontFinished : std_logic;
     signal back : integer := 0;
+    signal backRaw : integer := 0;
+    signal backFinished : std_logic;
     component hcsr04 IS
         generic(
                    fFpga : INTEGER := fFpga
@@ -60,6 +64,16 @@ architecture Behavioral of Principal is
                 start : IN STD_LOGIC;
                 finished : OUT STD_LOGIC
             );
+    end component;
+    component fir is
+        Port (
+                 clock : in STD_LOGIC;
+                 reset : in STD_LOGIC;
+                 signalIn : in INTEGER;
+                 signalOut : out INTEGER;
+                 start : in STD_LOGIC;
+                 done : out STD_LOGIC
+             );
     end component;
 
     -- AF
@@ -127,25 +141,44 @@ begin
                                   zero => zerocoder,
                                   counts => right
                               );
+
     frontCapt: hcsr04 port map (
                                    clk => CLK,
                                    reset => reset,
                                    echo => FRONTECHO,
-                                   distance => front,
+                                   distance => frontRaw,
                                    trigger => FRONTTRIGGER,
-                                   start => '1'
-                               -- finished =>
+                                   start => '1',
+                                   finished => frontFinished
+                               );
+    frontFilter : FIR port map (
+                                   clock     => CLK,
+                                   reset     => reset,
+                                   signalIn  => frontRaw,
+                                   signalOut => front,
+                                   start     => frontFinished
+                               -- done      => done
                                );
 
     backCapt: hcsr04 port map (
                                   clk => CLK,
                                   reset => reset,
                                   echo => BACKECHO,
-                                  distance => back,
+                                  distance => backRaw,
                                   trigger => BACKTRIGGER,
-                                  start => '1'
-                              -- finished =>
+                                  start => '1',
+                                  finished => backFinished
                               );
+    backFilter : FIR port map (
+                                  clock     => CLK,
+                                  reset     => reset,
+                                  signalIn  => backRaw,
+                                  signalOut => back,
+                                  start     => backFinished
+                               -- done      => done
+                              );
+
+
 
     FA: uart port map(
                          clock               => CLK,
