@@ -69,10 +69,10 @@ begin
     stimuli : process
         variable tampon : multipleChar;
     begin
-        left <= 0;
-        right <= 0;
         front <= 0;
         back <= 0;
+        left <= 1152;
+        right <= 11614;
         txAck <= '0';
         rxData <= (others => '0');
         rxStb <= '0';
@@ -185,24 +185,23 @@ begin
         assert txStb = '0' report "Not stopping send" severity error;
 
         -- Test encoder
-        left <= 1152;
-        right <= 11614;
 
         report "TEST Receiving 'D'" severity note;
         rxData <= x"44";
         rxStb <= '1';
         wait for TbPeriod;
+        rxStb <= '0';
+        wait for TbPeriod;
         assert zerocoder = '1' report "Not reseting coder values" severity error;
         left <= 0;
         right <= 0;
-        rxStb <= '0';
         wait for TbPeriod;
         assert zerocoder = '0' report "Not stopping reseting coder values" severity error;
 
         tampon(0 to 4) := (x"44", x"80", x"04", x"5E", x"2D");
         for I in 0 to 4 loop
             wait for 100 ns;
-            assert txData = tampon(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(tampon(I))))severity error;
+            assert txData = tampon(I) report "Not sent correct data, got " & integer'image(to_integer(unsigned(txData))) & ", expected " & integer'image(to_integer(unsigned(tampon(I)))) severity error;
             assert txStb = '1' report "Not sending" severity error;
 
             wait for 100 ns;

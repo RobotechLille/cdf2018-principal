@@ -174,11 +174,14 @@ build/%.o: %.vhd
 build/%_tb: build/%_tb.o $(addprefix build/,$(subst .vhd,.o,$(VHDSOURCE)))
 	ghdl -e $(GHDL_FLAGS) --workdir="$(shell dirname "$@")" -o "$(shell echo "$@" | tr A-Z a-z)" "$(basename $(notdir $<))"
 
+%_test: build/%_tb
+	(cd "$(shell dirname "$<")"; time ghdl -r "$(basename $(notdir $<))")
+
 build/%_tb.vcd: build/%_tb
-	(cd "$(shell dirname "$<")"; time ghdl -r "$(basename $(notdir $<))" --vcd="../$@" )
+	(cd "$(shell dirname "$<")"; time ghdl -r "$(basename $(notdir $<))" --vcd="../$@")
 
 build/%_tb.ghw: build/%_tb
-	(cd "$(shell dirname "$<")"; time ghdl -r "$(basename $(notdir $<))" --wave="../$@" )
+	(cd "$(shell dirname "$<")"; time ghdl -r "$(basename $(notdir $<))" --wave="../$@")
 
 %_wave: build/%_tb.ghw
 	gtkwave --save "$(notdir $(basename $<)).gtkw" "$<"

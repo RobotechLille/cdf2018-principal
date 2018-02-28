@@ -9,11 +9,11 @@ entity communication is
              reset : in std_logic;
              left : in integer;
              right : in integer;
-             zerocoder : out std_logic;
+             zerocoder : out std_logic := '0';
              front : in integer;
              back : in integer;
-             txData : out std_logic_vector(7 downto 0);
-             txStb : out std_logic;
+             txData : out std_logic_vector(7 downto 0) := x"00";
+             txStb : out std_logic := '0';
              txAck : in std_logic;
              rxData : in std_logic_vector(7 downto 0);
              rxStb : in std_logic
@@ -30,95 +30,73 @@ architecture Behavioral of communication is
     constant F2AI_CAPT : std_logic_vector(7 downto 0) := x"43"; -- 'C'
     constant F2AT_CAPT : std_logic_vector(7 downto 0) := x"63"; -- 'c'
 
-    type readMessages is (none, F2AT_CAPTs);
-    type sendMessages is (none, A2FD_PINGs, F2AI_CODERs, F2AI_CAPTs, F2AD_ERR_UNKNOWN_CODEs);
-
-    constant SENDQUEUE_SIZE : integer := 16;
-    type sendQueueMemorya is array (0 to SENDQUEUE_SIZE - 1) of sendMessages;
-
     signal frontTrigger : integer := 0;
     signal backTrigger : integer := 0;
     signal triggerSet : std_logic := '0';
 
-    signal txStbs : std_logic := '0';
+    type readMessages is (F2AT_CAPTs);
+    signal readMessage : readMessages;
+    signal readSize : integer := 0;
+    signal readOffset : integer := 0;
+    signal readData : std_logic_vector(63 downto 0) := (others => '0'); -- Max message size (will be trimmed down by the synthetizer)
+
+    type sendMessages is (A2FD_PINGs, F2AI_CODERs, F2AI_CAPTs, F2AD_ERR_UNKNOWN_CODEs);
+    constant SENDQUEUE_SIZE : integer := 16;
+    type sendQueueMemorya is array (0 to SENDQUEUE_SIZE - 1) of sendMessages;
+    signal sendQueueMemory : sendQueueMemorya;
+    signal sendTail : integer := 0;
+    signal sendHead : integer := 0;
+    signal sendLooped : std_logic := '0';
+
+    signal sendAvailable: std_logic := '0';
+    signal sendBegun : std_logic := '0';
+    signal sendOffset : integer := 0;
+    signal sendSize : integer := 0;
+    signal sendData : std_logic_vector(63 downto 0) := (others => '0'); -- Max message size (will be trimmed down by the synthetizer)
 
 begin
 
-    txStb <= txStbs;
-
     readsendFA : process(clock, reset)
-
-        variable readMessage : readMessages := none;
-        variable readSize : integer := 0;
-        variable readOffset : integer := 0;
-        variable readData : std_logic_vector(63 downto 0); -- Max message size (will be trimmed down by the synthetizer)
-
-        variable sendMessage : sendMessages := none;
-        variable sendOffset : integer := 0;
-        variable sendSize : integer := 0;
-        variable sendData : std_logic_vector(63 downto 0); -- Max message size (will be trimmed down by the synthetizer)
-
-        -- Send queue
-        variable sendQueueMemory : sendQueueMemorya;
-        variable sendTail : integer := 0;
-        variable sendHead : integer := 0;
-        variable sendLooped : boolean := false;
 
         procedure pushSend
         (message : in sendMessages) is
         begin
-            sendQueueMemory(sendHead) := message;
+            sendQueueMemory(sendHead) <= message;
             if sendHead < SENDQUEUE_SIZE - 1 then
-                sendHead := sendHead + 1;
+                sendHead <= sendHead + 1;
             else
-                sendHead := 0;
-                sendLooped := true;
+                sendHead <= 0;
+                sendLooped <= '1';
             end if;
         end pushSend;
 
-        procedure popSend
-        (message : out sendMessages) is
-        begin
-            if sendTail < sendHead or sendLooped then
-                message := sendQueueMemory(sendTail);
-                if sendTail < SENDQUEUE_SIZE - 1 then
-                    sendTail := sendTail + 1;
-                else
-                    sendTail := 0;
-                    sendLooped := false;
-                end if;
-            else
-                message := none;
-            end if;
-        end popSend;
-
     begin
         if reset = '1' then
-            readMessage := none;
-            readOffset := 0;
-            readSize := 0;
-
-            sendMessage := none;
-            sendOffset := 0;
-            sendSize := 0;
-
-            sendTail := 0;
-            sendHead := 0;
-            sendLooped := false;
-
             frontTrigger <= 0;
             backTrigger <= 0;
+            triggerSet <= '0';
+            readSize <= 0;
+            readOffset <= 0;
+            readData <= (others => '0');
+            sendTail <= 0;
+            sendHead <= 0;
+            sendLooped <= '0';
+            sendAvailable<= '0';
+            sendBegun <= '0';
+            sendOffset <= 0;
+            sendSize <= 0;
+            sendData <= (others => '0');
+            txStb <= '0';
             zerocoder <= '0';
             txData <= x"00";
-            triggerSet <= '0';
         else
             if rising_edge(clock) then
                 zerocoder <= '0';
 
                 -- If read something
-                if rxStb = '1' then
-                    if readSize = 0 then
-                        readSize := 0;
+                if rxStb = '1' then -- Incomming character
+                    if readSize = 0 then -- Beginning of message
+                        readSize <= 0;
                         case rxData is
                             when A2FD_PING =>
                                 pushSend(A2FD_PINGs);
@@ -127,80 +105,85 @@ begin
                             when F2AI_CAPT =>
                                 pushSend(F2AI_CAPTs);
                             when F2AT_CAPT =>
-                                readMessage := F2AT_CAPTs;
-                                readSize := 4;
+                                readMessage <= F2AT_CAPTs;
+                                readSize <= 4;
                             when others =>
                                 pushSend(F2AD_ERR_UNKNOWN_CODEs);
                         end case;
-                    else
-                        readData((readOffset + 1) * 8 - 1 downto readOffset * 8) := rxData;
-                        if readOffset = readSize - 1 then
-                            case readMessage is
-                                when F2AT_CAPTs =>
-                                    frontTrigger <= to_integer(unsigned(readData(15 downto 0)));
-                                    backTrigger <= to_integer(unsigned(readData(31 downto 16)));
-                                    triggerSet <= '1';
-                                when others =>
-                                    pushSend(F2AD_ERR_UNKNOWN_CODEs);
-                            end case;
-                            readMessage := none;
-                            readOffset := 0;
-                            readSize := 0;
-                        else
-                            readOffset := readOffset + 1;
+                    else -- Rest of message
+                        if readOffset < readSize then
+                            readData((readOffset + 1) * 8 - 1 downto readOffset * 8) <= rxData;
+                            readOffset <= readOffset + 1;
                         end if;
-
                     end if;
-                end if;
-
-                if (triggerSet = '1' and ((front > frontTrigger) or (back > backTrigger))) then
+                elsif readSize > 0 and readOffset = readSize then -- Rest of message ended
+                    case readMessage is
+                        when F2AT_CAPTs =>
+                            frontTrigger <= to_integer(unsigned(readData(15 downto 0)));
+                            backTrigger <= to_integer(unsigned(readData(31 downto 16)));
+                            triggerSet <= '1';
+                        when others =>
+                            pushSend(F2AD_ERR_UNKNOWN_CODEs);
+                    end case;
+                    readOffset <= 0;
+                    readSize <= 0;
+                elsif (triggerSet = '1' and ((front > frontTrigger) or (back > backTrigger))) then
                     pushSend(F2AI_CAPTs);
                     triggerSet <= '0';
                 end if;
 
-                -- If what was sent is acknowledged or nothing is being sent atm
-                if txStbs = '0' or txAck = '1' then
-                    if sendSize = 0 then -- If no data to be sent
-                        popSend(sendMessage); -- See if there a message in the message queue
-                        case sendMessage is
-                            when none => -- No message available, do nothing
+                if sendAvailable = '0' then -- If no message is being sent
+                    if sendTail < sendHead or sendLooped = '1' then -- If there is a message in the queue
+
+                        -- Update tail
+                        if sendTail < SENDQUEUE_SIZE - 1 then
+                            sendTail <= sendTail + 1;
+                        else
+                            sendTail <= 0;
+                            sendLooped <= '0';
+                        end if;
+
+                        sendAvailable <= '1';
+
+                        case sendQueueMemory(sendTail) is
                             when A2FD_PINGs =>
-                                sendData(7 downto 0) := A2FD_PING;
-                                sendSize := 1;
+                                sendData(7 downto 0) <= A2FD_PING;
+                                sendSize <= 1;
                             when F2AI_CAPTs =>
-                                sendData(7 downto 0) := F2AI_CAPT;
-                                sendData(23 downto 8) := std_logic_vector(to_signed(front, 16));
-                                sendData(39 downto 24) := std_logic_vector(to_unsigned(back, 16));
-                                sendSize := 5;
+                                sendData(7 downto 0) <= F2AI_CAPT;
+                                sendData(23 downto 8) <= std_logic_vector(to_signed(front, 16));
+                                sendData(39 downto 24) <= std_logic_vector(to_unsigned(back, 16));
+                                sendSize <= 5;
                             when F2AI_CODERs =>
                                 zerocoder <= '1';
-                                sendData(7 downto 0) := F2AI_CODER;
-                                sendData(23 downto 8) := std_logic_vector(to_signed(left, 16));
-                                sendData(39 downto 24) := std_logic_vector(to_signed(right, 16));
-                                sendSize := 5;
+                                sendData(7 downto 0) <= F2AI_CODER;
+                                sendData(23 downto 8) <= std_logic_vector(to_signed(left, 16));
+                                sendData(39 downto 24) <= std_logic_vector(to_signed(right, 16));
+                                sendSize <= 5;
                             when others => -- Including F2AD_ERR_UNKNOWN_CODEs
-                                sendData(7 downto 0) := F2AD_ERR;
-                                sendData(15 downto 8) := ERR_UNKNOWN_CODE;
-                                sendSize := 2;
+                                sendData(7 downto 0) <= F2AD_ERR;
+                                sendData(15 downto 8) <= ERR_UNKNOWN_CODE;
+                                sendSize <= 2;
                         end case;
                     end if;
 
-                    if sendSize > 0 then -- If data to be sent
-                        txData <= sendData((sendOffset + 1) * 8 - 1 downto sendOffset * 8);
-                        txStbs <= '1';
-
-                        if sendOffset = sendSize - 1 then -- If it was the last character sent
-                            sendSize := 0; -- Make next iteration check for send queue
-                            sendOffset := 0;
-                        else -- Still data to be sent after that
-                            sendOffset := sendOffset + 1;
+                else -- If a message is being sent
+                    if sendBegun = '0' or txAck = '1' then
+                        sendBegun <= '1';
+                        if sendOffset < sendSize then -- There is still data to send
+                            txData <= sendData((sendOffset + 1) * 8 - 1 downto sendOffset * 8);
+                            txStb <= '1';
+                            sendOffset <= sendOffset + 1;
+                        else -- There is no more data to send
+                            sendOffset <= 0;
+                            txStb <= '0';
+                            sendBegun <= '0';
+                            sendAvailable <= '0';
                         end if;
-                    else -- If really no data to be sent
-                        txStbs <= '0';
                     end if;
                 end if;
+
             end if;
         end if;
     end process;
-
 end Behavioral;

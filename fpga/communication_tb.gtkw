@@ -1,20 +1,20 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Tue Feb 27 20:44:59 2018
+[*] Wed Feb 28 14:53:10 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/communication_tb.ghw"
-[dumpfile_mtime] "Tue Feb 27 20:44:10 2018"
-[dumpfile_size] 6988
+[dumpfile_mtime] "Wed Feb 28 14:51:41 2018"
+[dumpfile_size] 7845
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/communication_tb.gtkw"
 [timestart] 0
 [size] 1600 862
 [pos] -1 -1
-*-29.975166 2184000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-30.009827 1783000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.communication_tb.
 [treeopen] top.communication_tb.dut.
 [sst_width] 213
-[signals_width] 126
+[signals_width] 198
 [sst_expanded] 1
 [sst_vpaned_height] 200
 @28
@@ -29,6 +29,17 @@ top.communication_tb.reset
 @28
 [color] 5
 top.communication_tb.dut.rxstb
+@420
+[color] 3
+top.communication_tb.dut.sendhead
+[color] 3
+top.communication_tb.dut.sendtail
+[color] 3
+top.communication_tb.dut.sendsize
+[color] 3
+top.communication_tb.dut.sendavailable
+[color] 3
+top.communication_tb.dut.sendbegun
 @22
 [color] 1
 #{top.communication_tb.txdata[7:0]} top.communication_tb.txdata[7] top.communication_tb.txdata[6] top.communication_tb.txdata[5] top.communication_tb.txdata[4] top.communication_tb.txdata[3] top.communication_tb.txdata[2] top.communication_tb.txdata[1] top.communication_tb.txdata[0]
@@ -44,12 +55,15 @@ top.communication_tb.dut.txack
 top.communication_tb.dut.zerocoder
 @420
 [color] 2
+top.communication_tb.dut.left
+[color] 2
+top.communication_tb.dut.right
+[color] 2
 top.communication_tb.dut.fronttrigger
 [color] 2
 top.communication_tb.dut.backtrigger
 [color] 2
 top.communication_tb.dut.front
-@421
 [color] 2
 top.communication_tb.dut.back
 [pattern_trace] 1

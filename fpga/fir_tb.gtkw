@@ -1,10 +1,10 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Wed Feb 28 09:53:14 2018
+[*] Wed Feb 28 11:47:06 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/fir_tb.ghw"
-[dumpfile_mtime] "Wed Feb 28 09:53:10 2018"
-[dumpfile_size] 595494
+[dumpfile_mtime] "Wed Feb 28 11:46:54 2018"
+[dumpfile_size] 458919
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/fir_tb.gtkw"
 [timestart] 0
 [size] 1600 862
