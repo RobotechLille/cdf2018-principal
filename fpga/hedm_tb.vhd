@@ -112,7 +112,7 @@ begin
         wait for TbPeriod;
 
         wait for 5 * TbPeriod;
-        assert counts = 3 report "Zero en éxecution faux, reçu " & integer'image(counts) severity error;
+        assert counts = 2 report "Zero en éxecution faux, reçu " & integer'image(counts) severity error;
 
         zero <= '1';
         wait for TbPeriod;
