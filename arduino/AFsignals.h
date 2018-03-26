@@ -41,8 +41,8 @@ struct __attribute__ ((packed)) F2AD_ERRs {
 // Récupère les valeur des encodeurs
 #define F2AI_CODER 'D'
 struct __attribute__ ((packed)) F2AI_CODERs {
-    int16_t left;
-    int16_t right;
+    int16_t dL;
+    int16_t dR;
 };
 
 // Récupère les valeur des capteurs de distance

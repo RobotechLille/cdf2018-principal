@@ -9,10 +9,14 @@
 #include <task.h>
 
 #include "ACsignals.h"
+#include "AFsignals.h"
 
 struct position actuel;
+struct F2AI_CODERs deltaCoder;
 
 TaskHandle_t tPosition;
+
+uint16_t nbCalcPos;
 
 void TaskPosition();
 void configurePosition();

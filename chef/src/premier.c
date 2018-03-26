@@ -8,7 +8,7 @@
 #include "movement.h"
 #include "debug.h"
 
-#define TEMPSMAX 10
+#define TEMPSMAX 60
 
 void* TaskParcours(void *pdata)
 {
@@ -42,8 +42,8 @@ int main()
     /* printf("En attente de la tirette...\n"); // TODO */
     printf("C'est parti !\n");
 
-    pthread_t tParcours;
-    pthread_create(&tParcours, NULL, TaskParcours, NULL);
+    /* pthread_t tParcours; */
+    /* pthread_create(&tParcours, NULL, TaskParcours, NULL); */
 
     sleep(TEMPSMAX);
 

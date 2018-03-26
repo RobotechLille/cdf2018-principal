@@ -5,6 +5,8 @@
 #ifndef __ACSIGNALS_H_
 #define __ACSIGNALS_H_
 
+#include "AFsignals.h"
+
 #define AC_BAUDRATE 9600UL
 
 // Structures used everywhere
@@ -62,6 +64,8 @@ struct __attribute__ ((packed)) A2CI_DBGs {
     struct position actuel;
     struct position destination;
     unsigned char movement;
+    struct F2AI_CODERs deltaCoder;
+    uint16_t nbCalcPos;
     // ...
 };
 

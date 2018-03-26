@@ -13,7 +13,10 @@ void TaskDebug(void *pvParameters) {
         // Copie des valeurs à envoyer en debug
         memcpy((void*) &debug.actuel, (const void*) &actuel, (unsigned long) sizeof(actuel));
         memcpy((void*) &debug.destination, (const void*) &destination, (unsigned long) sizeof(destination));
+        memcpy((void*) &debug.deltaCoder, (const void*) &deltaCoder, (unsigned long) sizeof(deltaCoder));
         debug.movement = movement;
+        debug.nbCalcPos = nbCalcPos;
+        nbCalcPos = 0;
 
         // Envoi des valeurs
         sendAC(A2CI_DBG, &debug, sizeof(debug));

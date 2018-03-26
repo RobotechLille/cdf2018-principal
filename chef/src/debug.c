@@ -21,14 +21,20 @@ void* TaskDebug(void* pdata)
 
 void printDebugInfos(struct A2CI_DBGs* debug)
 {
-    printf("← Position actuelle (%f; %f) (%f°)", debug->actuel.x, debug->actuel.y, debug->actuel.o);
-    printf(", destination : ");
+    // Position
+    printf("← + % .6g; % .6g % .6g°", debug->actuel.x, debug->actuel.y, debug->actuel.o);
+    // Frequence de calcul de la position
+    printf(" % 5d☼", debug->nbCalcPos);
+    // Delta codeuses
+    printf(", %5d↿↾%-5d", debug->deltaCoder.dL, debug->deltaCoder.dR);
+    // Destination
+    printf(", ");
     if (debug->movement == C2AD_BRAKE) {
-        printf("ne pas bouger\n");
+        printf("⇞ \n");
     } else if (debug->movement == C2AD_FREE) {
-        printf("là où le vent l'emporte\n");
+        printf("↕ \n");
     } else {
-        printf("(%f; %f) (%f°)\n", debug->destination.x, debug->destination.y, debug->destination.o);
+        printf("↑ % .6g; % .6g % .6g°\n", debug->destination.x, debug->destination.y, debug->destination.o);
     }
 }
 
