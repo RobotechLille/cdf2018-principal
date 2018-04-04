@@ -5,7 +5,7 @@ CC=gcc
 # Bibliothèques
 LIBS=
 ## Drapeaux pour le linker
-LDFLAGS=-lpthread
+LDFLAGS_CUSTOM += -lpthread -lwiringPi
 ## Drapeaux pour le compilateur
 CFLAGS=
 ## Générateurs de drapeaux pour les bibliothèques
@@ -13,7 +13,7 @@ PKG_CONFIG=pkg-config
 
 # VARIABLES AUTOMATIQUES
 ifdef LIBS
-	LDFLAGS += $(shell $(PKG_CONFIG) --libs $(LIBS))
+	LDFLAGS_CUSTOM += $(shell $(PKG_CONFIG) --libs $(LIBS))
 	CFLAGS += $(shell $(PKG_CONFIG) --cflags $(LIBS))
 endif
 
@@ -25,7 +25,7 @@ CFLAGS += -Wall -Wextra -pedantic -g -DDEBUG
 
 # Génération des fichiers éxecutables
 bin/%: obj/%.o
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS_CUSTOM) $^ -o $@
 # On enlève les symboles inutiles pour gagner en temps de chargement de l'éxecutable
 ifeq ($(DEBUG),no)
 	strip $@
@@ -34,12 +34,14 @@ endif
 # RÈGLES DE COMPILATION
 
 # Règle éxecutée par défaut (quand on fait juste `make`)
-default: bin/testpin bin/premier
+default: bin/testpin bin/premier bin/local
 
 # Binaires (dont il faut spécifier les objets explicitement)
-bin/premier: obj/CA.o obj/debug.o obj/movement.o
+bin/premier: obj/CF.o obj/movement.o obj/debug.o obj/position.o
 bin/testPin: obj/testPin.o
-	$(CC) $(LDFLAGS) $^ -lwiringPi -o $@
+
+bin/local: obj/local.o obj/CF.o obj/position.o
+	$(CC) -lpthread $^ -o $@
 
 # Génération des fichiers objets
 obj/%.o: src/%.c src/%.h

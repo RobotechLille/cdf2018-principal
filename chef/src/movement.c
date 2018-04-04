@@ -1,70 +1,92 @@
 #include "movement.h"
-#include "CA.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-void onC2AD_STOP()
+void configureMovement()
 {
-    // On considère que l'arrêt se fait très rapidement pour ne pas
-    // avoir à attendre le signal de retour de C2AD_STOP
-    registerRxHandler(C2AD_STOP, NULL);
-}
-
-void stop()
-{
-    printf("→ Arrêt\n");
-    registerRxHandler(C2AD_STOP, onC2AD_STOP);
-    sendCA(C2AD_STOP, NULL, 0);
-}
-
-void onC2AD_BRAKE()
-{
-    // On considère que l'arrêt se fait très rapidement pour ne pas
-    // avoir à attendre le signal de retour de C2AD_BRAKE
-    registerRxHandler(C2AD_BRAKE, NULL);
-}
-
-void brake()
-{
-    printf("→ Frein\n");
-    registerRxHandler(C2AD_BRAKE, onC2AD_BRAKE);
-    sendCA(C2AD_BRAKE, NULL, 0);
-}
-
-// Inspiré de https://stackoverflow.com/a/1760819
-pthread_mutex_t reponseMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t reponseCond = PTHREAD_COND_INITIALIZER;
-bool attenteReponse = false;
-
-void onC2AD_GOTO()
-{
-    pthread_mutex_lock(&reponseMutex);
-    attenteReponse = false;
-    pthread_cond_signal(&reponseCond);
-    pthread_mutex_unlock(&reponseMutex);
-}
-
-void aller(struct position* pos)
-{
-    printf("→ Déplacement vers (%f; %f) (%f°)\n", pos->x, pos->y, pos->o);
-
-    if (attenteReponse) {
-        printf("Déjà en déplacement !\n");
+    if (wiringPiSetup() == -1) {
+        fprintf(stderr, "Impossible d'initialiser WiringPi\n");
         exit(EXIT_FAILURE);
     }
-    attenteReponse = true;
+    pinMode(ENA, PWM_OUTPUT);
+    pinMode(ENB, PWM_OUTPUT);
+}
 
-    registerRxHandler(C2AD_GOTO, onC2AD_GOTO);
-    sendCA(C2AD_GOTO, (struct C2AD_GOTOs*)pos, sizeof(struct C2AD_GOTOs));
+void aller(struct position* pos);
 
-    pthread_mutex_lock(&reponseMutex);
-    while (attenteReponse) {
-        pthread_cond_wait(&reponseCond, &reponseMutex);
+int dbg = 0;
+
+int changerMoteurs(float lVit, float rVit)
+{
+    // Gauche
+    bool lFor = lVit < 0;
+    float lVolt = fabs(lVit); // TODO Utiliser les vitesses
+    if (lVolt > MOT_MAX_V) {
+        lVolt = MOT_MAX_V;
     }
-    pthread_mutex_unlock(&reponseMutex);
+    if (lVolt < MOT_MIN_V) {
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, LOW);
+        printf("x");
 
-    registerRxHandler(C2AD_GOTO, NULL);
+    } else if (lFor) {
+        digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, LOW);
+        printf("↑");
+    } else {
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, HIGH);
+        printf("↓");
+    }
+    int lAbs = lVolt * PWM_MAX / PWM_MAX_V;
+    pwmWrite(ENA, lAbs);
+    printf("%6d", lAbs);
 
-    printf("← Arrivé à destination\n");
+    // Droite
+    bool rFor = rVit < 0;
+    float rVolt = fabs(rVit); // TODO Utiriser res vitesses
+    if (rVolt > MOT_MAX_V) {
+        rVolt = MOT_MAX_V;
+    }
+    if (rVolt < MOT_MIN_V) {
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, LOW);
+        printf("x");
+
+    } else if (rFor) {
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+        printf("↑");
+    } else {
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, HIGH);
+        printf("↓");
+    }
+    int rAbs = rVolt * PWM_MAX / PWM_MAX_V;
+    pwmWrite(ENB, rAbs);
+    printf("%6d", rAbs);
+    printf("\n");
+}
+
+int brake()
+{
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+}
+
+int freewheel()
+{
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, HIGH);
+}
+
+void deconfigureMovement()
+{
+
 }

@@ -92,7 +92,6 @@ upgrade-fpga:
 
 # CHEF
 
-prog: chef
 chef:
 	make -C buildroot chef-rebuild
 

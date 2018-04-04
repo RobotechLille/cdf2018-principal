@@ -2,14 +2,14 @@
 #define __DEBUG_H_
 
 #include <pthread.h>
-#include "CA.h"
-#define REGULARREPORTS
+#include <time.h>
 
-struct A2CI_DBGs debug;
+clock_t debugStart;
+int debugFd;
+
 pthread_t tDebug;
 
 void* TaskDebug(void *pdata);
-void onA2CI_DBG();
 void configureDebug();
 void deconfigureDebug();
 

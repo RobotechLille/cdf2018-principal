@@ -1,20 +1,17 @@
 #!/bin/sh
 #
-# Start extra services when not in debug mode
+# Loads required hardware modules
 #
 
 start() {
-	printf "Starting extra services: "
-	# if ! /opt/cdf/bin/testpin 0 1
-	# then
-		/etc/extra.d/rcS
-	# fi
+	printf "Starting hardware handling: "
+    modprobe pl2303 # USB↔Serial cable
 	echo "OK"
 }
 
 stop() {
-	printf "Stopping extra services: "
-	/etc/extra.d/rcK
+	printf "Stopping hardware handling: "
+    rmmod pl2303 # USB↔Serial cable
 	echo "OK"
 }
 
