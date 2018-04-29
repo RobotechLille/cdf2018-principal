@@ -11,11 +11,17 @@ then
 
     # Network configuration
     echo -e "
+auto eth0
+iface eth0 inet static
+  address ${ETHADDRESS}
+  netmask 255.255.255.0
+  peer ${ETHPEER}
+  gateway ${ETHPEER}
+
 auto wlan0
-iface wlan0 inet static
-  address $ADDRESS
-  netmask $NETMASK
-  gateway $GATEWAY
+iface wlan0 inet dhcp
+  pre-up wpa_supplicant -D wext -B -iwlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf -P /var/run/wpa_supplicant.pid
+  pre-down start-stop-daemon -K -q -p /var/run/wpa_supplicant.pid
 " >> ${TARGET_DIR}/etc/network/interfaces
 
     # SSH configuration

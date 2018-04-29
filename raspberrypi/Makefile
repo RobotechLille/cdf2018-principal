@@ -6,6 +6,8 @@ upgrade-all: upgrade-chef upgrade-arduino upgrade-fpga upgrade-filesystem
 
 # Périphérique bloc à utiliser pour flasher
 SDCARD=/dev/mmcblk0
+CON_MODE=wifi
+ETH_IFACE=enp3s0
 
 # SYSTÈME D'EXPLOITATION
 
@@ -50,7 +52,12 @@ graphs:
 
 # Crée un fichier de conf utilisable pour s'y connecter
 sshconf: principalconf.sh
+ifeq ($(CON_MODE), eth)
+	source $$PWD/$<; echo -e "Host principal p\n    User root\n    Hostname $$ETHADDRESS\n    PreferredAuthentications publickey\n    PubkeyAuthentication yes\n    IdentityFile \"$$PWD/sshkey\"" > "$@"
+	source $$PWD/$<; sudo ip address add dev $(ETH_IFACE) $${ETHPEER}/20 peer $${ETHADDRESS}
+else
 	source $$PWD/$<; echo -e "Host principal p\n    User root\n    Hostname $$ADDRESS\n    PreferredAuthentications publickey\n    PubkeyAuthentication yes\n    IdentityFile \"$$PWD/sshkey\"" > "$@"
+endif
 	source $$PWD/$<; echo -e "$$SSHCPRV" > sshkey
 	chmod 600 sshkey
 
@@ -72,10 +79,12 @@ reboot: sshconf
 upgrade-filesystem: sshconf configure
 	make -C buildroot target-finalize
 	@# TODO Récupérer les ACL plutot que de mettre tous les fichiers en root
+	ssh -F sshconf principal true
 	rsync --rsh 'ssh -F sshconf' --archive --chown root:root buildroot/output/target/ principal:/
 
 # Met jour les overlays (une partie des fichiers)
 upgrade-overlays: sshconf
+	ssh -F sshconf principal true
 	rsync --rsh 'ssh -F sshconf' --archive --chown root:root robotech/chef/rootfs_overlay/ principal:/
 
 # ARDUINO
@@ -97,5 +106,6 @@ chef:
 
 upgrade-chef: chef
 	make -C buildroot chef-reinstall
+	ssh -F sshconf principal true
 	rsync --rsh 'ssh -F sshconf' --archive --chown root:root buildroot/output/target/opt/chef principal:/opt/
 
