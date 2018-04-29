@@ -34,7 +34,7 @@ endif
 # RÈGLES DE COMPILATION
 
 # Règle éxecutée par défaut (quand on fait juste `make`)
-default: bin/testpin bin/premier bin/local bin/testI2c bin/testLCD
+default: bin/testpin bin/premier bin/local bin/testI2c
 
 # Binaires (dont il faut spécifier les objets explicitement)
 bin/premier: obj/CF.o obj/movement.o obj/debug.o obj/position.o
