@@ -3,27 +3,34 @@
 #include <pthread.h>
 #include <unistd.h> // sleep
 
-#include "CF.h"
-#include "position.h"
+#include "debug.h"
 
-#define TEMPSMAX 10
+unsigned long int canard = 42;
+double banane = 63;
+char* artichaut = "Torticoli";
 
 int main()
 {
 
     printf("Démarrage...\n");
-    configureCF();
-    configurePosition();
     srand(time(NULL));
 
-    printf("C'est parti !\n");
+    configureDebug();
+    registerDebugVar("canard", ld, &canard);
+    registerDebugVar("banane", lf, &banane);
+    registerDebugVar("artichaut", s, &artichaut);
+    startDebug();
 
-    sleep(TEMPSMAX);
+    for (int i = 0; i < 2; i++) {
+        printf("21 %d\n", i);
+        canard += 3;
+        banane /= 2;
+        sleep(1);
+    }
 
-    printf("Fin des %d secondes\n", TEMPSMAX);
+    deconfigureDebug();
 
 
-    deconfigureCF();
     return EXIT_SUCCESS;
 }
 

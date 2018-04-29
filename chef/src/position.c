@@ -2,8 +2,21 @@
  * Fonctions de calcul de la position du robot
  */
 
-#include "position.h"
 #include <stdio.h>
+
+#include "debug.h"
+#include "position.h"
+
+// Globales
+struct position actuel;
+struct F2CI_CODERs deltaCoders;
+pthread_mutex_t posPolling;
+pthread_t tPosition;
+
+// Globales
+unsigned int nbCalcPos;
+long lCodTot, rCodTot;
+
 
 void* TaskPosition(void* pData)
 {
@@ -29,7 +42,6 @@ void* TaskPosition(void* pData)
         nbCalcPos++;
         lCodTot += deltaCoders.dL;
         rCodTot += deltaCoders.dR;
-
     }
 
     return NULL;
@@ -43,8 +55,11 @@ void onF2CI_CODER()
 
 void configurePosition()
 {
-    pthread_create(&tPosition, NULL, TaskPosition, NULL);
     registerRxHandler(F2CI_CODER, onF2CI_CODER);
+    registerDebugVar("lCodTot", ld, &lCodTot);
+    registerDebugVar("rCodTot", ld, &rCodTot);
+    registerDebugVar("nbCalcPos", d, &nbCalcPos);
+    pthread_create(&tPosition, NULL, TaskPosition, NULL);
 }
 
 void deconfigurePosition()

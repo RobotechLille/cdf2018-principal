@@ -1,38 +1,64 @@
-#include "debug.h"
-#include <stdio.h>
-#include <unistd.h> // sleep
-#include <time.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h> // sleep
 
-#include "position.h"
+#include "debug.h"
 
+// Variables globales
+pthread_t tDebug;
+
+struct debugArg* listeDebugArgs = NULL;
+
+FILE* debugFd;
 
 void* TaskDebug(void* pdata)
 {
     (void)pdata;
+
+    clock_t debugStart;
+    debugStart = clock();
+
     struct timespec tim; // 100 ms
     tim.tv_sec = 0;
     tim.tv_nsec = 100000000L;
-    /* tim.tv_sec = 1; */
-    /* tim.tv_nsec = 0; */
 
-    char line[1024];
-    clock_t t;
+    fprintf(debugFd, "\n");
 
     for (;;) {
+        clock_t t = clock() - debugStart;
+        fprintf(debugFd, "%ld", t);
 
-        // Calculating time index
-        t = clock() - debugStart;
+        struct debugArg* arg = listeDebugArgs;
+        while (arg != NULL) {
+            switch (arg->type) {
+            case d:
+                fprintf(debugFd, ",%d", *((int*)arg->var));
+                break;
+            case ld:
+                fprintf(debugFd, ",%ld", *((long int*)arg->var));
+                break;
+            case f:
+                fprintf(debugFd, ",%f", *((float*)arg->var));
+                break;
+            case lf:
+                fprintf(debugFd, ",%f", *((double*)arg->var));
+                break;
+            case s:
+                fprintf(debugFd, ",%s", *((char**)arg->var));
+                break;
+            default:
+                fprintf(debugFd, ",?");
+                break;
+            }
 
-        // Generating line
-        sprintf(line, "%ld,%d,%ld,%ld\n", t, nbCalcPos, lCodTot, rCodTot);
+            arg = arg->next;
+        }
+        fprintf(debugFd, "\n");
 
-        // Writing
-        write(debugFd, line, strlen(line));
-
-        // Sleeping
         nanosleep(&tim, NULL);
     }
 
@@ -41,7 +67,6 @@ void* TaskDebug(void* pdata)
 
 void configureDebug()
 {
-    debugStart = clock();
 
     // Génération du nom de fichier
     char path[256];
@@ -50,20 +75,41 @@ void configureDebug()
     sprintf(path, "log/%ld.csv", startTime);
 
     // Open file
-    debugFd = open(path, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if (debugFd < 0) {
-        fprintf(stderr, "Impossible d'ouvrir le fichier '%s', debug désactivé.\n", path);
+    debugFd = fopen(path, "w");
+    if (debugFd == NULL) {
+        perror("fopen debug file");
         return;
     }
 
-    char header[] = "time,nbCalcPos,lCodTot,rCodTot\n";
-    write(debugFd, header, strlen(header));
+    fprintf(debugFd, "time");
+}
 
+void registerDebugVar(char* name, enum debugArgTypes type, void* var)
+{
+    fprintf(debugFd, ",%s", name);
+
+    struct debugArg* arg = NULL;
+    struct debugArg** addrArg = &listeDebugArgs;
+    while (*addrArg != NULL) {
+        addrArg = &((*addrArg)->next);
+    }
+
+    arg = malloc(sizeof(struct debugArg));
+    arg->type = type;
+    arg->var = var;
+    arg->next = NULL;
+
+    *addrArg = arg;
+}
+
+void startDebug()
+{
     pthread_create(&tDebug, NULL, TaskDebug, NULL);
 }
 
 void deconfigureDebug()
 {
     pthread_cancel(tDebug);
-    close(debugFd);
+    fclose(debugFd);
+    // TODO Vider la liste des arguments
 }

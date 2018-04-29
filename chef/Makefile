@@ -25,7 +25,7 @@ CFLAGS += -Wall -Wextra -pedantic -g -DDEBUG
 
 # Génération des fichiers éxecutables
 bin/%: obj/%.o
-	$(CC) $(LDFLAGS_CUSTOM) $^ -o $@
+	$(CXX) $(LDFLAGS_CUSTOM) $^ -o $@
 # On enlève les symboles inutiles pour gagner en temps de chargement de l'éxecutable
 ifeq ($(DEBUG),no)
 	strip $@
@@ -34,13 +34,14 @@ endif
 # RÈGLES DE COMPILATION
 
 # Règle éxecutée par défaut (quand on fait juste `make`)
-default: bin/testpin bin/premier bin/local
+default: bin/testpin bin/premier bin/local bin/testI2c bin/testLCD
 
 # Binaires (dont il faut spécifier les objets explicitement)
 bin/premier: obj/CF.o obj/movement.o obj/debug.o obj/position.o
 bin/testPin: obj/testPin.o
+bin/testI2c: obj/testI2c.o obj/i2c.o obj/srf08.o obj/lcd.o
 
-bin/local: obj/local.o obj/CF.o obj/position.o
+bin/local: obj/local.o obj/debug.o
 	$(CC) -lpthread $^ -o $@
 
 # Génération des fichiers objets

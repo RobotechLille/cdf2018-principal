@@ -33,7 +33,7 @@ void* TaskParcours(void *pdata)
 #define RAMP_TIME 100
 #define MAX_VIT MOT_MAX_V
 
-    for (;;) {
+    /* for (;;) { */
         // ↗
         for (int i = 0; i < RAMP_TIME; i++) {
             float p = (float) i / (float) RAMP_TIME;
@@ -43,15 +43,15 @@ void* TaskParcours(void *pdata)
         changerMoteurs(MOT_MAX_V, MOT_MAX_V);
         // ↑
         sleep(2);
-        // ↘
-        for (int i = 0; i < RAMP_TIME; i++) {
-            float p = (float) i / (float) RAMP_TIME;
-            p = 1 - p;
-            changerMoteurs(p * MOT_MAX_V, p * MOT_MAX_V);
-            nanosleep(&tim, NULL);
-        }
-        sleep(5);
-    }
+    /*     // ↘ */
+    /*     for (int i = 0; i < RAMP_TIME; i++) { */
+    /*         float p = (float) i / (float) RAMP_TIME; */
+    /*         p = 1 - p; */
+    /*         changerMoteurs(p * MOT_MAX_V, p * MOT_MAX_V); */
+    /*         nanosleep(&tim, NULL); */
+    /*     } */
+    /*     sleep(5); */
+    /* } */
 
     printf("Fin du parcours\n");
     return NULL;
@@ -61,10 +61,11 @@ int main()
 {
 
     printf("Démarrage...\n");
-    configureCF();
     configureDebug();
+    configureCF();
     configureMovement();
     configurePosition();
+    startDebug();
     srand(time(NULL));
 
     /* printf("En attente de la tirette...\n"); // TODO */
@@ -78,12 +79,15 @@ int main()
     printf("Fin des %d secondes\n", TEMPSMAX);
     /* pthread_cancel(tParcours); */
 
+    for (;;) {
+
+    }
 
     /* stop(); */
 
     deconfigureMovement();
     deconfigurePosition();
-    deconfigureDebug();
     deconfigureCF();
+    deconfigureDebug();
     return EXIT_SUCCESS;
 }

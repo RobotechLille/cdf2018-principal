@@ -4,13 +4,24 @@
 #include <pthread.h>
 #include <time.h>
 
-clock_t debugStart;
-int debugFd;
 
-pthread_t tDebug;
+// Structures
+enum debugArgTypes {d, f, ld, lf, s};
 
-void* TaskDebug(void *pdata);
-void configureDebug();
+struct debugArg {
+    enum debugArgTypes type;
+    void* var;
+    struct debugArg* next;
+};
+
+
+// Public
+void configureDebug(); // Avant tous les configure
+void registerDebugVar(char* name, enum debugArgTypes type, void* var);
+void startDebug(); // Après tous les configure
 void deconfigureDebug();
+
+// Private
+void* TaskDebug(void *pdata);
 
 #endif
