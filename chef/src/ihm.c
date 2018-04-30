@@ -1,6 +1,5 @@
 #include <pthread.h>
 #include <signal.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
 #include <wiringPi.h>
@@ -12,13 +11,13 @@
 
 // Globales
 pthread_t tIHM;
+pthread_t tStdinIHM;
 
 // Fonctions
 void configureIHM()
 {
     initLCD();
-    gotoLCD(LCD_LINE_1);
-    printLCD("Demarrage...");
+    printToLCD(LCD_LINE_1, "Demarrage");
 }
 
 void startIHM()
@@ -31,6 +30,7 @@ void startIHM()
     pullUpDnControl(IHM_PIN_TIRETTE, PUD_UP);
 
     pthread_create(&tIHM, NULL, TaskIHM, NULL);
+    pthread_create(&tStdinIHM, NULL, TaskStdinIHM, NULL);
     pthread_join(tIHM, NULL);
 }
 
@@ -66,10 +66,34 @@ bool debunkButtonIHM(int pin)
     return true;
 }
 
+enum boutons stdinbutton = none;
+
+void* TaskStdinIHM(void* pdata)
+{
+    (void)pdata;
+
+    for (;;) {
+        char c = getchar();
+        if (c == '1') {
+            stdinbutton = jaune;
+        } else if (c == '2') {
+            stdinbutton = rouge;
+        }
+    }
+
+    return NULL;
+}
+
 enum boutons pressedIHM(int timeout)
 {
     bool block = timeout < 0;
     while (timeout > 0 || block) {
+
+        if (stdinbutton != none) {
+            enum boutons bout = stdinbutton;
+            stdinbutton = none;
+            return bout;
+        }
 
         if (debunkButtonIHM(IHM_PIN_JAUNE)) {
             return jaune;
@@ -100,29 +124,23 @@ bool tirettePresente()
     return etat == LOW;
 }
 
-char tempLine[16];
 bool isDebug = false;
 bool isOrange = true;
 bool annuler = false;
 clock_t lastCalibrage = 0;
-clock_t parcoursStart = 0;
 pthread_t tParcours;
 
-void printCouleur()
+char* orangeStr = "Orange";
+char* vertStr = "Vert";
+
+char* getCouleur()
 {
-    if (isOrange) {
-        printLCD("Orange");
-    } else {
-        printLCD("Vert");
-    }
+    return isOrange ? orangeStr : vertStr;
 }
 
 void* TaskIHM(void* pdata)
 {
     (void)pdata;
-
-    gotoLCD(LCD_LINE_1 + 1);
-    printLCD("Niuh");
 
     enum boutons bout;
     for (;;) {
@@ -130,14 +148,9 @@ void* TaskIHM(void* pdata)
         // Debug
         for (;;) {
             clearLCD();
-            gotoLCD(LCD_LINE_1);
-            printLCD("Debug : ");
+            printfToLCD(LCD_LINE_1, "Debug : %s", isDebug ? "On" : "Off");
             if (isDebug) {
-                printLCD("On");
-                gotoLCD(LCD_LINE_2);
-                printLCD("192.168.0.0 TODO");
-            } else {
-                printLCD("Off");
+                printToLCD(LCD_LINE_2, "192.168.0.0 TODO");
             }
             bout = pressedIHM(IHM_REFRESH_INTERVAL);
 
@@ -151,9 +164,7 @@ void* TaskIHM(void* pdata)
         // Couleur
         for (;;) {
             clearLCD();
-            gotoLCD(LCD_LINE_1);
-            printLCD("Couleur : ");
-            printCouleur();
+            printfToLCD(LCD_LINE_1, "Couleur : %s", getCouleur());
             bout = pressedIHM(IHM_BLOCK);
 
             if (bout == rouge) {
@@ -166,27 +177,20 @@ void* TaskIHM(void* pdata)
         // Calibrage
         for (;;) {
             clearLCD();
-            gotoLCD(LCD_LINE_1);
             if (lastCalibrage != 0) {
-                printLCD("Calibre il y a");
-                gotoLCD(LCD_LINE_2);
-                sprintf(tempLine, "%ld secondes", (clock() - lastCalibrage) / CLOCKS_PER_SEC);
-                printLCD(tempLine);
+                printToLCD(LCD_LINE_1, "Calibre il y a");
+                printfToLCD(LCD_LINE_2, "%ld secondes", (clock() - lastCalibrage) / CLOCKS_PER_SEC);
             } else {
-                printLCD("Calibrer");
-                gotoLCD(LCD_LINE_2);
-                printLCD("(");
-                printCouleur();
-                printLCD(")");
+                printToLCD(LCD_LINE_1, "Calibrer");
+                printfToLCD(LCD_LINE_2, "(%s)", getCouleur());
             }
             bout = pressedIHM(IHM_REFRESH_INTERVAL);
 
             if (bout == rouge) {
                 clearLCD();
-                gotoLCD(LCD_LINE_1);
-                printLCD("Calibrage...");
-                delay(3000); // TODO
-                lastCalibrage = clock();
+                printToLCD(LCD_LINE_1, "Calibrage...");
+                delay(3000);             // TODO
+                lastCalibrage = clock(); // TODO struct timespec
             } else if (bout == jaune) {
                 break;
             }
@@ -195,14 +199,12 @@ void* TaskIHM(void* pdata)
         // Diagnostics
         for (;;) {
             clearLCD();
-            gotoLCD(LCD_LINE_1);
-            printLCD("Diagnostiquer");
+            printToLCD(LCD_LINE_1, "Diagnostiquer");
             bout = pressedIHM(IHM_BLOCK);
 
             if (bout == rouge) {
                 clearLCD();
-                gotoLCD(LCD_LINE_1);
-                printLCD("Diagnostics...");
+                printToLCD(LCD_LINE_1, "Diagnostics...");
                 delay(3000); // TODO
             } else if (bout == jaune) {
                 break;
@@ -212,22 +214,16 @@ void* TaskIHM(void* pdata)
         // Parcours
         for (;;) {
             clearLCD();
-            gotoLCD(LCD_LINE_1);
-            printLCD("Lancer parcours");
-            gotoLCD(LCD_LINE_2);
-            printLCD("(");
-            printCouleur();
-            printLCD(")");
+            printToLCD(LCD_LINE_1, "Lancer parcours");
+            printfToLCD(LCD_LINE_2, "(%s)", getCouleur());
             bout = pressedIHM(IHM_BLOCK);
             if (bout == rouge) {
                 // No tirette
                 annuler = false;
                 while (!tirettePresente()) {
                     clearLCD();
-                    gotoLCD(LCD_LINE_1);
-                    printLCD("Inserez tirette");
-                    gotoLCD(LCD_LINE_2);
-                    printLCD("(ROUGE: ignorer)");
+                    printToLCD(LCD_LINE_1, "Inserez tirette");
+                    printToLCD(LCD_LINE_2, "(ROUGE: ignorer)");
                     bout = pressedIHM(IHM_REFRESH_INTERVAL);
                     if (bout == rouge) {
                         break;
@@ -277,14 +273,12 @@ void* TaskIHM(void* pdata)
         // RàZ
         for (;;) {
             clearLCD();
-            gotoLCD(LCD_LINE_1);
-            printLCD("Remettre a zero");
+            printToLCD(LCD_LINE_1, "Remettre a zero");
             bout = pressedIHM(IHM_BLOCK);
 
             if (bout == rouge) {
                 clearLCD();
-                gotoLCD(LCD_LINE_1);
-                printLCD("Remise a zero...");
+                printToLCD(LCD_LINE_1, "Remise a zero...");
                 delay(3000); // TODO
             } else if (bout == jaune) {
                 break;
@@ -296,6 +290,5 @@ void* TaskIHM(void* pdata)
 void deconfigureIHM()
 {
     clearLCD();
-    gotoLCD(LCD_LINE_1);
-    printLCD("Bye bye!");
+    printToLCD(LCD_LINE_1, "Bye bye!");
 }

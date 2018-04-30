@@ -11,8 +11,8 @@
 #define PWM_MAX 1023
 #define PWM_MAX_V 3.3
 
-// #define TESTINATOR
-#define TLE5206
+#define TESTINATOR
+// #define TLE5206
 
 #ifdef TESTINATOR
 #define MOT_MIN_V 0.1
@@ -26,16 +26,14 @@
 
 // Pins definition
 // Left
-// Physical 32
 #define ENA 26
-#define IN1 2
-#define IN2 3
+#define IN1 21
+#define IN2 22
 
-// Physical 33
 // Right
 #define ENB 23
-#define IN3 4
-#define IN4 5
+#define IN3 24
+#define IN4 25
 
 
 void configureMovement();

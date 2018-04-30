@@ -6,8 +6,8 @@
 #include <unistd.h>
 #include <wiringPiI2C.h>
 
-#include "i2c.h"
 #include "lcd.h"
+#include "movement.h"
 
 int main(int argc, char* argv[])
 {
@@ -16,9 +16,16 @@ int main(int argc, char* argv[])
     (void)argv;
 
     initI2C();
+
     initLCD();
     clearLCD();
-    gotoLCD(LCD_LINE_1);
-    printLCD("Bojour");
+    printToLCD(LCD_LINE_1, "Forward");
+
+    configureMovement();
+
+    for (;;) {
+        changerMoteurs(1.5, 2);
+        sleep(1);
+    }
 
 }

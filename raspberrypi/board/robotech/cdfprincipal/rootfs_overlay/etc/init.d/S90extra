@@ -5,10 +5,7 @@
 
 start() {
 	printf "Starting extra services: "
-	# if ! /opt/cdf/bin/testpin 0 1
-	# then
-		/etc/extra.d/rcS
-	# fi
+	/etc/extra.d/rcS
 	echo "OK"
 }
 

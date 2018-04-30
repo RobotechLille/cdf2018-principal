@@ -1,6 +1,8 @@
 #ifndef __IHM_H_
 #define __IHM_H_
 
+#include <stdbool.h>
+
 #include "lcd.h"
 
 #define IHM_PIN_ROUGE 0
@@ -22,6 +24,8 @@ void deconfigureIHM();
 
 // Private
 void* TaskIHM(void *pdata);
+void* TaskStdinIHM(void *pdata);
 enum boutons pressedIHM(int timeout); // timeout: ms or -1
+bool debunkButtonIHM(int pin);
 
 #endif

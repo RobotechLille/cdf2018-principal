@@ -91,7 +91,8 @@ upgrade-filesystem: sshconf configure
 # Met jour les overlays (une partie des fichiers)
 upgrade-overlays: sshconf
 	ssh -F sshconf principal true
-	rsync --rsh 'ssh -F sshconf' --archive --chown root:root robotech/chef/rootfs_overlay/ principal:/
+	chmod 700 board/robotech/cdfprincipal/rootfs_overlay/root
+	rsync --rsh 'ssh -F sshconf' --archive --chown root:root board/robotech/cdfprincipal/rootfs_overlay/ principal:/
 
 # ARDUINO
 upgrade-arduino:
@@ -116,6 +117,11 @@ upgrade-chef: chef
 	rsync --rsh 'ssh -F sshconf' --archive --chown root:root buildroot/output/target/opt/chef principal:/opt/
 
 run:
+	ssh -F sshconf principal true
+	ssh -F sshconf principal /etc/init.d/S50chef stop
+	ssh -F sshconf principal 'cd /opt/chef; bin/premier; /opt/chef/lcdOff.sh'
+
+restart:
 	ssh -F sshconf principal true
 	ssh -F sshconf principal /etc/init.d/S50chef restart
 

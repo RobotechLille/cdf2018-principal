@@ -20,7 +20,7 @@ void* TaskDebug(void* pdata)
     (void)pdata;
 
     clock_t debugStart;
-    debugStart = clock();
+    debugStart = clock(); // TODO struct timespec
 
     struct timespec tim; // 100 ms
     tim.tv_sec = 0;

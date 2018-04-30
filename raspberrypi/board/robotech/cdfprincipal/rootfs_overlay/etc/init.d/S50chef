@@ -3,19 +3,22 @@
 # Start main program
 #
 
-EXEC=$(which sh)
+SHELL=$(which sh)
+EXECDIR=/opt/chef
+EXECNAME=premier
+EXECPATH=bin/$EXECNAME
 PIDFILE=/var/run/chef.pid
-LOGFILE=/var/run/chef.log
 
 start() {
 	printf "Starting chef: "
-	start-stop-daemon -p "$PIDFILE" -x "$EXEC" -b -m -S -- "/opt/chef/run.sh" -l "$LOGFILE"
-echo "OK"
+	cd "$EXECDIR"; /sbin/start-stop-daemon -p "$PIDFILE" -x "$EXECPATH" -b -m -S
+	echo "OK"
 }
 
 stop() {
 	printf "Stopping chef: "
-	start-stop-daemon -p "$PIDFILE" -x "$EXEC" -K
+	/sbin/start-stop-daemon -x "$EXECPATH" -K
+	/opt/chef/lcdOff.sh
 	echo "OK"
 }
 

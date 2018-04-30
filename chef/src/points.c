@@ -3,7 +3,6 @@
 #include "lcd.h"
 
 int points;
-char tempLine[16];
 
 void resetPoints()
 {
@@ -17,11 +16,7 @@ int getPoints()
 
 void showPoints()
 {
-    sprintf(tempLine, "%d points", getPoints());
-    lockLCD();
-    gotoLCD(LCD_LINE_2);
-    printLCD(tempLine);
-    unlockLCD();
+    printfToLCD(LCD_LINE_2, "%d points", getPoints());
 }
 
 void addPoints(int pts)

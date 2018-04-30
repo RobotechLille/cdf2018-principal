@@ -10,6 +10,9 @@ LDFLAGS_CUSTOM += -lpthread -lwiringPi
 CFLAGS_CUSTOM += -g
 ## Générateurs de drapeaux pour les bibliothèques
 PKG_CONFIG=pkg-config
+## Nom des objets communs
+OBJS=CF debug i2c ihm lcd movement parcours points position
+OBJS_O=$(addprefix obj/,$(addsuffix .o,$(OBJS)))
 
 # VARIABLES AUTOMATIQUES
 ifdef LIBS
@@ -21,25 +24,20 @@ endif
 CFLAGS += -Wall -Wextra -pedantic -g -DDEBUG
 # buildroot se charge de remplacer ces flags avec des optimisations
 
-# RÈGLES AUTOMATIQUES DE COMPILATION
+# RÈGLES DE COMPILATION
+
+# Règle éxecutée par défaut (quand on fait juste `make`)
+default: bin/premier bin/local $(subst src,bin,$(subst .c,,$(wildcard src/test*.c)))
 
 # Génération des fichiers éxecutables
-bin/%: obj/%.o
+bin/%: obj/%.o $(OBJS_O)
 	$(CC) $(LDFLAGS) $(LDFLAGS_CUSTOM) $^ -o $@
 	$(OBJCOPY) --only-keep-debug $@ $@.debug
 	$(STRIP) --strip-debug --strip-unneeded $@
 
-# RÈGLES DE COMPILATION
-
-# Règle éxecutée par défaut (quand on fait juste `make`)
-default: bin/testpin bin/premier bin/local bin/testI2c
-
 # Binaires (dont il faut spécifier les objets explicitement)
-OBJS=CF movement debug position ihm lcd i2c points parcours
-bin/premier: $(addprefix obj/,$(addsuffix .o,$(OBJS)))
-bin/testPin: obj/testPin.o
-# TODO ↑ Enlever (remplacé par IHM)
-bin/testI2c: obj/testI2c.o obj/i2c.o obj/srf08.o obj/lcd.o
+bin/premier: obj/premier.o $(OBJS_O)
+bin/test%: obj/test%.o $(OBJS_O)
 
 # Programme de test sur PC, n'embarquant pas wiringPi
 bin/local: obj/local.o obj/debug.o

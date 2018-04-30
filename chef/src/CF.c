@@ -114,7 +114,7 @@ void configureCF()
     pthread_mutex_init(&sSendCF, NULL);
     pthread_create(&tReaderAC, NULL, TaskReaderAC, NULL);
 
-    printf("Attente de réponse de l'Fpga... ");
+    printf("Attente de réponse du Fpga... ");
     fflush(stdout);
     struct timespec tim;
     tim.tv_sec = 0;

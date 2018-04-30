@@ -9,6 +9,11 @@
 #define LCD_MODE_CHR 1
 #define LCD_MODE_CMD 0
 
+#define LCD_NB_LINES 2
+#define LCD_NB_CHARS 16
+#define LCD_NB_TOTAL LCD_NB_LINES*LCD_NB_CHARS
+
+
 #define LCD_LINE_1 0x80 // 1st line
 #define LCD_LINE_2 0xC0 // 2nd line
 
@@ -21,15 +26,18 @@
 // Public
 void initLCD();
 void clearLCD();
-void gotoLCD(uint8_t line);
-void charLCD(char c);
-void printLCD(char* s);
-// Not necessary, but should be used when different threads use the display
-void lockLCD();
-void unlockLCD();
+void printToLCD(uint8_t line, char* s);
+void printRightLCD(uint8_t line, char* s);
+void printfToLCD(uint8_t line, char* s, ...);
 
 // Private
 void sendLCD(uint8_t bits, uint8_t mode);
 void toggleEnableLCD(uint8_t bits);
+void gotoLCD(uint8_t line);
+void charLCD(char c);
+void printLCD(char* s);
+void displayLCD();
+void lockLCD();
+void unlockLCD();
 
 #endif
