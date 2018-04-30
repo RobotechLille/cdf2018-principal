@@ -3,3 +3,4 @@ output
 principalconf.sh
 sshconf
 sshkey*
+gdbcommands

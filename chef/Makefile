@@ -7,7 +7,7 @@ LIBS=
 ## Drapeaux pour le linker
 LDFLAGS_CUSTOM += -lpthread -lwiringPi
 ## Drapeaux pour le compilateur
-CFLAGS=
+CFLAGS_CUSTOM += -g
 ## Générateurs de drapeaux pour les bibliothèques
 PKG_CONFIG=pkg-config
 
@@ -25,11 +25,9 @@ CFLAGS += -Wall -Wextra -pedantic -g -DDEBUG
 
 # Génération des fichiers éxecutables
 bin/%: obj/%.o
-	$(CXX) $(LDFLAGS_CUSTOM) $^ -o $@
-# On enlève les symboles inutiles pour gagner en temps de chargement de l'éxecutable
-ifeq ($(DEBUG),no)
-	strip $@
-endif
+	$(CC) $(LDFLAGS) $(LDFLAGS_CUSTOM) $^ -o $@
+	$(OBJCOPY) --only-keep-debug $@ $@.debug
+	$(STRIP) --strip-debug --strip-unneeded $@
 
 # RÈGLES DE COMPILATION
 
@@ -37,18 +35,21 @@ endif
 default: bin/testpin bin/premier bin/local bin/testI2c
 
 # Binaires (dont il faut spécifier les objets explicitement)
-bin/premier: obj/CF.o obj/movement.o obj/debug.o obj/position.o
+OBJS=CF movement debug position ihm lcd i2c points parcours
+bin/premier: $(addprefix obj/,$(addsuffix .o,$(OBJS)))
 bin/testPin: obj/testPin.o
+# TODO ↑ Enlever (remplacé par IHM)
 bin/testI2c: obj/testI2c.o obj/i2c.o obj/srf08.o obj/lcd.o
 
+# Programme de test sur PC, n'embarquant pas wiringPi
 bin/local: obj/local.o obj/debug.o
-	$(CC) -lpthread $^ -o $@
+	$(CC) $(CFLAGS) $(CFLAGS_CUSTOM) -lpthread $^ -o $@
 
 # Génération des fichiers objets
 obj/%.o: src/%.c src/%.h
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CFLAGS_CUSTOM) -c $< -o $@
 obj/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CFLAGS_CUSTOM) -c $< -o $@
 
 # OUTILS DE DÉVELOPPEMENT
 

@@ -9,6 +9,12 @@ SDCARD=/dev/mmcblk0
 CON_MODE=wifi
 ETH_IFACE=enp3s0
 
+# Debug
+TARGET_DIR=$(PWD)/buildroot/output/target/
+EXECDIR=/opt/chef/
+EXECPATH=bin/premier
+GDBPORT=2346
+
 # SYSTÈME D'EXPLOITATION
 
 # Configuration
@@ -109,3 +115,24 @@ upgrade-chef: chef
 	ssh -F sshconf principal true
 	rsync --rsh 'ssh -F sshconf' --archive --chown root:root buildroot/output/target/opt/chef principal:/opt/
 
+run:
+	ssh -F sshconf principal true
+	ssh -F sshconf principal /etc/init.d/S50chef restart
+
+gdbcommands:
+	echo "set sysroot $(TARGET_DIR)" > "$@"
+	echo "exec-file $(TARGET_DIR)$(EXECDIR)$(EXECPATH)" >> "$@"
+	echo "symbol-file $(TARGET_DIR)$(EXECDIR)$(EXECPATH).debug" >> "$@"
+	echo "target remote :$(GDBPORT)" >> "$@"
+	echo "continue" >> "$@"
+
+debug: gdbcommands
+	ssh -F sshconf principal true
+	ssh -F sshconf principal /etc/init.d/S50chef stop
+	ssh -F sshconf principal killall gdbserver; true
+	ssh -F sshconf principal -L $(GDBPORT):127.0.0.1:$(GDBPORT) 'cd $(EXECDIR); gdbserver 127.0.0.1:$(GDBPORT) $(EXECPATH)' & sleep 1
+	buildroot/output/host/usr/bin/arm-linux-gnueabihf-gdb -x gdbcommands; \
+		ssh -F sshconf principal /opt/chef/lcdOff.sh; \
+		ssh -F sshconf principal killall gdbserver; true
+
+.PHONY: gdbcommands

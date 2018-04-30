@@ -77,6 +77,9 @@ BR2_PACKAGE_PPPD=y
 # Pour faire plaisir à Geoffrey
 BR2_PACKAGE_HTOP=y
 
+# Pour debugguer
+BR2_PACKAGE_GDB=y
+
 # Pour uploader sur le Arduino
 BR2_TOOLCHAIN_BUILDROOT_WCHAR=y
 BR2_SHARED_LIBS=y
