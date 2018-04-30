@@ -2,6 +2,7 @@
 #define __LCD_H_
 
 #include "stdint.h"
+#include "i2c.h"
 
 #define LCD_ADDR 0x27
 
@@ -23,6 +24,9 @@ void clearLCD();
 void gotoLCD(uint8_t line);
 void charLCD(char c);
 void printLCD(char* s);
+// Not necessary, but should be used when different threads use the display
+void lockLCD();
+void unlockLCD();
 
 // Private
 void sendLCD(uint8_t bits, uint8_t mode);

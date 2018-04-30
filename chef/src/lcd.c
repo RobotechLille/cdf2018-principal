@@ -1,9 +1,11 @@
-#include "lcd.h"
-#include "i2c.h"
+#include <pthread.h>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
+#include "lcd.h"
+
 int lcdFd;
+pthread_mutex_t sLCD;
 
 void initLCD()
 {
@@ -43,7 +45,6 @@ void printLCD(char* s)
     }
 }
 
-
 void sendLCD(uint8_t bits, uint8_t mode)
 {
     lockI2C();
@@ -65,4 +66,14 @@ void toggleEnableLCD(uint8_t bits)
     delayMicroseconds(1);
     wiringPiI2CReadReg8(lcdFd, (bits & ~LCD_MASK_ENABLE));
     delayMicroseconds(50);
+}
+
+void lockLCD()
+{
+    pthread_mutex_lock(&sLCD);
+}
+
+void unlockLCD()
+{
+    pthread_mutex_unlock(&sLCD);
 }

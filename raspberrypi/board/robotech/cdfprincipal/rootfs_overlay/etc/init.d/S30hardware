@@ -8,6 +8,7 @@ start() {
 	modprobe pl2303 # USB↔Serial cable
 	modprobe i2c-bcm2708 # I2C
 	modprobe i2c-dev # I2C
+	/opt/chef/i2cOff.sh
 	echo "OK"
 }
 

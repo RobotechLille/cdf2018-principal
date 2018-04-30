@@ -6,10 +6,6 @@
 
 void configureMovement()
 {
-    if (wiringPiSetup() == -1) {
-        fprintf(stderr, "Impossible d'initialiser WiringPi\n");
-        exit(EXIT_FAILURE);
-    }
     pinMode(ENA, PWM_OUTPUT);
     pinMode(ENB, PWM_OUTPUT);
 }
@@ -89,4 +85,10 @@ int freewheel()
 void deconfigureMovement()
 {
 
+}
+
+int stop()
+{
+    brake();
+    // TODO
 }

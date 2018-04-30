@@ -18,7 +18,7 @@ define CHEF_INSTALL_TARGET_CMDS
 	$(INSTALL) -d -m 0755 $(TARGET_DIR)/opt/chef/com
 	$(INSTALL) -d -m 0755 $(TARGET_DIR)/opt/chef/log
 	$(INSTALL) -D -m 0755 $(@D)/bin/* $(TARGET_DIR)/opt/chef/bin
-	$(INSTALL) -D -m 0755 $(@D)/run.sh $(TARGET_DIR)/opt/chef
+	$(INSTALL) -D -m 0755 $(@D)/*.sh $(TARGET_DIR)/opt/chef
 endef
 
 $(eval $(generic-package))
