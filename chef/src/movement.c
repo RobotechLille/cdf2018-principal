@@ -71,13 +71,14 @@ int freewheel()
     sendCF(C2FD_PWM, &msgFree, sizeof(struct C2FD_PWMs));
 }
 
-void deconfigureMovement()
-{
-
-}
-
 int stop()
 {
     brake();
     // TODO Actionneurs
 }
+
+void deconfigureMovement()
+{
+    stop();
+}
+

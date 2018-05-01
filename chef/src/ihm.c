@@ -23,7 +23,6 @@ void startIHM()
 {
     configureButtons();
     pthread_create(&tIHM, NULL, TaskIHM, NULL);
-    pthread_join(tIHM, NULL);
 }
 
 // t1 - t2
@@ -203,6 +202,7 @@ void* TaskIHM(void* pdata)
 
 void deconfigureIHM()
 {
+    pthread_cancel(tIHM);
     clearLCD();
     printToLCD(LCD_LINE_1, "Bye bye!");
 }
