@@ -4,6 +4,9 @@
 #include <pthread.h>
 #include <time.h>
 
+// Constantes
+#define DEBUG_INTERVAL 100
+
 
 // Structures
 enum debugArgTypes {d, f, ld, lf, s};

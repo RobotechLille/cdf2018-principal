@@ -40,7 +40,7 @@ bin/premier: obj/premier.o $(OBJS_O)
 bin/test%: obj/test%.o $(OBJS_O)
 
 # Programme de test sur PC, n'embarquant pas wiringPi
-bin/local: obj/local.o obj/debug.o
+bin/local: obj/local.o
 	$(CC) $(CFLAGS) $(CFLAGS_CUSTOM) -lpthread $^ -o $@
 
 # Génération des fichiers objets

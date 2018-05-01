@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -5,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h> // sleep
+#include <wiringPi.h>
 
 #include "debug.h"
 
@@ -15,22 +17,51 @@ struct debugArg* listeDebugArgs = NULL;
 
 FILE* debugFd;
 
+int nextId()
+{
+    DIR* d;
+    struct dirent* dir;
+    d = opendir("log");
+
+    int maxId = 0, id, ret;
+
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            ret = sscanf(dir->d_name, "%d", &id);
+            if (ret == 1 && id > maxId) {
+                maxId = id;
+            }
+        }
+        closedir(d);
+    }
+    return maxId + 1;
+}
+
+struct timespec debugStart;
+struct timespec debugNow;
+struct timespec debugEcoule;
+
 void* TaskDebug(void* pdata)
 {
     (void)pdata;
 
-    clock_t debugStart;
-    debugStart = clock(); // TODO struct timespec
-
-    struct timespec tim; // 100 ms
-    tim.tv_sec = 0;
-    tim.tv_nsec = 100000000L;
+    if (DEBUG_INTERVAL <= 0) {
+        return NULL;
+    }
+    clock_gettime(CLOCK_REALTIME, &debugStart);
 
     fprintf(debugFd, "\n");
 
     for (;;) {
-        clock_t t = clock() - debugStart;
-        fprintf(debugFd, "%ld", t);
+        clock_gettime(CLOCK_REALTIME, &debugNow);
+        if ((debugNow.tv_nsec - debugStart.tv_nsec) < 0) {
+            debugEcoule.tv_sec = debugNow.tv_sec - debugStart.tv_sec - 1;
+            debugEcoule.tv_nsec = debugNow.tv_nsec - debugStart.tv_nsec + 1000000000UL;
+        } else {
+            debugEcoule.tv_sec = debugNow.tv_sec - debugStart.tv_sec;
+            debugEcoule.tv_nsec = debugNow.tv_nsec - debugStart.tv_nsec;
+        }
+        fprintf(debugFd, "%ld.%09ld", debugEcoule.tv_sec, debugEcoule.tv_nsec);
 
         struct debugArg* arg = listeDebugArgs;
         while (arg != NULL) {
@@ -58,8 +89,9 @@ void* TaskDebug(void* pdata)
             arg = arg->next;
         }
         fprintf(debugFd, "\n");
+        fflush(debugFd);
 
-        nanosleep(&tim, NULL);
+        delay(DEBUG_INTERVAL);
     }
 
     return NULL;
@@ -70,9 +102,7 @@ void configureDebug()
 
     // Génération du nom de fichier
     char path[256];
-    time_t startTime;
-    time(&startTime);
-    sprintf(path, "log/%ld.csv", startTime);
+    sprintf(path, "log/%d.csv", nextId());
 
     // Open file
     debugFd = fopen(path, "w");

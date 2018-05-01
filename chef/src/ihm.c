@@ -25,22 +25,9 @@ void startIHM()
     pthread_create(&tIHM, NULL, TaskIHM, NULL);
 }
 
-// t1 - t2
-void diffTimespec(const struct timespec* t1, const struct timespec* t2, struct timespec* td)
-{
-    if ((t1->tv_nsec - t2->tv_nsec) < 0) {
-        td->tv_sec = t1->tv_sec - t2->tv_sec - 1;
-        td->tv_nsec = t1->tv_nsec - t2->tv_nsec + 1000000000UL;
-    } else {
-        td->tv_sec = t1->tv_sec - t2->tv_sec;
-        td->tv_nsec = t1->tv_nsec - t2->tv_nsec;
-    }
-}
-
 bool isDebug = false;
 bool isOrange = true;
 bool annuler = false;
-clock_t lastCalibrage = 0;
 pthread_t tParcours;
 
 char* orangeStr = "Orange";
@@ -51,6 +38,10 @@ char* getCouleur()
     return isOrange ? orangeStr : vertStr;
 }
 
+struct timespec calibrageLast = {0, 0};
+struct timespec calibrageNow;
+struct timespec calibrageEcoule;
+
 void* TaskIHM(void* pdata)
 {
     (void)pdata;
@@ -58,21 +49,21 @@ void* TaskIHM(void* pdata)
     enum boutons bout;
     for (;;) {
 
-        // Debug
-        for (;;) {
-            clearLCD();
-            printfToLCD(LCD_LINE_1, "Debug : %s", isDebug ? "On" : "Off");
-            if (isDebug) {
-                printToLCD(LCD_LINE_2, "192.168.0.0 TODO");
-            }
-            bout = pressedButton(BUT_REFRESH_INTERVAL);
-
-            if (bout == rouge) {
-                isDebug = !isDebug;
-            } else if (bout == jaune) {
-                break;
-            }
-        }
+        /* // Debug */
+        /* for (;;) { */
+        /*     clearLCD(); */
+        /*     printfToLCD(LCD_LINE_1, "Debug : %s", isDebug ? "On" : "Off"); */
+        /*     if (isDebug) { */
+        /*         printToLCD(LCD_LINE_2, "192.168.0.0 TODO"); */
+        /*     } */
+        /*     bout = pressedButton(BUT_REFRESH_INTERVAL); */
+        /*  */
+        /*     if (bout == rouge) { */
+        /*         isDebug = !isDebug; */
+        /*     } else if (bout == jaune) { */
+        /*         break; */
+        /*     } */
+        /* } */
 
         // Couleur
         for (;;) {
@@ -90,9 +81,18 @@ void* TaskIHM(void* pdata)
         // Calibrage
         for (;;) {
             clearLCD();
-            if (lastCalibrage != 0) {
+            printf("84 %ld\n", calibrageLast.tv_sec);
+            if (calibrageLast.tv_sec > 0) {
+                clock_gettime(CLOCK_REALTIME, &calibrageNow);
+                if ((calibrageNow.tv_nsec - calibrageLast.tv_nsec) > 0) {
+                    calibrageEcoule.tv_sec = calibrageNow.tv_sec - calibrageLast.tv_sec - 1;
+                    calibrageEcoule.tv_nsec = calibrageNow.tv_nsec - calibrageLast.tv_nsec + 1000000000UL;
+                } else {
+                    calibrageEcoule.tv_sec = calibrageNow.tv_sec - calibrageLast.tv_sec;
+                    calibrageEcoule.tv_nsec = calibrageNow.tv_nsec - calibrageLast.tv_nsec;
+                }
                 printToLCD(LCD_LINE_1, "Calibre il y a");
-                printfToLCD(LCD_LINE_2, "%ld secondes", (clock() - lastCalibrage) / CLOCKS_PER_SEC);
+                printfToLCD(LCD_LINE_2, "%ld secondes", calibrageEcoule.tv_sec);
             } else {
                 printToLCD(LCD_LINE_1, "Calibrer");
                 printfToLCD(LCD_LINE_2, "(%s)", getCouleur());
@@ -103,7 +103,7 @@ void* TaskIHM(void* pdata)
                 clearLCD();
                 printToLCD(LCD_LINE_1, "Calibrage...");
                 delay(3000);             // TODO
-                lastCalibrage = clock(); // TODO struct timespec
+                clock_gettime(CLOCK_REALTIME, &calibrageLast);
             } else if (bout == jaune) {
                 break;
             }
