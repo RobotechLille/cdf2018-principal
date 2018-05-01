@@ -58,5 +58,21 @@ struct __attribute__ ((packed)) F2CT_CAPTs {
     uint16_t back;
 };
 
+// Met à jour la PWM (pour ctrl moteur (EN, IN × 2) × 2)
+#define C2FD_PWM 'W'
+struct __attribute__ ((packed)) C2FD_PWMs { 
+    uint8_t ena;
+    uint8_t enb;
+    uint8_t in;
+};
+
+// Met à jour la PWM (pour ctrl moteur (EN × 2) × 2)
+#define C2FD_PWM2 'w'
+struct __attribute__ ((packed)) C2FD_PWM2s { 
+    uint8_t ena;
+    uint8_t enc;
+    uint8_t enb;
+    uint8_t end;
+};
 
 #endif

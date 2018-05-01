@@ -1,15 +1,15 @@
 [*]
-[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Wed Feb 28 14:53:10 2018
+[*] GTKWave Analyzer v3.3.89 (w)1999-2018 BSI
+[*] Tue May  1 04:06:11 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/communication_tb.ghw"
-[dumpfile_mtime] "Wed Feb 28 14:51:41 2018"
-[dumpfile_size] 7845
+[dumpfile_mtime] "Tue May  1 04:02:41 2018"
+[dumpfile_size] 8903
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/communication_tb.gtkw"
 [timestart] 0
 [size] 1600 862
 [pos] -1 -1
-*-30.009827 1783000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-30.189280 1783000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.communication_tb.
 [treeopen] top.communication_tb.dut.
@@ -66,5 +66,22 @@ top.communication_tb.dut.backtrigger
 top.communication_tb.dut.front
 [color] 2
 top.communication_tb.dut.back
+@22
+[color] 6
+#{top.communication_tb.ena[7:0]} top.communication_tb.ena[7] top.communication_tb.ena[6] top.communication_tb.ena[5] top.communication_tb.ena[4] top.communication_tb.ena[3] top.communication_tb.ena[2] top.communication_tb.ena[1] top.communication_tb.ena[0]
+[color] 6
+#{top.communication_tb.in1enc[7:0]} top.communication_tb.in1enc[7] top.communication_tb.in1enc[6] top.communication_tb.in1enc[5] top.communication_tb.in1enc[4] top.communication_tb.in1enc[3] top.communication_tb.in1enc[2] top.communication_tb.in1enc[1] top.communication_tb.in1enc[0]
+@28
+[color] 6
+top.communication_tb.dut.in2
+@22
+[color] 6
+#{top.communication_tb.enb[7:0]} top.communication_tb.enb[7] top.communication_tb.enb[6] top.communication_tb.enb[5] top.communication_tb.enb[4] top.communication_tb.enb[3] top.communication_tb.enb[2] top.communication_tb.enb[1] top.communication_tb.enb[0]
+@80023
+[color] 6
+#{top.communication_tb.in3end[7:0]} top.communication_tb.in3end[7] top.communication_tb.in3end[6] top.communication_tb.in3end[5] top.communication_tb.in3end[4] top.communication_tb.in3end[3] top.communication_tb.in3end[2] top.communication_tb.in3end[1] top.communication_tb.in3end[0]
+@28
+[color] 6
+top.communication_tb.dut.in4
 [pattern_trace] 1
 [pattern_trace] 0

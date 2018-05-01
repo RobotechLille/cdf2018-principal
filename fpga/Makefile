@@ -163,7 +163,7 @@ isimgui: build/isim_$(TB)$(EXE)
 # Testing (using ghdl and gtkwave)
 ###########################################################################
 
-GHDL_FLAGS=--mb-comments
+GHDL_FLAGS=--mb-comments --ieee=synopsys
 
 %_syntax: %.vhd
 	ghdl -s $(GHDL_FLAGS) "$<"

@@ -20,7 +20,13 @@ entity Principal is
              FRONTTRIGGER: out std_logic;
              FRONTECHO: in std_logic;
              BACKTRIGGER: out std_logic;
-             BACKECHO: in std_logic
+             BACKECHO: in std_logic;
+             ENA: out std_logic;
+             IN1ENC: out std_logic;
+             IN2: out std_logic;
+             ENB: out std_logic;
+             IN3END: out std_logic;
+             IN4: out std_logic
          );
 end Principal;
 
@@ -76,7 +82,22 @@ architecture Behavioral of Principal is
              );
     end component;
 
-    -- AF
+    -- Motor controller
+    signal enAd : std_logic_vector(7 downto 0);
+    signal in1enCd : std_logic_vector(7 downto 0);
+    signal in2d : std_logic;
+    signal enBd : std_logic_vector(7 downto 0);
+    signal in3enDd : std_logic_vector(7 downto 0);
+    signal in4d : std_logic;
+    component PWM is
+        port (
+                 clk : in std_logic;
+                 data : in std_logic_vector (7 downto 0);
+                 pulse : out std_logic
+             );
+    end component;
+
+    -- CF
     component uart is
         generic (
                     baud                : positive := fBaud;
@@ -116,7 +137,13 @@ architecture Behavioral of Principal is
                  txStb : out std_logic;
                  txAck : in std_logic;
                  rxData : in std_logic_vector(7 downto 0);
-                 rxStb : in std_logic
+                 rxStb : in std_logic;
+                 enA : out std_logic_vector(7 downto 0);
+                 in1enC : out std_logic_vector(7 downto 0);
+                 in2 : out std_logic;
+                 enB : out std_logic_vector(7 downto 0);
+                 in3enD : out std_logic_vector(7 downto 0);
+                 in4 : out std_logic
              );
     end component;
 
@@ -175,9 +202,33 @@ begin
                                   signalIn  => backRaw,
                                   signalOut => back,
                                   start     => backFinished
-                               -- done      => done
+                              -- done      => done
                               );
+    enAp : PWM port map (
+                            clk => CLK,
+                            data => enAd,
+                            pulse => ENA
+                        );
 
+    in1enCp : PWM port map (
+                               clk => CLK,
+                               data => in1enCd,
+                               pulse => IN1ENC
+                           );
+    IN2 <= in2d;
+
+    enBp : PWM port map (
+                            clk => CLK,
+                            data => enBd,
+                            pulse => ENB
+                        );
+
+    in3enDp : PWM port map (
+                               clk => CLK,
+                               data => in3enDd,
+                               pulse => IN3END
+                           );
+    IN4 <= in4d;
 
 
     FA: uart port map(
@@ -204,7 +255,13 @@ begin
                                    txStb  => txStb,
                                    txAck  => txAck,
                                    rxData  => rxData,
-                                   rxStb  => rxStb
+                                   rxStb  => rxStb,
+                                   enA    => enAd,
+                                   in1enC => in1enCd,
+                                   in2    => in2d,
+                                   enB    => enBd,
+                                   in3enD => in3enDd,
+                                   in4    => in4d
                                );
 end Behavioral;
 

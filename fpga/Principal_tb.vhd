@@ -30,7 +30,13 @@ architecture tb of Principal_tb is
                  FRONTTRIGGER: out std_logic;
                  FRONTECHO: in std_logic;
                  BACKTRIGGER: out std_logic;
-                 BACKECHO: in std_logic
+                 BACKECHO: in std_logic;
+                 ENA: out std_logic;
+                 IN1ENC: out std_logic;
+                 IN2: out std_logic;
+                 ENB: out std_logic;
+                 IN3END: out std_logic;
+                 IN4: out std_logic
              );
     end component;
 
@@ -46,6 +52,12 @@ architecture tb of Principal_tb is
     signal FRONTECHO    : std_logic;
     signal BACKTRIGGER  : std_logic;
     signal BACKECHO     : std_logic;
+    signal ENA          : std_logic;
+    signal IN1ENC       : std_logic;
+    signal IN2          : std_logic;
+    signal ENB          : std_logic;
+    signal IN3END       : std_logic;
+    signal IN4          : std_logic;
 
     constant TbPeriod : time := 500 ns;
     signal TbClock : std_logic := '0';
@@ -71,7 +83,14 @@ begin
               FRONTTRIGGER => FRONTTRIGGER,
               FRONTECHO    => FRONTECHO,
               BACKTRIGGER  => BACKTRIGGER,
-              BACKECHO     => BACKECHO);
+              BACKECHO     => BACKECHO,
+              ENA          => ENA,
+              IN1ENC       => IN1ENC,
+              IN2          => IN2,
+              ENB          => ENB,
+              IN3END       => IN3END,
+              IN4          => IN4
+          );
 
     -- Clock generation
     TbClock <= not TbClock after TbPeriod/2 when TbSimEnded /= '1' else '0';

@@ -7,8 +7,7 @@
 
 #include "position.h"
 
-#include <wiringPi.h>
-#define PWM_MAX 1023
+#define PWM_MAX 255
 #define PWM_MAX_V 3.3
 
 #define TESTINATOR
@@ -24,17 +23,10 @@
 #define MOT_MAX_V 2.5
 #endif
 
-// Pins definition
-// Left
-#define ENA 26
-#define IN1 21
-#define IN2 22
-
-// Right
-#define ENB 23
-#define IN3 24
-#define IN4 25
-
+#define IN1 0
+#define IN2 1
+#define IN3 2
+#define IN4 3
 
 void configureMovement();
 void aller(struct position* pos);

@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <wiringPi.h>
 
 #include "lcd.h"
 #include "movement.h"
@@ -69,7 +70,7 @@ void stopParcours()
 }
 
 #define UP_TIME 1000
-#define HIGH_TIME 30000
+#define HIGH_TIME 3000
 #define DOWN_TIME 1000
 #define LOW_TIME 2000
 #define MAX_VIT MOT_MAX_V

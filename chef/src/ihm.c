@@ -1,17 +1,16 @@
 #include <pthread.h>
 #include <signal.h>
-#include <stdio.h>
 #include <time.h>
-#include <wiringPi.h>
 
 #include "ihm.h"
 #include "movement.h"
 #include "parcours.h"
 #include "points.h"
+#include "lcd.h"
+#include "buttons.h"
 
 // Globales
 pthread_t tIHM;
-pthread_t tStdinIHM;
 
 // Fonctions
 void configureIHM()
@@ -22,15 +21,8 @@ void configureIHM()
 
 void startIHM()
 {
-    pinMode(IHM_PIN_ROUGE, INPUT);
-    pullUpDnControl(IHM_PIN_ROUGE, PUD_UP);
-    pinMode(IHM_PIN_JAUNE, INPUT);
-    pullUpDnControl(IHM_PIN_JAUNE, PUD_UP);
-    pinMode(IHM_PIN_TIRETTE, INPUT);
-    pullUpDnControl(IHM_PIN_TIRETTE, PUD_UP);
-
+    configureButtons();
     pthread_create(&tIHM, NULL, TaskIHM, NULL);
-    pthread_create(&tStdinIHM, NULL, TaskStdinIHM, NULL);
     pthread_join(tIHM, NULL);
 }
 
@@ -44,84 +36,6 @@ void diffTimespec(const struct timespec* t1, const struct timespec* t2, struct t
         td->tv_sec = t1->tv_sec - t2->tv_sec;
         td->tv_nsec = t1->tv_nsec - t2->tv_nsec;
     }
-}
-
-bool debunkButtonIHM(int pin)
-{
-    int t;
-    // Press (cancel if wrong)
-    for (t = IHM_DEBUNK_TIME / 2; t > 0; t--) {
-        if (digitalRead(pin) != LOW) {
-            return false;
-        }
-        delay(1);
-    }
-    // Release (re-wait if wrong)
-    for (t = IHM_DEBUNK_TIME / 2; t > 0; t--) {
-        if (digitalRead(pin) != HIGH) {
-            t = IHM_DEBUNK_TIME / 2;
-        }
-        delay(1);
-    }
-    return true;
-}
-
-enum boutons stdinbutton = none;
-
-void* TaskStdinIHM(void* pdata)
-{
-    (void)pdata;
-
-    for (;;) {
-        char c = getchar();
-        if (c == '1') {
-            stdinbutton = jaune;
-        } else if (c == '2') {
-            stdinbutton = rouge;
-        }
-    }
-
-    return NULL;
-}
-
-enum boutons pressedIHM(int timeout)
-{
-    bool block = timeout < 0;
-    while (timeout > 0 || block) {
-
-        if (stdinbutton != none) {
-            enum boutons bout = stdinbutton;
-            stdinbutton = none;
-            return bout;
-        }
-
-        if (debunkButtonIHM(IHM_PIN_JAUNE)) {
-            return jaune;
-        }
-
-        if (debunkButtonIHM(IHM_PIN_ROUGE)) {
-            return rouge;
-        }
-
-        delay(IHM_POLLING_INTERVAL);
-        timeout -= IHM_POLLING_INTERVAL;
-    }
-    return none;
-}
-
-bool tirettePresente()
-{
-    int etat, newEtat;
-    int t;
-    for (t = 0; t < IHM_DEBUNK_TIME; t++) {
-        newEtat = digitalRead(IHM_PIN_TIRETTE);
-        if (etat != newEtat) {
-            t = 0;
-            etat = newEtat;
-        }
-        delay(1);
-    }
-    return etat == LOW;
 }
 
 bool isDebug = false;
@@ -152,7 +66,7 @@ void* TaskIHM(void* pdata)
             if (isDebug) {
                 printToLCD(LCD_LINE_2, "192.168.0.0 TODO");
             }
-            bout = pressedIHM(IHM_REFRESH_INTERVAL);
+            bout = pressedButton(BUT_REFRESH_INTERVAL);
 
             if (bout == rouge) {
                 isDebug = !isDebug;
@@ -165,7 +79,7 @@ void* TaskIHM(void* pdata)
         for (;;) {
             clearLCD();
             printfToLCD(LCD_LINE_1, "Couleur : %s", getCouleur());
-            bout = pressedIHM(IHM_BLOCK);
+            bout = pressedButton(BUT_BLOCK);
 
             if (bout == rouge) {
                 isOrange = !isOrange;
@@ -184,7 +98,7 @@ void* TaskIHM(void* pdata)
                 printToLCD(LCD_LINE_1, "Calibrer");
                 printfToLCD(LCD_LINE_2, "(%s)", getCouleur());
             }
-            bout = pressedIHM(IHM_REFRESH_INTERVAL);
+            bout = pressedButton(BUT_REFRESH_INTERVAL);
 
             if (bout == rouge) {
                 clearLCD();
@@ -200,7 +114,7 @@ void* TaskIHM(void* pdata)
         for (;;) {
             clearLCD();
             printToLCD(LCD_LINE_1, "Diagnostiquer");
-            bout = pressedIHM(IHM_BLOCK);
+            bout = pressedButton(BUT_BLOCK);
 
             if (bout == rouge) {
                 clearLCD();
@@ -216,7 +130,7 @@ void* TaskIHM(void* pdata)
             clearLCD();
             printToLCD(LCD_LINE_1, "Lancer parcours");
             printfToLCD(LCD_LINE_2, "(%s)", getCouleur());
-            bout = pressedIHM(IHM_BLOCK);
+            bout = pressedButton(BUT_BLOCK);
             if (bout == rouge) {
                 // No tirette
                 annuler = false;
@@ -224,7 +138,7 @@ void* TaskIHM(void* pdata)
                     clearLCD();
                     printToLCD(LCD_LINE_1, "Inserez tirette");
                     printToLCD(LCD_LINE_2, "(ROUGE: ignorer)");
-                    bout = pressedIHM(IHM_REFRESH_INTERVAL);
+                    bout = pressedButton(BUT_REFRESH_INTERVAL);
                     if (bout == rouge) {
                         break;
                     } else if (bout == jaune) {
@@ -241,7 +155,7 @@ void* TaskIHM(void* pdata)
 
                 prepareParcours(isOrange);
                 while (tirettePresente()) {
-                    bout = pressedIHM(IHM_POLLING_INTERVAL);
+                    bout = pressedButton(BUT_POLLING_INTERVAL);
                     if (bout == jaune) {
                         annuler = true;
                         break;
@@ -256,15 +170,15 @@ void* TaskIHM(void* pdata)
 
                 int toWait;
                 while ((toWait = updateParcours()) >= 0) {
-                    if (pressedIHM(toWait) != none) {
+                    if (pressedButton(toWait) != none) {
                         break;
                     }
                 }
                 stopParcours();
 
-                pressedIHM(IHM_BLOCK); // Nécessite 3 appuis pour éviter d'enlever le score par inadvertance
-                pressedIHM(IHM_BLOCK);
-                pressedIHM(IHM_BLOCK);
+                pressedButton(BUT_BLOCK); // Nécessite 3 appuis pour éviter d'enlever le score par inadvertance
+                pressedButton(BUT_BLOCK);
+                pressedButton(BUT_BLOCK);
             } else if (bout == jaune) {
                 break;
             }
@@ -274,7 +188,7 @@ void* TaskIHM(void* pdata)
         for (;;) {
             clearLCD();
             printToLCD(LCD_LINE_1, "Remettre a zero");
-            bout = pressedIHM(IHM_BLOCK);
+            bout = pressedButton(BUT_BLOCK);
 
             if (bout == rouge) {
                 clearLCD();

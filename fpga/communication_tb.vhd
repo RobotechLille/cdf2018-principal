@@ -23,7 +23,14 @@ architecture tb of communication_tb is
               txStb  : out std_logic;
               txAck  : in std_logic;
               rxData : in std_logic_vector (7 downto 0);
-              rxStb  : in std_logic);
+              rxStb  : in std_logic;
+              enA    : out std_logic_vector(7 downto 0);
+              in1enC : out std_logic_vector(7 downto 0);
+              in2    : out std_logic;
+              enB    : out std_logic_vector(7 downto 0);
+              in3enD : out std_logic_vector(7 downto 0);
+              in4    : out std_logic
+          );
     end component;
 
     signal clock  : std_logic;
@@ -38,6 +45,12 @@ architecture tb of communication_tb is
     signal txAck  : std_logic;
     signal rxData : std_logic_vector (7 downto 0);
     signal rxStb  : std_logic;
+    signal enA    : std_logic_vector(7 downto 0);
+    signal in1enC : std_logic_vector(7 downto 0);
+    signal in2    : std_logic;
+    signal enB    : std_logic_vector(7 downto 0);
+    signal in3enD : std_logic_vector(7 downto 0);
+    signal in4    : std_logic;
 
     constant TbPeriod : time := 20 ns;
     signal TbClock : std_logic := '0';
@@ -59,7 +72,14 @@ begin
               zerocoder  => zerocoder,
               txAck  => txAck,
               rxData => rxData,
-              rxStb  => rxStb);
+              rxStb  => rxStb,
+              enA    => enA,
+              in1enC => in1enC,
+              in2    => in2,
+              enB    => enB,
+              in3enD => in3enD,
+              in4    => in4
+          );
 
     -- Clock generation
     TbClock <= not TbClock after TbPeriod/2 when TbSimEnded /= '1' else '0';
@@ -242,6 +262,46 @@ begin
             wait for TbPeriod;
             txAck <= '0';
         end loop;
+
+        wait for 100 ns;
+
+        -- Test PWM1
+        report "TEST Receiving 'W'" severity note;
+
+        tampon(0 to 3) := (x"57", x"CC", x"77", x"03");
+        for I in 0 to 3 loop
+            rxData <= tampon(I);
+            rxStb <= '1';
+            wait for TbPeriod;
+            rxStb <= '0';
+            wait for TbPeriod;
+        end loop;
+
+        assert enA = x"CC" report "ENA not at correct value" severity error;
+        assert enB = x"77" report "ENB not at correct value" severity error;
+        assert in1enC = x"FF" report "IN1 not at correct value" severity error;
+        assert in2 = '1' report "IN1 not at correct value" severity error;
+        assert in3enD = x"00" report "IN3 not at correct value" severity error;
+        assert in4 = '0' report "IN4 not at correct value" severity error;
+
+        wait for 100 ns;
+
+        -- Test PWM2
+        report "TEST Receiving 'w'" severity note;
+
+        tampon(0 to 4) := (x"77", x"11", x"22", x"33", x"44");
+        for I in 0 to 4 loop
+            rxData <= tampon(I);
+            rxStb <= '1';
+            wait for TbPeriod;
+            rxStb <= '0';
+            wait for TbPeriod;
+        end loop;
+
+        assert enA = x"11" report "ENA not at correct value" severity error;
+        assert in1enC = x"22" report "ENC not at correct value" severity error;
+        assert enB = x"33" report "ENB not at correct value" severity error;
+        assert in3enD = x"44" report "END not at correct value" severity error;
 
         wait for 100 ns;
 

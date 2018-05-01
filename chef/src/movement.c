@@ -1,85 +1,74 @@
-#include "movement.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
+#include "movement.h"
+#include "CF.h"
+
 void configureMovement()
 {
-    pinMode(ENA, PWM_OUTPUT);
-    pinMode(ENB, PWM_OUTPUT);
+    stop();
 }
 
 void aller(struct position* pos);
 
 int dbg = 0;
 
-int changerMoteurs(float lVit, float rVit)
+uint8_t tensionToPWM(float V)
 {
+    if (V >= PWM_MAX_V) {
+        return PWM_MAX;
+    } else if (V <= 0) {
+        return 0;
+    } else {
+        return V * (float) PWM_MAX / (float) PWM_MAX_V;
+    }
+}
+
+// Tension de PWM
+// TODO Changer en tension de moteur
+int setMoteurTension(float lVolt, float rVolt)
+{
+    static struct C2FD_PWMs msg;
+
+    msg.in = 0x00;
+
     // Gauche
-    bool lFor = lVit < 0;
-    float lVolt = fabs(lVit); // TODO Utiliser les vitesses
+    bool lFor = lVolt < 0;
+    lVolt = fabs(lVolt);
     if (lVolt > MOT_MAX_V) {
         lVolt = MOT_MAX_V;
     }
-    if (lVolt < MOT_MIN_V) {
-        digitalWrite(IN1, LOW);
-        digitalWrite(IN2, LOW);
-        printf("x");
-
-    } else if (lFor) {
-        digitalWrite(IN1, HIGH);
-        digitalWrite(IN2, LOW);
-        printf("↑");
-    } else {
-        digitalWrite(IN1, LOW);
-        digitalWrite(IN2, HIGH);
-        printf("↓");
-    }
-    int lAbs = lVolt * PWM_MAX / PWM_MAX_V;
-    pwmWrite(ENA, lAbs);
-    printf("%6d", lAbs);
+    msg.in |= 1 << (lFor ? IN1 : IN2);
+    msg.ena = tensionToPWM(lVolt);
 
     // Droite
-    bool rFor = rVit < 0;
-    float rVolt = fabs(rVit); // TODO Utiriser res vitesses
-    if (rVolt > MOT_MAX_V) {
-        rVolt = MOT_MAX_V;
-    }
-    if (rVolt < MOT_MIN_V) {
-        digitalWrite(IN3, LOW);
-        digitalWrite(IN4, LOW);
-        printf("x");
+    bool rFor = rVolt < 0;
+    rVolt = fabs(rVolt);
+    msg.in |= 1 << (rFor ? IN3 : IN4);
+    msg.enb = tensionToPWM(rVolt);
 
-    } else if (rFor) {
-        digitalWrite(IN3, HIGH);
-        digitalWrite(IN4, LOW);
-        printf("↑");
-    } else {
-        digitalWrite(IN3, LOW);
-        digitalWrite(IN4, HIGH);
-        printf("↓");
-    }
-    int rAbs = rVolt * PWM_MAX / PWM_MAX_V;
-    pwmWrite(ENB, rAbs);
-    printf("%6d", rAbs);
-    printf("\n");
+    sendCF(C2FD_PWM, &msg, sizeof(struct C2FD_PWMs));
 }
+
+int changerMoteurs(float lVit, float rVit)
+{
+    // TODO Conversion en vitesse
+    setMoteurTension(lVit, rVit);
+}
+
+static struct C2FD_PWMs msgBrake = {0, 0, 0x00};
+static struct C2FD_PWMs msgFree = {0, 0, (1 << IN1) | (1 << IN2) | (1 << IN3) | (1 << IN4)};
 
 int brake()
 {
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, LOW);
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, LOW);
+    sendCF(C2FD_PWM, &msgBrake, sizeof(struct C2FD_PWMs));
 }
 
 int freewheel()
 {
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, HIGH);
-    digitalWrite(IN3, HIGH);
-    digitalWrite(IN4, HIGH);
+    sendCF(C2FD_PWM, &msgFree, sizeof(struct C2FD_PWMs));
 }
 
 void deconfigureMovement()
@@ -90,5 +79,5 @@ void deconfigureMovement()
 int stop()
 {
     brake();
-    // TODO
+    // TODO Actionneurs
 }

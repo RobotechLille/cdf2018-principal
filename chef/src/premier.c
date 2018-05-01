@@ -24,16 +24,16 @@ int main()
 
     srand(time(NULL));
     configureDebug();
-    /* configureCF(); */
-    /* configureMovement(); */
-    /* configurePosition(); */
+    configureCF();
+    configureMovement();
+    configurePosition();
     startDebug();
 
     startIHM();
 
-    /* deconfigureMovement(); */
-    /* deconfigurePosition(); */
-    /* deconfigureCF(); */
+    deconfigureMovement();
+    deconfigurePosition();
+    deconfigureCF();
     deconfigureIHM();
     deconfigureDebug();
     return EXIT_SUCCESS;

@@ -1,20 +1,22 @@
 [*]
-[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Tue Feb 27 18:30:48 2018
+[*] GTKWave Analyzer v3.3.89 (w)1999-2018 BSI
+[*] Tue May  1 05:22:50 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/Principal_tb.ghw"
-[dumpfile_mtime] "Tue Feb 27 18:29:45 2018"
-[dumpfile_size] 4891772
+[dumpfile_mtime] "Tue May  1 05:18:35 2018"
+[dumpfile_size] 6534540
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/Principal_tb.gtkw"
 [timestart] 0
 [size] 1600 862
 [pos] -1 -1
-*-43.418156 1760000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-43.492355 11010000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.principal_tb.
 [treeopen] top.principal_tb.dut.
+[treeopen] top.principal_tb.dut.in1encp.
+[treeopen] top.principal_tb.dut.in3endp.
 [sst_width] 213
-[signals_width] 198
+[signals_width] 255
 [sst_expanded] 1
 [sst_vpaned_height] 296
 @28
@@ -95,11 +97,43 @@ top.principal_tb.dut.backcapt.start
 top.principal_tb.dut.backcapt.trigger
 [color] 3
 top.principal_tb.dut.backcapt.echo
-@8421
+@8420
 [color] 3
 top.principal_tb.dut.backcapt.distancecounter
 @420
 [color] 3
 top.principal_tb.dut.back
+@22
+[color] 5
+#{top.principal_tb.dut.enad[7:0]} top.principal_tb.dut.enad[7] top.principal_tb.dut.enad[6] top.principal_tb.dut.enad[5] top.principal_tb.dut.enad[4] top.principal_tb.dut.enad[3] top.principal_tb.dut.enad[2] top.principal_tb.dut.enad[1] top.principal_tb.dut.enad[0]
+@28
+[color] 5
+top.principal_tb.dut.ena
+@22
+[color] 5
+#{top.principal_tb.dut.in1encd[7:0]} top.principal_tb.dut.in1encd[7] top.principal_tb.dut.in1encd[6] top.principal_tb.dut.in1encd[5] top.principal_tb.dut.in1encd[4] top.principal_tb.dut.in1encd[3] top.principal_tb.dut.in1encd[2] top.principal_tb.dut.in1encd[1] top.principal_tb.dut.in1encd[0]
+@28
+[color] 5
+top.principal_tb.dut.in1enc
+[color] 5
+top.principal_tb.dut.in2d
+[color] 5
+top.principal_tb.dut.in2
+@22
+[color] 5
+#{top.principal_tb.dut.enbd[7:0]} top.principal_tb.dut.enbd[7] top.principal_tb.dut.enbd[6] top.principal_tb.dut.enbd[5] top.principal_tb.dut.enbd[4] top.principal_tb.dut.enbd[3] top.principal_tb.dut.enbd[2] top.principal_tb.dut.enbd[1] top.principal_tb.dut.enbd[0]
+@28
+[color] 5
+top.principal_tb.dut.enb
+@22
+[color] 5
+#{top.principal_tb.dut.in3endd[7:0]} top.principal_tb.dut.in3endd[7] top.principal_tb.dut.in3endd[6] top.principal_tb.dut.in3endd[5] top.principal_tb.dut.in3endd[4] top.principal_tb.dut.in3endd[3] top.principal_tb.dut.in3endd[2] top.principal_tb.dut.in3endd[1] top.principal_tb.dut.in3endd[0]
+@28
+[color] 5
+top.principal_tb.dut.in3end
+[color] 5
+top.principal_tb.dut.in4d
+[color] 5
+top.principal_tb.dut.in4
 [pattern_trace] 1
 [pattern_trace] 0
