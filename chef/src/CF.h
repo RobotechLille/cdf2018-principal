@@ -9,7 +9,7 @@
 #include "CFsignals.h"
 
 #define FPGA_PORTNAME "/dev/ttyUSB0"
-#define CF_BAUDRATE B9600
+#define CF_BAUDRATE B115200
 // #define PRINTRAWDATA
 
 int fpga;

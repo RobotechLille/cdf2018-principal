@@ -6,7 +6,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity Principal is
     Generic(
                fFpga : INTEGER := 50_000_000;
-               fBaud : INTEGER := 9600
+               fBaud : INTEGER := 115200
            );
     Port (
              CLK : in  std_logic;
