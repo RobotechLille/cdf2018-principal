@@ -11,7 +11,7 @@ CFLAGS_CUSTOM += -g
 ## Générateurs de drapeaux pour les bibliothèques
 PKG_CONFIG=pkg-config
 ## Nom des objets communs
-OBJS=buttons CF debug i2c ihm lcd movement parcours points position
+OBJS=buttons CF debug diagnostics i2c ihm lcd movement parcours points position
 OBJS_O=$(addprefix obj/,$(addsuffix .o,$(OBJS)))
 
 # VARIABLES AUTOMATIQUES

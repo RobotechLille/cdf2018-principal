@@ -8,6 +8,7 @@
 #include "points.h"
 #include "lcd.h"
 #include "buttons.h"
+#include "diagnostics.h"
 
 // Globales
 pthread_t tIHM;
@@ -117,8 +118,7 @@ void* TaskIHM(void* pdata)
 
             if (bout == rouge) {
                 clearLCD();
-                printToLCD(LCD_LINE_1, "Diagnostics...");
-                delay(3000); // TODO
+                runDiagnostics();
             } else if (bout == jaune) {
                 break;
             }

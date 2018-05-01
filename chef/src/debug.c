@@ -6,7 +6,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h> // sleep
-#include <wiringPi.h>
 
 #include "debug.h"
 
@@ -91,7 +90,7 @@ void* TaskDebug(void* pdata)
         fprintf(debugFd, "\n");
         fflush(debugFd);
 
-        delay(DEBUG_INTERVAL);
+        usleep(DEBUG_INTERVAL * 1000);
     }
 
     return NULL;

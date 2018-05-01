@@ -26,27 +26,49 @@ void configureFpga()
     // Connection au port série
     printf("Connexion à %s... ", FPGA_PORTNAME);
     fflush(stdout);
-    fpga = open(FPGA_PORTNAME, O_RDWR | O_NOCTTY | O_NDELAY);
+    fpga = open(FPGA_PORTNAME, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    fpga = serialOpen(FPGA_PORTNAME, 9600);
     if (fpga < 0) {
         printf("Échec !\n");
         exit(1);
     }
 
     // Configuration du port série
+    fcntl(fpga, F_SETFL, O_RDWR);
+
     struct termios cfg;
-    bzero(&cfg, sizeof(cfg));
-    cfg.c_cflag = CLOCAL | CREAD | CF_BAUDRATE | CS8;
-    cfg.c_iflag = 0;
-    cfg.c_oflag = 0;
-    cfg.c_lflag = 0;     /* set input mode (non-canonical, no echo,...) */
-    cfg.c_cc[VTIME] = 0; /* inter-character timer unused */
-    cfg.c_cc[VMIN] = 1;  /* blocking read until 1 char received */
+
+    tcgetattr(fpga, &cfg);
+
+    cfmakeraw(&cfg);
+    cfsetispeed(&cfg, CF_BAUDRATE);
+    cfsetospeed(&cfg, CF_BAUDRATE);
+
+    cfg.c_cflag |= (CLOCAL | CREAD);
+    cfg.c_cflag &= ~PARENB;
+    cfg.c_cflag &= ~CSTOPB;
+    cfg.c_cflag &= ~CSIZE;
+    cfg.c_cflag |= CS8;
+    cfg.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    cfg.c_oflag &= ~OPOST;
+
+    cfg.c_cc[VMIN] = 0;
+    cfg.c_cc[VTIME] = 10;
+
     if (tcsetattr(fpga, TCSANOW, &cfg) < 0) {
         perror("serialConfig.tcsetattr");
         exit(1);
     }
 
-    sleep(1);
+    int status;
+    ioctl(fpga, TIOCMGET, &status);
+
+    status |= TIOCM_DTR;
+    status |= TIOCM_RTS;
+
+    ioctl(fpga, TIOCMSET, &status);
+
+    usleep(10 * 1000);
 
     // Flush
     unsigned char trash[1024];
@@ -101,7 +123,6 @@ void setPret()
 
 void doNothing()
 {
-
 }
 
 void configureCF()
@@ -116,16 +137,13 @@ void configureCF()
 
     printf("Attente de réponse du Fpga... ");
     fflush(stdout);
-    struct timespec tim;
-    tim.tv_sec = 0;
-    tim.tv_nsec = 100000000L;
     // Dans le cas où on aurait laissé l'Fpga en attente de donnée,
     // on envoie des pings en boucle jusqu'à ce qu'il nous réponde.
     pret = false;
     registerRxHandler(C2FD_PING, setPret);
     while (!pret) {
         sendCF(C2FD_PING, NULL, 0);
-        nanosleep(&tim, NULL);
+        usleep(100 * 1000);
     }
     registerRxHandler(C2FD_PING, doNothing); // TODO
     registerRxHandler(C2FD_PING, NULL);
