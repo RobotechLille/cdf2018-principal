@@ -34,12 +34,11 @@ int setMoteurTension(float lVolt, float rVolt)
 
     msg.in = 0x00;
 
+    // TODO Protections
+
     // Gauche
     bool lFor = lVolt < 0;
     lVolt = fabs(lVolt);
-    if (lVolt > MOT_MAX_V) {
-        lVolt = MOT_MAX_V;
-    }
     msg.in |= 1 << (lFor ? IN1 : IN2);
     msg.ena = tensionToPWM(lVolt);
 

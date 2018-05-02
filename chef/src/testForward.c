@@ -12,6 +12,8 @@
 #include "movement.h"
 #include "buttons.h"
 
+#define PATATE 3.3/2
+
 int main(int argc, char* argv[])
 {
 
@@ -29,22 +31,22 @@ int main(int argc, char* argv[])
     for (;;) {
         clearLCD();
         printToLCD(LCD_LINE_1, "Forward");
-        changerMoteurs(3.3, 3.3);
+        changerMoteurs(PATATE, PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Right");
-        changerMoteurs(-3.3, 3.3);
+        changerMoteurs(-PATATE, PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Left");
-        changerMoteurs(-3.3, -3.3);
+        changerMoteurs(-PATATE, -PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Backward");
-        changerMoteurs(3.3, -3.3);
+        changerMoteurs(PATATE, -PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();

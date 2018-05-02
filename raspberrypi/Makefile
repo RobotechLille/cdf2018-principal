@@ -125,6 +125,10 @@ restart:
 	ssh -F sshconf principal true
 	ssh -F sshconf principal /etc/init.d/S50chef restart
 
+getlogs:
+	ssh -F sshconf principal true
+	rsync --rsh 'ssh -F sshconf' --archive principal:/opt/chef/log/* ../log/
+
 gdbcommands:
 	echo "set sysroot $(TARGET_DIR)" > "$@"
 	echo "exec-file $(TARGET_DIR)$(EXECDIR)$(EXECPATH)" >> "$@"

@@ -26,7 +26,7 @@ int nextId()
 
     if (d) {
         while ((dir = readdir(d)) != NULL) {
-            ret = sscanf(dir->d_name, "%d", &id);
+            ret = sscanf(dir->d_name, "%06d", &id);
             if (ret == 1 && id > maxId) {
                 maxId = id;
             }
@@ -101,7 +101,7 @@ void configureDebug()
 
     // Génération du nom de fichier
     char path[256];
-    sprintf(path, "log/%d.csv", nextId());
+    sprintf(path, "log/%06d.csv", nextId());
 
     // Open file
     debugFd = fopen(path, "w");

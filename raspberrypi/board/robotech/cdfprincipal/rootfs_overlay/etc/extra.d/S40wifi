@@ -7,6 +7,7 @@ start() {
 	printf "Starting Wi-Fi connection: "
 	# modprobe brcmfmac
 	modprobe r8188eu
+	modprobe 8192cu
 	ifup wlan0
 	echo "OK"
 }
@@ -14,8 +15,6 @@ start() {
 stop() {
 	printf "Stopping Wi-Fi connection: "
 	ifdown wlan0
-	# rmmod brcmfmac
-	rmmod r8188eu
 	echo "OK"
 }
 

@@ -5,7 +5,7 @@ CC=gcc
 # Bibliothèques
 LIBS=
 ## Drapeaux pour le linker
-LDFLAGS_CUSTOM += -lpthread -lwiringPi
+LDFLAGS_CUSTOM += -lpthread -lwiringPi -lm
 ## Drapeaux pour le compilateur
 CFLAGS_CUSTOM += -g
 ## Générateurs de drapeaux pour les bibliothèques
