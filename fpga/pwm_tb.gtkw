@@ -1,0 +1,31 @@
+[*]
+[*] GTKWave Analyzer v3.3.89 (w)1999-2018 BSI
+[*] Tue May  1 17:18:48 2018
+[*]
+[dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/pwm_tb.ghw"
+[dumpfile_mtime] "Tue May  1 17:16:31 2018"
+[dumpfile_size] 11137
+[savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/pwm_tb.gtkw"
+[timestart] 0
+[size] 1600 862
+[pos] -1 -1
+*-29.567368 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.pwm_tb.
+[treeopen] top.pwm_tb.dut.
+[sst_width] 213
+[signals_width] 257
+[sst_expanded] 1
+[sst_vpaned_height] 244
+@28
+top.pwm_tb.clk
+@22
+#{top.pwm_tb.data[7:0]} top.pwm_tb.data[7] top.pwm_tb.data[6] top.pwm_tb.data[5] top.pwm_tb.data[4] top.pwm_tb.data[3] top.pwm_tb.data[2] top.pwm_tb.data[1] top.pwm_tb.data[0]
+@8421
+top.pwm_tb.dut.datai
+@88420
+top.pwm_tb.dut.accui
+@28
+top.pwm_tb.dut.pulse
+[pattern_trace] 1
+[pattern_trace] 0

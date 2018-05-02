@@ -82,6 +82,11 @@ architecture Behavioral of Principal is
              );
     end component;
 
+    -- PWM clock
+    signal pwmClk : std_logic := '0';
+    signal pwmCounter : integer := 0;
+    constant PWM_DIVIDER : integer := 1024;
+
     -- Motor controller
     signal enAd : std_logic_vector(7 downto 0);
     signal in1enCd : std_logic_vector(7 downto 0);
@@ -151,6 +156,17 @@ begin
 
     reset <= BTN;
 
+    pwmClkGenerator: process (clk) begin
+        if rising_edge(clk) then
+            if (pwmCounter >= PWM_DIVIDER) then
+                pwmClk <= not pwmClk;
+                pwmCounter <= 0;
+            else
+                pwmCounter <= pwmCounter + 1;
+            end if;
+        end if;
+    end process;
+
     leftCoder: hedm port map (
                                  clk => CLK,
                                  chA => LEFTCHA,
@@ -205,26 +221,26 @@ begin
                               -- done      => done
                               );
     enAp : PWM port map (
-                            clk => CLK,
+                            clk => pwmClk,
                             data => enAd,
                             pulse => ENA
                         );
 
     in1enCp : PWM port map (
-                               clk => CLK,
+                               clk => pwmClk,
                                data => in1enCd,
                                pulse => IN1ENC
                            );
     IN2 <= in2d;
 
     enBp : PWM port map (
-                            clk => CLK,
+                            clk => pwmClk,
                             data => enBd,
                             pulse => ENB
                         );
 
     in3enDp : PWM port map (
-                               clk => CLK,
+                               clk => pwmClk,
                                data => in3enDd,
                                pulse => IN3END
                            );

@@ -13,8 +13,8 @@ entity PWM is
 end PWM;
 
 architecture Behavioral of PWM is
-    signal  accuI : integer;
-    signal  dataI : integer;
+    signal  accuI : integer := 0;
+    signal  dataI : integer := 0;
 begin
 
     dataI <= to_integer(unsigned(data));
@@ -22,9 +22,9 @@ begin
     process(clk, data)
     begin
         if rising_edge(clk) then
-            accuI  <=  accuI mod 256 + dataI + 1;
+            accuI  <=  accuI mod 256 + dataI;
         end if;
     end process;
 
-    pulse <= '1' when accuI >= 256 else '0';
+    pulse <= '1' when accuI > 256 else '0';
 end Behavioral;

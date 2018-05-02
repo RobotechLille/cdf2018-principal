@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.89 (w)1999-2018 BSI
-[*] Tue May  1 05:22:50 2018
+[*] Tue May  1 19:20:55 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/Principal_tb.ghw"
-[dumpfile_mtime] "Tue May  1 05:18:35 2018"
-[dumpfile_size] 6534540
+[dumpfile_mtime] "Tue May  1 19:20:01 2018"
+[dumpfile_size] 5276557
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/Principal_tb.gtkw"
 [timestart] 0
 [size] 1600 862
 [pos] -1 -1
-*-43.492355 11010000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-42.492355 11010000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.principal_tb.
 [treeopen] top.principal_tb.dut.
@@ -103,6 +103,12 @@ top.principal_tb.dut.backcapt.distancecounter
 @420
 [color] 3
 top.principal_tb.dut.back
+@8421
+[color] 5
+top.principal_tb.dut.pwmcounter
+@29
+[color] 5
+top.principal_tb.dut.pwmclk
 @22
 [color] 5
 #{top.principal_tb.dut.enad[7:0]} top.principal_tb.dut.enad[7] top.principal_tb.dut.enad[6] top.principal_tb.dut.enad[5] top.principal_tb.dut.enad[4] top.principal_tb.dut.enad[3] top.principal_tb.dut.enad[2] top.principal_tb.dut.enad[1] top.principal_tb.dut.enad[0]
