@@ -2,13 +2,11 @@
 #include <signal.h>
 #include <time.h>
 
-#include "ihm.h"
-#include "movement.h"
-#include "parcours.h"
-#include "points.h"
-#include "lcd.h"
 #include "buttons.h"
 #include "diagnostics.h"
+#include "ihm.h"
+#include "lcd.h"
+#include "parcours.h"
 
 // Globales
 pthread_t tIHM;
@@ -18,6 +16,7 @@ void configureIHM()
 {
     initLCD();
     printToLCD(LCD_LINE_1, "Demarrage");
+    configureParcours();
 }
 
 void startIHM()
@@ -39,7 +38,7 @@ char* getCouleur()
     return isOrange ? orangeStr : vertStr;
 }
 
-struct timespec calibrageLast = {0, 0};
+struct timespec calibrageLast = { 0, 0 };
 struct timespec calibrageNow;
 struct timespec calibrageEcoule;
 
@@ -66,6 +65,20 @@ void* TaskIHM(void* pdata)
         /*     } */
         /* } */
 
+        // Diagnostics
+        for (;;) {
+            clearLCD();
+            printToLCD(LCD_LINE_1, "Diagnostiquer");
+            bout = pressedButton(BUT_BLOCK);
+
+            if (bout == rouge) {
+                clearLCD();
+                runDiagnostics();
+            } else if (bout == jaune) {
+                break;
+            }
+        }
+
         // Couleur
         for (;;) {
             clearLCD();
@@ -82,7 +95,6 @@ void* TaskIHM(void* pdata)
         // Calibrage
         for (;;) {
             clearLCD();
-            printf("84 %ld\n", calibrageLast.tv_sec);
             if (calibrageLast.tv_sec > 0) {
                 clock_gettime(CLOCK_REALTIME, &calibrageNow);
                 if ((calibrageNow.tv_nsec - calibrageLast.tv_nsec) > 0) {
@@ -103,22 +115,8 @@ void* TaskIHM(void* pdata)
             if (bout == rouge) {
                 clearLCD();
                 printToLCD(LCD_LINE_1, "Calibrage...");
-                delay(3000);             // TODO
+                delay(3000); // TODO
                 clock_gettime(CLOCK_REALTIME, &calibrageLast);
-            } else if (bout == jaune) {
-                break;
-            }
-        }
-
-        // Diagnostics
-        for (;;) {
-            clearLCD();
-            printToLCD(LCD_LINE_1, "Diagnostiquer");
-            bout = pressedButton(BUT_BLOCK);
-
-            if (bout == rouge) {
-                clearLCD();
-                runDiagnostics();
             } else if (bout == jaune) {
                 break;
             }

@@ -10,7 +10,7 @@
 
 #define FPGA_PORTNAME "/dev/ttyUSB0"
 #define CF_BAUDRATE B115200
-#define PRINTRAWDATA
+// #define PRINTRAWDATA
 
 int fpga;
 pthread_mutex_t sSendCF;

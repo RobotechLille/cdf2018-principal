@@ -1,8 +1,14 @@
 #include <stdio.h>
 
 #include "lcd.h"
+#include "debug.h"
 
 int points;
+
+void configurePoints()
+{
+    registerDebugVar("points", d, &points);
+}
 
 void resetPoints()
 {

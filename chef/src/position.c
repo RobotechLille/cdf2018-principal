@@ -83,3 +83,10 @@ void deconfigurePosition()
 {
     pthread_cancel(tPosition);
 }
+
+void getCoders(long* l, long* r)
+{
+    *l = lCodTot;
+    *r = rCodTot;
+
+}

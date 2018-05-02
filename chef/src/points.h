@@ -2,6 +2,7 @@
 #define __POINTS_H__
 
 // Public
+void configurePoints();
 void resetPoints();
 int getPoints();
 void addPoints(int points);

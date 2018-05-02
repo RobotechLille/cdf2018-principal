@@ -5,6 +5,7 @@
 
 #define TEMPS_PARCOURS 100
 
+void configureParcours();
 void prepareParcours(bool orange);
 void startParcours();
 // Returns : -1 if parcours ended, N ms for the next time it should be checked

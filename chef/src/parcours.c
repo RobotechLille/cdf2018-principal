@@ -8,12 +8,19 @@
 #include "parcours.h"
 #include "points.h"
 #include "position.h"
+#include "debug.h"
 
 pthread_t tParcours;
 bool isOrange;
 struct timespec tempsStart;
 struct timespec tempsNow;
-struct timespec tempsEcoule;
+struct timespec tempsEcoule = {0, 0};
+
+void configureParcours()
+{
+    registerDebugVar("temps", ld, &tempsEcoule.tv_sec);
+    configurePoints();
+}
 
 void prepareParcours(bool orange)
 {
@@ -32,6 +39,7 @@ void startParcours()
     clock_gettime(CLOCK_REALTIME, &tempsStart);
     pthread_create(&tParcours, NULL, TaskParcours, NULL); // TODO Start on mutex unlock
     printRightLCD(LCD_LINE_1, "   ");
+    debugSetActive(true);
 }
 
 void updateTimeDisplay()
@@ -67,6 +75,7 @@ void stopParcours()
     updateTimeDisplay();
     printRightLCD(LCD_LINE_1, "FIN");
     showPoints();
+    debugSetActive(false);
 }
 
 #define UP_TIME 1000

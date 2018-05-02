@@ -40,6 +40,13 @@ struct timespec debugStart;
 struct timespec debugNow;
 struct timespec debugEcoule;
 
+int debugInterval = DEBUG_INTERVAL_IDLE;
+
+void debugSetActive(bool active)
+{
+    debugInterval = active ? DEBUG_INTERVAL_ACTIVE : DEBUG_INTERVAL_IDLE;
+}
+
 void* TaskDebug(void* pdata)
 {
     (void)pdata;
@@ -90,7 +97,7 @@ void* TaskDebug(void* pdata)
         fprintf(debugFd, "\n");
         fflush(debugFd);
 
-        usleep(DEBUG_INTERVAL * 1000);
+        usleep(debugInterval * 1000);
     }
 
     return NULL;

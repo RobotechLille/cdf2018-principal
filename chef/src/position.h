@@ -19,6 +19,7 @@ struct __attribute__ ((packed)) position {
 // Fonctions
 void configurePosition();
 void deconfigurePosition();
+void getCoders(long* l, long* r);
 
 #endif
 
