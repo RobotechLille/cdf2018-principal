@@ -6,8 +6,7 @@
 start() {
 	printf "Starting Wi-Fi connection: "
 	# modprobe brcmfmac
-	modprobe r8188eu
-	modprobe 8192cu
+	modprobe rtl8xxxu
 	modprobe ar5523
 	ifup wlan0
 	echo "OK"
