@@ -8,6 +8,7 @@ start() {
 	# modprobe brcmfmac
 	modprobe r8188eu
 	modprobe 8192cu
+	modprobe ar5523
 	ifup wlan0
 	echo "OK"
 }
