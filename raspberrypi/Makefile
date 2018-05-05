@@ -112,7 +112,6 @@ chef:
 	make -C buildroot chef-rebuild
 
 upgrade-chef: chef
-	make -C buildroot chef-reinstall
 	ssh -F sshconf principal true
 	rsync --rsh 'ssh -F sshconf' --archive --chown root:root buildroot/output/target/opt/chef principal:/opt/
 

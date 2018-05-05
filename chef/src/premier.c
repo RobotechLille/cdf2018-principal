@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "i2c.h"
 #include "ihm.h"
+#include "imu.h"
 #include "movement.h"
 #include "position.h"
 
@@ -18,7 +19,6 @@ pthread_mutex_t sRunning;
 void endRunning(int signal)
 {
     (void)signal;
-    printf("21\n");
     pthread_mutex_unlock(&sRunning);
 }
 
@@ -32,9 +32,10 @@ int main()
     initI2C();
     srand(time(NULL));
 
-    configureIHM();
     configureDebug();
+    configureIHM();
     configureCF();
+    configureIMU();
     configureMovement();
     configurePosition();
     startDebug();
@@ -48,11 +49,11 @@ int main()
     pthread_mutex_lock(&sRunning);
     pthread_mutex_lock(&sRunning);
 
-    deconfigureMovement();
-    deconfigureMovement();
     deconfigurePosition();
+    deconfigureMovement();
+    deconfigureIMU();
     deconfigureCF();
-    deconfigureDebug();
     deconfigureIHM();
+    deconfigureDebug();
     return EXIT_SUCCESS;
 }

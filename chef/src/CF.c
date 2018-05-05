@@ -27,7 +27,6 @@ void configureFpga()
     printf("Connexion à %s... ", FPGA_PORTNAME);
     fflush(stdout);
     fpga = open(FPGA_PORTNAME, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
-    fpga = serialOpen(FPGA_PORTNAME, 9600);
     if (fpga < 0) {
         printf("Échec !\n");
         exit(1);

@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdio.h>
 
 #include "diagnostics.h"
 #include "buttons.h"
@@ -6,6 +7,7 @@
 
 #include "CF.h"
 #include "movement.h"
+#include "imu.h"
 
 bool recu;
 
@@ -71,6 +73,12 @@ bool diagCodeuse(void* arg)
     }
 }
 
+bool diagIMU(void* arg)
+{
+    (void) arg;
+    return connectedIMU();
+}
+
 void execDiagnostic(char *name, bool (*diagnostic)(void* arg), void* arg)
 {
     clearLCD();
@@ -90,6 +98,7 @@ void runDiagnostics()
 {
     execDiagnostic("Lien FPGA", diagFPGA, NULL);
     /* execDiagnostic("Lien Arduino", diagArduino); */
+    execDiagnostic("Lien IMU", diagIMU, NULL);
     int i;
     i = 0; execDiagnostic("Mot+Cod L AV", diagCodeuse, &i);
     i = 1; execDiagnostic("Mot+Cod L AR", diagCodeuse, &i);

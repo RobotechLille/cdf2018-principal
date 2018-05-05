@@ -51,9 +51,6 @@ void* TaskDebug(void* pdata)
 {
     (void)pdata;
 
-    if (DEBUG_INTERVAL <= 0) {
-        return NULL;
-    }
     clock_gettime(CLOCK_REALTIME, &debugStart);
 
     fprintf(debugFd, "\n");

@@ -6,17 +6,16 @@
 start() {
 	printf "Starting hardware handling: "
 	modprobe pl2303 # USB↔Serial cable
-	modprobe i2c-bcm2708 # I2C
-	modprobe i2c-dev # I2C
+	# I2C
+	modprobe i2c-bcm2708 # RPi2
+	modprobe i2c-bcm2835 # RPi3
+	modprobe i2c-dev # Both
 	/opt/chef/lcdOff.sh
 	echo "OK"
 }
 
 stop() {
 	printf "Stopping hardware handling: "
-	rmmod i2c-dev # I2C
-	rmmod i2c-bcm2708 # I2C
-	rmmod pl2303 # USB↔Serial cable
 	echo "OK"
 }
 
