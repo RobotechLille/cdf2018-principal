@@ -1,10 +1,10 @@
 [*]
-[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Tue Feb 27 08:32:01 2018
+[*] GTKWave Analyzer v3.3.89 (w)1999-2018 BSI
+[*] Sat May  5 22:58:30 2018
 [*]
 [dumpfile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/build/hedm_tb.ghw"
-[dumpfile_mtime] "Tue Feb 27 08:31:12 2018"
-[dumpfile_size] 4287
+[dumpfile_mtime] "Sat May  5 22:57:01 2018"
+[dumpfile_size] 5011
 [savefile] "/home/geoffrey/Documents/Polytech/Robotech/2017-2018/CdF/cdf2018-principal/fpga/hedm_tb.gtkw"
 [timestart] 0
 [size] 1600 862
@@ -13,7 +13,7 @@
 [treeopen] top.
 [treeopen] top.hedm_tb.
 [sst_width] 213
-[signals_width] 78
+[signals_width] 110
 [sst_expanded] 1
 [sst_vpaned_height] 244
 @28
@@ -33,10 +33,13 @@ top.hedm_tb.dut.bp
 top.hedm_tb.dut.an
 [color] 2
 top.hedm_tb.dut.bn
+@421
+[color] 7
+top.hedm_tb.dut.oldcounter
 @420
 [color] 1
 top.hedm_tb.dut.counts
-@8421
+@8420
 [color] 1
 top.hedm_tb.dut.counts
 [pattern_trace] 1

@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/sh
 
 alias la='ls -al'
 alias ll='ls -l'
@@ -15,4 +15,7 @@ export PS4="- "
 alias r="/etc/init.d/S50chef restart"
 alias s="/etc/init.d/S50chef stop"
 alias c="cd /opt/chef/"
-alias l="tail -f $(find /opt/chef/log | sort | tail -1)"
+l()
+{
+    tail -f $(find /opt/chef/log | sort | tail -1)
+}

@@ -111,7 +111,7 @@ void configureDebug()
     debugFd = fopen(path, "w");
     if (debugFd == NULL) {
         perror("fopen debug file");
-        return;
+        exit(EXIT_FAILURE);
     }
 
     fprintf(debugFd, "time");

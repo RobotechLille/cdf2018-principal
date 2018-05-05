@@ -4,12 +4,19 @@
 #include <stdlib.h>
 #include <time.h>   // random seed
 #include <unistd.h> // sleep
+#include <wiringPi.h>
 
 #include "CF.h"
 #include "debug.h"
+#include "i2c.h"
+#include "ihm.h"
+#include "imu.h"
 #include "movement.h"
+#include "position.h"
 
 pthread_mutex_t sRunning;
+
+#define VIT 1
 
 void endRunning(int signal)
 {
@@ -24,12 +31,13 @@ int main()
     configureCF();
     configurePosition();
 
-    /* long lCod, rCod; */
+    changerMoteurs(VIT, VIT);
+
+    long lCod, rCod;
     for (;;) {
-        sleep(1);
-        /* getCoders(&lCod, &rCod); */
-        /* printf("%ld %ld\n", lCod, rCod); */
-        /* usleep(100*1000); */
+        getCoders(&lCod, &rCod);
+        printf("%10ld %10ld\n", lCod, rCod);
+        usleep(100*1000);
     }
 
 }

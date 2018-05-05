@@ -30,6 +30,7 @@ bool diagFPGA(void* arg)
         }
         usleep(DIAGNOSTIC_POLL_INTERVAL * 1000);
     }
+    registerRxHandler(C2FD_PING, NULL);
     return recu;
 }
 

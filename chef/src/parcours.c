@@ -1,20 +1,19 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <wiringPi.h>
 
+#include "debug.h"
 #include "lcd.h"
 #include "movement.h"
 #include "parcours.h"
 #include "points.h"
 #include "position.h"
-#include "debug.h"
 
 pthread_t tParcours;
 bool isOrange;
 struct timespec tempsStart;
 struct timespec tempsNow;
-struct timespec tempsEcoule = {0, 0};
+struct timespec tempsEcoule = { 0, 0 };
 
 void configureParcours()
 {
@@ -93,24 +92,23 @@ void* TaskParcours(void* pdata)
         for (int i = 0; i < UP_TIME; i++) {
             float p = (float)i / (float)UP_TIME;
             changerMoteurs(p * MOT_MAX_V, p * MOT_MAX_V);
-            delay(1);
+            usleep(1000 * 1);
         }
         addPoints(1);
         changerMoteurs(MOT_MAX_V, MOT_MAX_V);
-        delay(HIGH_TIME);
+        usleep(1000 * HIGH_TIME);
 
         addPoints(1);
         for (int i = 0; i < DOWN_TIME; i++) {
             float p = (float)i / (float)DOWN_TIME;
             p = 1 - p;
             changerMoteurs(p * MOT_MAX_V, p * MOT_MAX_V);
-            delay(1);
+            usleep(1000 * 1);
         }
         addPoints(1);
         changerMoteurs(0, 0);
-        delay(LOW_TIME);
+        usleep(1000 * LOW_TIME);
     }
 
     return NULL;
 }
-
