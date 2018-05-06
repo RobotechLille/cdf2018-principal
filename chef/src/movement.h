@@ -9,5 +9,9 @@
 
 void configureMovement();
 void deconfigureMovement();
+void setDestination(struct position* pos);
+void* TaskMovement(void* pData);
+void enableConsigne();
+void disableConsigne();
 
 #endif

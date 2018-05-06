@@ -1,13 +1,13 @@
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
 
-#include "diagnostics.h"
 #include "buttons.h"
+#include "diagnostics.h"
 #include "lcd.h"
 
 #include "CF.h"
-#include "motor.h"
 #include "imu.h"
+#include "motor.h"
 #include "position.h"
 
 bool recu;
@@ -19,7 +19,7 @@ void setRecu()
 
 bool diagFPGA(void* arg)
 {
-    (void) arg;
+    (void)arg;
 
     recu = false;
     registerRxHandler(C2FD_PING, setRecu);
@@ -37,37 +37,34 @@ bool diagFPGA(void* arg)
 
 bool diagArduino(void* arg)
 {
-    (void) arg;
+    (void)arg;
     return false;
 }
 
 bool diagCodeuse(void* arg)
 {
-    int i = *((int*) arg);
+    int i = *((int*)arg);
     long lCod, rCod;
     getCoders(&lCod, &rCod);
     float tension = DIAGNOSTIC_TENSION_TEST;
     if (i % 2 == 1) { // Arrière
-        tension = - tension;
+        tension = -tension;
     }
-    printf("49 %f\n", tension);
     if (i < 2) {
-        setPWMTension(tension, 0);
+        setMoteurTension(tension, 0);
     } else {
-        setPWMTension(0, tension);
+        setMoteurTension(0, tension);
     }
-    usleep(500*1000);
+    usleep(DIAGNOSTIC_TEMPS_ROTATION * 1000);
     brake();
     long lCodn, rCodn;
     getCoders(&lCodn, &rCodn);
     long diff;
-    printf("60 %ld %ld %ld %ld\n", lCod, lCodn, rCod, rCodn);
     if (i < 2) {
         diff = lCodn - lCod;
     } else {
         diff = rCodn - rCod;
     }
-    printf("65 %ld\n", diff);
     if (i % 2 == 0) { // Avant
         return (diff > DIAGNOSTIC_CODEUSES_DIFF_MIN);
     } else { // Arrière
@@ -77,11 +74,11 @@ bool diagCodeuse(void* arg)
 
 bool diagIMU(void* arg)
 {
-    (void) arg;
+    (void)arg;
     return connectedIMU();
 }
 
-void execDiagnostic(char *name, bool (*diagnostic)(void* arg), void* arg)
+void execDiagnostic(char* name, bool (*diagnostic)(void* arg), void* arg)
 {
     clearLCD();
     printToLCD(LCD_LINE_1, name);
@@ -102,9 +99,12 @@ void runDiagnostics()
     /* execDiagnostic("Lien Arduino", diagArduino); */
     execDiagnostic("Lien IMU", diagIMU, NULL);
     int i;
-    i = 0; execDiagnostic("Mot+Cod L AV", diagCodeuse, &i);
-    i = 1; execDiagnostic("Mot+Cod L AR", diagCodeuse, &i);
-    i = 2; execDiagnostic("Mot+Cod R AV", diagCodeuse, &i);
-    i = 3; execDiagnostic("Mot+Cod R AR", diagCodeuse, &i);
+    i = 0;
+    execDiagnostic("Mot+Cod L AV", diagCodeuse, &i);
+    i = 1;
+    execDiagnostic("Mot+Cod L AR", diagCodeuse, &i);
+    i = 2;
+    execDiagnostic("Mot+Cod R AV", diagCodeuse, &i);
+    i = 3;
+    execDiagnostic("Mot+Cod R AR", diagCodeuse, &i);
 }
-

@@ -21,6 +21,12 @@ s()
     /opt/chef/bin/testStop
 }
 
+f()
+{
+    /etc/init.d/S50chef stop
+    /opt/chef/bin/testFree
+}
+
 l()
 {
     tail -f $(find /opt/chef/log | sort | tail -1)

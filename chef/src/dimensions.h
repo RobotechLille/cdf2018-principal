@@ -20,9 +20,9 @@
 #define MOTOR_NOMINAL_TENSION 24.0 // V (from datasheet)
 #define MOTOR_CONTROLLER_ALIMENTATION 24.0 // V (from elec)
 #define MOTOR_CONTROLLER_REFERENCE 5 // V (from wiring)
-#define MOTOR_SATURATION_MIN 1.0 // V (from random)
+#define MOTOR_SATURATION_MIN 0.1 // V (from random)
 #define MOTOR_SATURATION_MAX 12.0 // V (from testing)
-#define PWM_MAX 3.5 // V (from FPGA datasheet)
+#define PWM_MAX 3.3 // V (from FPGA datasheet)
 #define CODER_RESOLUTION 370.0 // cycles/motor rev
 #define CODER_DATA_FACTOR 4.0 // increments/motor cycles
 #define CODER_DATA_RESOLUTION (CODER_RESOLUTION * CODER_DATA_FACTOR) // cycles/motor rev
@@ -33,10 +33,11 @@
 #define AV_PER_CYCLE (WHEEL_PERIMETER / CODER_FULL_RESOLUTION) // mm
 
 // Constantes asservissement
-#define D_DIR_ECART_MIN 1 // mm
-#define D_DIR_ECART_MAX 5 // mm
-#define O_DIR_ECART_MIN 1 / 360 * 2 * M_PI // rad
-#define O_DIR_ECART_MAX 3 / 360 * 2 * M_PI // rad
+#define D_DIR_ECART_MIN 1.0 // mm
+#define D_DIR_ECART_MAX 5.0 // mm
+#define O_DIR_ECART_MIN (2.5 / 360.0 * 2.0 * M_PI) // rad
+#define O_DIR_ECART_MAX (7.5 / 360.0 * 2.0 * M_PI) // rad
+#define O_GAIN 1
 #define P 2
 #define I 0
 #define D 0

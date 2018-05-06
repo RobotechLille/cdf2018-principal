@@ -32,6 +32,7 @@ void prepareParcours(bool orange)
     resetPoints();
     showPoints();
     printRightLCD(LCD_LINE_2, isOrange ? "Org" : "Vrt");
+    enableConsigne();
 }
 
 void startParcours()
@@ -71,6 +72,7 @@ void stopParcours()
 {
     pthread_cancel(tParcours);
     stop();
+    disableConsigne();
 
     updateTimeDisplay();
     printRightLCD(LCD_LINE_1, "FIN");
@@ -78,42 +80,24 @@ void stopParcours()
     debugSetActive(false);
 }
 
-#define UP_TIME 1000
-#define HIGH_TIME 3000
-#define DOWN_TIME 1000
-#define LOW_TIME 2000
-#define MAX_VIT 1
-
 void* TaskParcours(void* pdata)
 {
     (void)pdata;
 
-    for (;;) {
-        setPWMTension(MAX_VIT, MAX_VIT);
-    }
+    struct position dest1 = {0, 0, 0};
+    setDestination(&dest1);
 
-    for (;;) {
-        addPoints(1);
-        for (int i = 0; i < UP_TIME; i++) {
-            float p = (float)i / (float)UP_TIME;
-            setPWMTension(p * MAX_VIT, p * MAX_VIT);
-            usleep(1000 * 1);
-        }
-        addPoints(1);
-        setPWMTension(MAX_VIT, MAX_VIT);
-        usleep(1000 * HIGH_TIME);
+    sleep(1);
 
-        addPoints(1);
-        for (int i = 0; i < DOWN_TIME; i++) {
-            float p = (float)i / (float)DOWN_TIME;
-            p = 1 - p;
-            setPWMTension(p * MAX_VIT, p * MAX_VIT);
-            usleep(1000 * 1);
-        }
-        addPoints(1);
-        setPWMTension(0, 0);
-        usleep(1000 * LOW_TIME);
-    }
+    struct position dest2 = {300, -300, 0};
+    setDestination(&dest2);
+
+    sleep(5);
+    /*  */
+    /* struct position dest3 = {1000, 1000, 0}; */
+    /* setDestination(&dest3); */
+    /*  */
+    /* sleep(5); */
 
     return NULL;
 }

@@ -5,31 +5,48 @@
 #include <time.h>   // random seed
 #include <unistd.h> // sleep
 
-#include "CF.h"
-#include "debug.h"
-#include "movement.h"
+pthread_mutex_t posConnu;
+pthread_cond_t newPos;
+pthread_t tPosition;
+pthread_t tMovement;
 
-pthread_mutex_t sRunning;
-
-void endRunning(int signal)
+void* TaskPosition(void* pData)
 {
-    (void)signal;
-    pthread_mutex_unlock(&sRunning);
+
+    (void)pData;
+    for (;;) {
+        printf("Begin position\n");
+        sleep(1);
+
+        pthread_mutex_lock(&posConnu);
+        printf("Sending position\n");
+        pthread_cond_signal(&newPos);
+        pthread_mutex_unlock(&posConnu);
+    }
+    return NULL;
+}
+
+void* TaskMovement(void* pData)
+{
+    (void)pData;
+    for (;;) {
+        printf("Begin Movement\n");
+        sleep(3);
+
+        pthread_mutex_lock(&posConnu);
+        printf("Waiting movement\n");
+        pthread_cond_wait(&newPos, &posConnu);
+        pthread_mutex_unlock(&posConnu);
+
+    }
+    return NULL;
 }
 
 int main()
 {
-
-    configureDebug();
-    configureCF();
-    configurePosition();
-
-    /* long lCod, rCod; */
-    for (;;) {
-        sleep(1);
-        /* getCoders(&lCod, &rCod); */
-        /* printf("%ld %ld\n", lCod, rCod); */
-        /* usleep(100*1000); */
-    }
-
+    pthread_mutex_init(&posConnu, NULL);
+    pthread_cond_init(&newPos, NULL);
+    pthread_create(&tPosition, NULL, TaskPosition, NULL);
+    pthread_create(&tMovement, NULL, TaskMovement, NULL);
+    sleep(300);
 }

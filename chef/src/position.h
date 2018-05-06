@@ -22,6 +22,10 @@ struct __attribute__ ((packed)) position {
 void configurePosition();
 void deconfigurePosition();
 void getCoders(long* l, long* r);
+unsigned int getPositionNewer(struct position* pos, unsigned int lastCalc);
+unsigned int getPosition(struct position* pos);
+void setPosition(struct position* pos);
+void resetPosition();
 
 #endif
 

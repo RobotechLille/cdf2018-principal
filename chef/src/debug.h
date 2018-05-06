@@ -6,8 +6,8 @@
 #include <stdbool.h>
 
 // Constantes
-#define DEBUG_INTERVAL_IDLE 50
-#define DEBUG_INTERVAL_ACTIVE 1000
+#define DEBUG_INTERVAL_IDLE 1000
+#define DEBUG_INTERVAL_ACTIVE 50
 
 // Structures
 enum debugArgTypes {

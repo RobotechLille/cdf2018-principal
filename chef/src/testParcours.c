@@ -9,18 +9,13 @@
 #include "CF.h"
 #include "debug.h"
 #include "i2c.h"
-#include "ihm.h"
 #include "imu.h"
 #include "movement.h"
+#include "buttons.h"
+#include "parcours.h"
 #include "position.h"
 
 pthread_mutex_t sRunning;
-
-void endRunning(int signal)
-{
-    (void)signal;
-    pthread_mutex_unlock(&sRunning);
-}
 
 int main()
 {
@@ -33,27 +28,28 @@ int main()
     srand(time(NULL));
 
     configureDebug();
-    configureIHM();
     configureCF();
     configureIMU();
     configurePosition();
     configureMovement();
     startDebug();
-    startIHM();
 
-    // Bloque jusqu'à l'arrivée d'un signal
-    pthread_mutex_init(&sRunning, NULL);
-    signal(SIGINT, endRunning);
-    signal(SIGTERM, endRunning);
-    signal(SIGQUIT, endRunning);
-    pthread_mutex_lock(&sRunning);
-    pthread_mutex_lock(&sRunning);
+    configureParcours();
+    prepareParcours(false);
+    startParcours();
+
+    int toWait;
+    while ((toWait = updateParcours()) >= 0) {
+        if (pressedButton(toWait) != none) {
+            break;
+        }
+    }
+    stopParcours();
 
     deconfigureMovement();
     deconfigurePosition();
     deconfigureIMU();
     deconfigureCF();
-    deconfigureIHM();
     deconfigureDebug();
     return EXIT_SUCCESS;
 }

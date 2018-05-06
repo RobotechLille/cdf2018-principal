@@ -14,7 +14,7 @@
 
 #define VIT 1
 #define VITL VIT
-#define VITR 0
+#define VITR VIT
 
 
 void setPWMTensionWrapper(float l, float r) {

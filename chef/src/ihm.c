@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <time.h>
 
+#include "position.h"
 #include "buttons.h"
 #include "diagnostics.h"
 #include "ihm.h"
@@ -115,7 +116,7 @@ void* TaskIHM(void* pdata)
             if (bout == rouge) {
                 clearLCD();
                 printToLCD(LCD_LINE_1, "Calibrage...");
-                delay(3000); // TODO
+                resetPosition();
                 clock_gettime(CLOCK_REALTIME, &calibrageLast);
             } else if (bout == jaune) {
                 break;

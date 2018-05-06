@@ -2,17 +2,21 @@
  * Fonctions de calcul de la position du robot
  */
 
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "debug.h"
-#include "position.h"
 #include "dimensions.h"
+#include "position.h"
 
 // Globales
 struct position connu;
 struct F2CI_CODERs deltaCoders;
 pthread_mutex_t posPolling;
+pthread_mutex_t posConnu;
+pthread_cond_t newPos;
 pthread_t tPosition;
 
 // Globales
@@ -23,11 +27,10 @@ void* TaskPosition(void* pData)
 {
     (void)pData;
 
+    resetPosition();
     nbCalcPos = 0;
     lCodTot = 0;
     rCodTot = 0;
-
-    pthread_mutex_init(&posPolling, NULL);
 
     for (;;) {
 
@@ -40,7 +43,6 @@ void* TaskPosition(void* pData)
         pthread_mutex_unlock(&posPolling);
 
         // Calculation
-        nbCalcPos++;
 #ifdef INVERSE_L_CODER
         deltaCoders.dL = -deltaCoders.dL;
 #endif
@@ -56,11 +58,17 @@ void* TaskPosition(void* pData)
         float deltaO = atan2(dR - dL, DISTANCE_BETWEEN_WHEELS);
         float deltaD = (dL + dR) / 2;
 
+        pthread_mutex_lock(&posConnu);
         connu.o += deltaO;
         float deltaX = deltaD * cos(connu.o);
         float deltaY = deltaD * sin(connu.o);
         connu.x += deltaX;
         connu.y += deltaY;
+        nbCalcPos++;
+        pthread_cond_signal(&newPos);
+        pthread_mutex_unlock(&posConnu);
+
+
     }
 
     return NULL;
@@ -74,6 +82,9 @@ void onF2CI_CODER()
 
 void configurePosition()
 {
+    pthread_mutex_init(&posPolling, NULL);
+    pthread_mutex_init(&posConnu, NULL);
+    pthread_cond_init(&newPos, NULL);
     registerRxHandler(F2CI_CODER, onF2CI_CODER);
     registerDebugVar("lCodTot", ld, &lCodTot);
     registerDebugVar("rCodTot", ld, &rCodTot);
@@ -96,5 +107,36 @@ void getCoders(long* l, long* r)
 {
     *l = lCodTot;
     *r = rCodTot;
+}
 
+unsigned int getPosition(struct position* pos)
+{
+    pthread_mutex_lock(&posConnu);
+    unsigned int nb = nbCalcPos;
+    memcpy(pos, &connu, sizeof(struct position));
+    pthread_mutex_unlock(&posConnu);
+    return nb;
+}
+
+unsigned int getPositionNewer(struct position* pos, unsigned int lastCalc)
+{
+    pthread_mutex_lock(&posConnu);
+    while (nbCalcPos <= lastCalc) {
+        pthread_cond_wait(&newPos, &posConnu);
+    }
+    pthread_mutex_unlock(&posConnu);
+    return getPosition(pos);
+}
+
+void setPosition(struct position* pos)
+{
+    pthread_mutex_lock(&posConnu);
+    memcpy(&connu, pos, sizeof(struct position));
+    pthread_mutex_unlock(&posConnu);
+}
+
+void resetPosition()
+{
+    struct position pos = {0, 0, 0};
+    setPosition(&pos);
 }
