@@ -8,6 +8,8 @@
 #include "CF.h"
 #include <pthread.h>
 
+// #define INVERSE_L_CODER
+#define INVERSE_R_CODER
 
 // Structures
 struct __attribute__ ((packed)) position {

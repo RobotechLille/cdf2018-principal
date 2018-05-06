@@ -8,6 +8,7 @@
 #include "CF.h"
 #include "motor.h"
 #include "imu.h"
+#include "position.h"
 
 bool recu;
 

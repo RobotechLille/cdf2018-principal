@@ -114,6 +114,8 @@ void configureDebug()
         exit(EXIT_FAILURE);
     }
 
+    printf("Writing log in file: %s\n", path);
+
     fprintf(debugFd, "time");
 }
 

@@ -16,14 +16,14 @@
 #define HIGH_TIME 3000
 #define DOWN_TIME 1000
 #define LOW_TIME 2000
-#define MAXI 3.3
+#define MAXI 12
 #define INTERVAL 10
 
 void changerMoteursWrapper(float l, float r) {
     /* clearLCD(); */
     printfToLCD(LCD_LINE_1, "L: %f", l);
     printfToLCD(LCD_LINE_2, "R: %f", r);
-    setPWMTension(l, r);
+    setMoteurTension(l, r);
 }
 
 int main(int argc, char* argv[])

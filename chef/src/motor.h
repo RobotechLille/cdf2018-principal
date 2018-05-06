@@ -7,6 +7,9 @@
 #include "dimensions.h"
 #include "CF.h"
 
+#define INVERSE_L_MOTOR
+// #define INVERSE_R_MOTOR
+
 #define TESTINATOR
 // #define TLE5206
 

@@ -85,7 +85,7 @@ architecture Behavioral of Principal is
     -- PWM clock
     signal pwmClk : std_logic := '0';
     signal pwmCounter : integer := 0;
-    constant PWM_DIVIDER : integer := 1024;
+    constant PWM_DIVIDER : integer := 4096;
 
     -- Motor controller
     signal enAd : std_logic_vector(7 downto 0);

@@ -1,18 +1,35 @@
 #include "motor.h"
 
-uint8_t moteurTensionToPWM(float V)
+uint8_t tensionToPWM(float V)
 {
-    if (V >= MOTOR_CONTROLLER_ALIMENTATION) {
+    printf("PWM tension %f\n", V);
+    if (V >= PWM_MAX) {
         return UINT8_MAX;
     } else if (V <= 0) {
         return 0;
     } else {
-        return V * UINT8_MAX / MOTOR_CONTROLLER_ALIMENTATION;
+        printf("PWM value %d\n", (uint8_t) (V * UINT8_MAX / PWM_MAX));
+        return V * UINT8_MAX / PWM_MAX;
     }
+}
+
+uint8_t moteurTensionToPWM(float V)
+{
+    printf("Moteur tension %f\n", V);
+    if (V >= MOTOR_CONTROLLER_ALIMENTATION) {
+        V = MOTOR_CONTROLLER_ALIMENTATION;
+    } else if (V <= 0) {
+        V = 0;
+    }
+    return tensionToPWM(V * MOTOR_CONTROLLER_REFERENCE / MOTOR_CONTROLLER_ALIMENTATION);
 }
 
 void setMoteurTensionRaw(float lVolt, float rVolt, bool lFor, bool rFor)
 {
+
+#ifdef INVERSE_L_MOTOR
+    lFor = !lFor;
+#endif
     static struct C2FD_PWMs msg;
     msg.in = 0x00;
     if (lVolt > 0) {
@@ -22,6 +39,9 @@ void setMoteurTensionRaw(float lVolt, float rVolt, bool lFor, bool rFor)
         // Nothing needs to be changed for this motor controller
     }
 
+#ifdef INVERSE_R_MOTOR
+    rFor = !rFor;
+#endif
     if (rVolt > 0) {
         msg.in |= 1 << (rFor ? IN3 : IN4);
         msg.enb = moteurTensionToPWM(lVolt);

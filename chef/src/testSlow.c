@@ -12,7 +12,9 @@
 #include "motor.h"
 #include "buttons.h"
 
-#define VIT 0.40
+#define VIT 1
+#define VITL VIT
+#define VITR 0
 
 
 void setPWMTensionWrapper(float l, float r) {
@@ -34,12 +36,9 @@ int main(int argc, char* argv[])
     initLCD();
     configureCF();
     configureButtons();
-    configureMovement();
-
-    setPWMTensionWrapper(VIT, VIT);
 
     for (;;) {
-        setPWMTensionWrapper(VIT, VIT);
+        setPWMTensionWrapper(VITL, VITR);
         pressedButton(BUT_BLOCK);
         brake();
         pressedButton(BUT_BLOCK);

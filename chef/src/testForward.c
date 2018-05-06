@@ -12,7 +12,7 @@
 #include "motor.h"
 #include "buttons.h"
 
-#define PATATE 3.3/2
+#define PATATE 2
 
 int main(int argc, char* argv[])
 {
@@ -30,22 +30,22 @@ int main(int argc, char* argv[])
     for (;;) {
         clearLCD();
         printToLCD(LCD_LINE_1, "Forward");
-        setPWMTension(PATATE, PATATE);
+        setMoteurTension(PATATE, PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Right");
-        setPWMTension(-PATATE, PATATE);
+        setMoteurTension(-PATATE, PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Left");
-        setPWMTension(-PATATE, -PATATE);
+        setMoteurTension(PATATE, -PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Backward");
-        setPWMTension(PATATE, -PATATE);
+        setMoteurTension(-PATATE, -PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();

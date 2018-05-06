@@ -82,11 +82,15 @@ void stopParcours()
 #define HIGH_TIME 3000
 #define DOWN_TIME 1000
 #define LOW_TIME 2000
-#define MAX_VIT 2
+#define MAX_VIT 1
 
 void* TaskParcours(void* pdata)
 {
     (void)pdata;
+
+    for (;;) {
+        setPWMTension(MAX_VIT, MAX_VIT);
+    }
 
     for (;;) {
         addPoints(1);

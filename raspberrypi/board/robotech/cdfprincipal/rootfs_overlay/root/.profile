@@ -13,8 +13,14 @@ export PS3="+ "
 export PS4="- "
 
 alias r="/etc/init.d/S50chef restart"
-alias s="/etc/init.d/S50chef stop"
 alias c="cd /opt/chef/"
+
+s()
+{
+    /etc/init.d/S50chef stop
+    /opt/chef/bin/testStop
+}
+
 l()
 {
     tail -f $(find /opt/chef/log | sort | tail -1)

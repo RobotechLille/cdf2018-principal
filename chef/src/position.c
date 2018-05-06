@@ -19,7 +19,6 @@ pthread_t tPosition;
 unsigned int nbCalcPos;
 long lCodTot, rCodTot;
 
-
 void* TaskPosition(void* pData)
 {
     (void)pData;
@@ -42,11 +41,20 @@ void* TaskPosition(void* pData)
 
         // Calculation
         nbCalcPos++;
+#ifdef INVERSE_L_CODER
+        deltaCoders.dL = -deltaCoders.dL;
+#endif
+#ifdef INVERSE_R_CODER
+        deltaCoders.dR = -deltaCoders.dR;
+#endif
         lCodTot += deltaCoders.dL;
         rCodTot += deltaCoders.dR;
 
-        float deltaO = atan2(deltaCoders.dR - deltaCoders.dL, DISTANCE_BETWEEN_WHEELS);
-        float deltaD = (deltaCoders.dL + deltaCoders.dR) / 2;
+        float dR = deltaCoders.dR * AV_PER_CYCLE;
+        float dL = deltaCoders.dL * AV_PER_CYCLE;
+
+        float deltaO = atan2(dR - dL, DISTANCE_BETWEEN_WHEELS);
+        float deltaD = (dL + dR) / 2;
 
         connu.o += deltaO;
         float deltaX = deltaD * cos(connu.o);
