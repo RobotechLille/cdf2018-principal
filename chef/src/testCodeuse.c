@@ -11,7 +11,7 @@
 #include "i2c.h"
 #include "ihm.h"
 #include "imu.h"
-#include "movement.h"
+#include "motor.h"
 #include "position.h"
 
 pthread_mutex_t sRunning;
@@ -31,7 +31,7 @@ int main()
     configureCF();
     configurePosition();
 
-    changerMoteurs(VIT, VIT);
+    setPWMTension(VIT, VIT);
 
     long lCod, rCod;
     for (;;) {

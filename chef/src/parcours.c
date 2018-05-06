@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "lcd.h"
 #include "movement.h"
+#include "motor.h"
 #include "parcours.h"
 #include "points.h"
 #include "position.h"
@@ -81,7 +82,7 @@ void stopParcours()
 #define HIGH_TIME 3000
 #define DOWN_TIME 1000
 #define LOW_TIME 2000
-#define MAX_VIT MOT_MAX_V
+#define MAX_VIT 2
 
 void* TaskParcours(void* pdata)
 {
@@ -91,22 +92,22 @@ void* TaskParcours(void* pdata)
         addPoints(1);
         for (int i = 0; i < UP_TIME; i++) {
             float p = (float)i / (float)UP_TIME;
-            changerMoteurs(p * MOT_MAX_V, p * MOT_MAX_V);
+            setPWMTension(p * MAX_VIT, p * MAX_VIT);
             usleep(1000 * 1);
         }
         addPoints(1);
-        changerMoteurs(MOT_MAX_V, MOT_MAX_V);
+        setPWMTension(MAX_VIT, MAX_VIT);
         usleep(1000 * HIGH_TIME);
 
         addPoints(1);
         for (int i = 0; i < DOWN_TIME; i++) {
             float p = (float)i / (float)DOWN_TIME;
             p = 1 - p;
-            changerMoteurs(p * MOT_MAX_V, p * MOT_MAX_V);
+            setPWMTension(p * MAX_VIT, p * MAX_VIT);
             usleep(1000 * 1);
         }
         addPoints(1);
-        changerMoteurs(0, 0);
+        setPWMTension(0, 0);
         usleep(1000 * LOW_TIME);
     }
 

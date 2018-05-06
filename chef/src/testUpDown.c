@@ -9,7 +9,7 @@
 
 #include "lcd.h"
 #include "CF.h"
-#include "movement.h"
+#include "motor.h"
 #include "buttons.h"
 
 #define UP_TIME 1000
@@ -23,7 +23,7 @@ void changerMoteursWrapper(float l, float r) {
     /* clearLCD(); */
     printfToLCD(LCD_LINE_1, "L: %f", l);
     printfToLCD(LCD_LINE_2, "R: %f", r);
-    changerMoteurs(l, r);
+    setPWMTension(l, r);
 }
 
 int main(int argc, char* argv[])
@@ -38,21 +38,20 @@ int main(int argc, char* argv[])
     initLCD();
     configureCF();
     configureButtons();
-    configureMovement();
 
     for (;;) {
         for (int i = 0; i < UP_TIME; i += INTERVAL) {
             float p = (float)i / (float)UP_TIME;
-            changerMoteursWrapper(p * MOT_MAX_V, p * MOT_MAX_V);
+            changerMoteursWrapper(p * MAXI, p * MAXI);
             delay(INTERVAL);
         }
-        changerMoteursWrapper(MOT_MAX_V, MOT_MAX_V);
+        changerMoteursWrapper(MAXI, MAXI);
         delay(HIGH_TIME);
 
         for (int i = 0; i < DOWN_TIME; i += INTERVAL) {
             float p = (float)i / (float)DOWN_TIME;
             p = 1 - p;
-            changerMoteursWrapper(p * MOT_MAX_V, p * MOT_MAX_V);
+            changerMoteursWrapper(p * MAXI, p * MAXI);
             delay(INTERVAL);
         }
         changerMoteursWrapper(0, 0);

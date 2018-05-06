@@ -9,17 +9,17 @@
 
 #include "lcd.h"
 #include "CF.h"
-#include "movement.h"
+#include "motor.h"
 #include "buttons.h"
 
 #define VIT 0.40
 
 
-void changerMoteursWrapper(float l, float r) {
+void setPWMTensionWrapper(float l, float r) {
     /* clearLCD(); */
     printfToLCD(LCD_LINE_1, "L: %f", l);
     printfToLCD(LCD_LINE_2, "R: %f", r);
-    changerMoteurs(l, r);
+    setPWMTension(l, r);
 }
 
 int main(int argc, char* argv[])
@@ -36,10 +36,10 @@ int main(int argc, char* argv[])
     configureButtons();
     configureMovement();
 
-    changerMoteursWrapper(VIT, VIT);
+    setPWMTensionWrapper(VIT, VIT);
 
     for (;;) {
-        changerMoteursWrapper(VIT, VIT);
+        setPWMTensionWrapper(VIT, VIT);
         pressedButton(BUT_BLOCK);
         brake();
         pressedButton(BUT_BLOCK);

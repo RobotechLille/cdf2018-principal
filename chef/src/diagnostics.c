@@ -6,7 +6,7 @@
 #include "lcd.h"
 
 #include "CF.h"
-#include "movement.h"
+#include "motor.h"
 #include "imu.h"
 
 bool recu;
@@ -51,9 +51,9 @@ bool diagCodeuse(void* arg)
     }
     printf("49 %f\n", tension);
     if (i < 2) {
-        changerMoteurs(tension, 0);
+        setPWMTension(tension, 0);
     } else {
-        changerMoteurs(0, tension);
+        setPWMTension(0, tension);
     }
     usleep(500*1000);
     brake();

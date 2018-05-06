@@ -9,7 +9,7 @@
 
 #include "lcd.h"
 #include "CF.h"
-#include "movement.h"
+#include "motor.h"
 #include "buttons.h"
 
 #define PATATE 3.3/2
@@ -26,27 +26,26 @@ int main(int argc, char* argv[])
     initLCD();
     configureCF();
     configureButtons();
-    configureMovement();
 
     for (;;) {
         clearLCD();
         printToLCD(LCD_LINE_1, "Forward");
-        changerMoteurs(PATATE, PATATE);
+        setPWMTension(PATATE, PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Right");
-        changerMoteurs(-PATATE, PATATE);
+        setPWMTension(-PATATE, PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Left");
-        changerMoteurs(-PATATE, -PATATE);
+        setPWMTension(-PATATE, -PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Backward");
-        changerMoteurs(PATATE, -PATATE);
+        setPWMTension(PATATE, -PATATE);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
