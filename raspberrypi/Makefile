@@ -109,6 +109,7 @@ upgrade-fpga:
 # CHEF
 
 chef:
+	../simu/mat2h.sh
 	make -C buildroot chef-rebuild
 
 upgrade-chef: chef
