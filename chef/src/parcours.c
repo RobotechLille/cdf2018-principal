@@ -89,15 +89,20 @@ void* TaskParcours(void* pdata)
 
     sleep(1);
 
-    struct position dest2 = {300, -300, 0};
+    struct position dest2 = {0, 0, M_PI_2};
     setDestination(&dest2);
 
-    sleep(5);
+    sleep(10);
+
+    stop();
+
     /*  */
     /* struct position dest3 = {1000, 1000, 0}; */
     /* setDestination(&dest3); */
     /*  */
     /* sleep(5); */
+
+
 
     return NULL;
 }

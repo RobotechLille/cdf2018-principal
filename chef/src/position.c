@@ -85,7 +85,7 @@ void configurePosition()
     pthread_mutex_init(&posPolling, NULL);
     pthread_mutex_init(&posConnu, NULL);
     pthread_cond_init(&newPos, NULL);
-    registerRxHandler(F2CI_CODER, onF2CI_CODER);
+    registerRxHandlerCF(F2CI_CODER, onF2CI_CODER);
     registerDebugVar("lCodTot", ld, &lCodTot);
     registerDebugVar("rCodTot", ld, &rCodTot);
     connu.x = 0;

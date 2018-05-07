@@ -22,7 +22,7 @@ bool diagFPGA(void* arg)
     (void)arg;
 
     recu = false;
-    registerRxHandler(C2FD_PING, setRecu);
+    registerRxHandlerCF(C2FD_PING, setRecu);
     sendCF(C2FD_PING, NULL, 0);
 
     for (int i = 0; i <= DIAGNOSTIC_SERIAL_TIMEOUT; i += DIAGNOSTIC_POLL_INTERVAL) {
@@ -31,7 +31,7 @@ bool diagFPGA(void* arg)
         }
         usleep(DIAGNOSTIC_POLL_INTERVAL * 1000);
     }
-    registerRxHandler(C2FD_PING, NULL);
+    registerRxHandlerCF(C2FD_PING, NULL);
     return recu;
 }
 

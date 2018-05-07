@@ -27,7 +27,15 @@ bool oRetenu;
 bool dRetenu;
 float lErr;
 float rErr;
+float lErrPrev;
+float rErrPrev;
+float lVolt;
+float rVolt;
 unsigned int nbCalcCons;
+
+struct timespec pidStart;
+struct timespec pidNow;
+struct timespec pidEcoule;
 
 void configureMovement()
 {
@@ -56,6 +64,8 @@ void configureMovement()
     registerDebugVar("oRetenu", d, &oRetenu);
     registerDebugVar("lErr", f, &lErr);
     registerDebugVar("rErr", f, &rErr);
+    registerDebugVar("lVolt", f, &lVolt);
+    registerDebugVar("rVolt", f, &rVolt);
     registerDebugVar("nbCalcCons", d, &nbCalcCons);
 
     disableConsigne();
@@ -73,6 +83,14 @@ float angleGap(float target, float actual)
     return fmod(target - actual + M_PI, 2 * M_PI) - M_PI;
 }
 
+float angleGap180(float target, float actual, float* dist)
+{
+    if (fabs(fmod(target - actual + M_PI, 2 * M_PI) - M_PI) > M_PI_2) {
+        *dist = -*dist;
+    }
+    return fmod(target - actual + M_PI_2, M_PI) - M_PI_2;
+}
+
 void* TaskMovement(void* pData)
 {
     (void)pData;
@@ -83,6 +101,11 @@ void* TaskMovement(void* pData)
     oRetenu = true;
     dRetenu = true;
 
+    float lErrInteg = 0;
+    float rErrInteg = 0;
+
+    clock_gettime(CLOCK_REALTIME, &pidStart);
+
     for (;;) {
 
         // Test if enabled
@@ -92,44 +115,88 @@ void* TaskMovement(void* pData)
         }
         pthread_mutex_unlock(&movEnableMutex);
 
+        // Wait for new calculation if not calculated yet
         lastPosCalc = getPositionNewer(&connu, lastPosCalc);
+
         // Destination → ordre
         pthread_mutex_lock(&movCons);
         xDiff = cons.x - connu.x;
         yDiff = cons.y - connu.y;
         oEcart = angleGap(cons.o, connu.o);
 
+        // Distance d'écart entre la position actuelle et celle de consigne
         dDirEcart = hypotf(xDiff, yDiff);
-        oDirEcart = angleGap(atan2(yDiff, xDiff), connu.o);
+        // Écart entre l'angle actuel et celui orienté vers la position de consigne
+        // Si l'angle se trouve à gauche du cercle trigo, on le remet à droite
+        // et on inverse la direction
+        oDirEcart = angleGap180(atan2(yDiff, xDiff), connu.o, &dDirEcart);
         pthread_mutex_unlock(&movCons);
 
+        // Si on est loin de la consigne, l'angle cible devient celui orienté vers la consigne
         if (dDirEcart > D_DIR_ECART_MAX) {
             oRetenu = true;
+        // Si on est proche de la consigne, l'angle cible devient celui voulu par la consigne
         } else if (dDirEcart < D_DIR_ECART_MIN) {
             oRetenu = false;
         }
         oErr = oRetenu ? oDirEcart : oEcart;
 
         float oDirEcartAbs = fabs(oDirEcart);
+        // Si l'écart avec l'angle orienté vers la consigne est grand, la distance cible devient 0
+        // pour se réorienter vers l'angle de la consigne
         if (oDirEcartAbs > O_DIR_ECART_MAX) {
             dRetenu = true;
+        // Si l'écart avec l'angle orienté vers la consigne est petit, la distance cible devient
+        // la distance entre la position actuelle et la consigne
         } else if (oDirEcartAbs < O_DIR_ECART_MIN) {
             dRetenu = false;
         }
         dErr = dRetenu ? 0 : dDirEcart;
 
         // Ordre → Volt
+        // Nombre de rotation nécessaire sur les deux roues dans le même sens pour arriver à la distance voulue
         float dErrRev = dErr / WHEEL_PERIMETER;
-        float oErrRev = O_GAIN * oErr * DISTANCE_BETWEEN_WHEELS / WHEEL_PERIMETER;
+        // Nombre de rotation nécessaire sur les deux roues dans le sens inverse pour arriver à l'angle voulu
+        float oErrRev = oErr * DISTANCE_BETWEEN_WHEELS / WHEEL_PERIMETER;
+
+        // Si on est en avancement on applique une grande priorité au retour sur la ligne
+        if (!dRetenu && oRetenu) {
+            oErrRev *= O_GAIN;
+        }
 
         lErr = dErrRev - oErrRev;
         rErr = dErrRev + oErrRev;
 
         // PID
-        float lVoltCons = P * lErr;
-        float rVoltCons = P * rErr;
+        // Calcul du temps écoulé par rapport à la dernière mesure
+        clock_gettime(CLOCK_REALTIME, &pidNow);
+        if ((pidNow.tv_nsec - pidStart.tv_nsec) < 0) {
+            pidEcoule.tv_sec = pidNow.tv_sec - pidStart.tv_sec - 1;
+            pidEcoule.tv_nsec = pidNow.tv_nsec - pidStart.tv_nsec + 1000000000UL;
+        } else {
+            pidEcoule.tv_sec = pidNow.tv_sec - pidStart.tv_sec;
+            pidEcoule.tv_nsec = pidNow.tv_nsec - pidStart.tv_nsec;
+        }
+        // Enregistrement de cette mesure comme la dernière mesure
+        pidStart.tv_sec = pidNow.tv_sec;
+        pidStart.tv_nsec = pidNow.tv_nsec;
+        float timeStep = pidEcoule.tv_sec + pidStart.tv_nsec * 1E-9;
 
-        setMoteurTension(lVoltCons, rVoltCons);
+        // Calcul des facteurs dérivé et intégrale
+        lErrInteg += (lErr + lErrPrev) / 2 * timeStep;
+        float lErrDeriv = (lErr - lErrPrev) / timeStep;
+        lErrPrev = lErr;
+
+        rErrInteg += (rErr + rErrPrev) / 2 * timeStep;
+        float rErrDeriv = (rErr - rErrPrev) / timeStep;
+        rErrPrev = rErr;
+
+        // Calcul de la commande
+        lVolt = P * lErr + I * lErrInteg + D * lErrDeriv;
+        rVolt = P * rErr + I * rErrInteg + D * rErrDeriv;
+
+        // Envoi de la commande
+        setMoteurTension(lVolt, rVolt);
 
         nbCalcCons++;
     }
@@ -146,6 +213,7 @@ void deconfigureMovement()
 void enableConsigne()
 {
     pthread_mutex_lock(&movEnableMutex);
+    clock_gettime(CLOCK_REALTIME, &pidNow);
     movEnableBool = true;
     pthread_cond_signal(&movEnableCond);
     pthread_mutex_unlock(&movEnableMutex);
