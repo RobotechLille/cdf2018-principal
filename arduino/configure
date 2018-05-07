@@ -1,6 +1,0 @@
-#!/usr/bin/env sh
-
-wget "https://sourceforge.net/projects/freertos/files/FreeRTOS/V9.0.0/FreeRTOSv9.0.0.zip/download" -O FreeRTOSv9.0.0.zip -c
-unzip "FreeRTOSv9.0.0.zip"
-rm "FreeRTOSv9.0.0.zip"
-

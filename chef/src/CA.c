@@ -1,4 +1,4 @@
-#include "CF.h"
+#include "CA.h"
 #include <fcntl.h>   // O_*
 #include <stdio.h>   // printf...
 #include <stdlib.h>  // stuff
@@ -6,15 +6,15 @@
 #include <strings.h> // bzero
 #include <unistd.h>  // read(), write()...
 
-int fpga;
-pthread_mutex_t sSendCF;
-pthread_t tReaderAF;
+int arduino;
+pthread_mutex_t sSendCA;
+pthread_t tReaderAC;
 
-rxHandler rxHandlersAF[256];
+rxHandler rxHandlersAC[256];
 bool pret;
 
 
-void printDataCF(void* data, size_t size)
+void printDataCA(void* data, size_t size)
 {
     printf(" ");
     unsigned char* p = data;
@@ -29,27 +29,27 @@ void printDataCF(void* data, size_t size)
     printf("\n");
 }
 
-void configureFpga()
+void configureArduino()
 {
     // Connection au port série
-    printf("Connexion à %s... ", FPGA_PORTNAME);
+    printf("Connexion à %s... ", ARDUINO_PORTNAME);
     fflush(stdout);
-    fpga = open(FPGA_PORTNAME, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
-    if (fpga < 0) {
+    arduino = open(ARDUINO_PORTNAME, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    if (arduino < 0) {
         printf("Échec !\n");
         exit(1);
     }
 
     // Configuration du port série
-    fcntl(fpga, F_SETFL, O_RDWR);
+    fcntl(arduino, F_SETFL, O_RDWR);
 
     struct termios cfg;
 
-    tcgetattr(fpga, &cfg);
+    tcgetattr(arduino, &cfg);
 
     cfmakeraw(&cfg);
-    cfsetispeed(&cfg, CF_BAUDRATE);
-    cfsetospeed(&cfg, CF_BAUDRATE);
+    cfsetispeed(&cfg, CA_BAUDRATE);
+    cfsetospeed(&cfg, CA_BAUDRATE);
 
     cfg.c_cflag |= (CLOCAL | CREAD);
     cfg.c_cflag &= ~PARENB;
@@ -62,51 +62,51 @@ void configureFpga()
     cfg.c_cc[VMIN] = 0;
     cfg.c_cc[VTIME] = 10;
 
-    if (tcsetattr(fpga, TCSANOW, &cfg) < 0) {
+    if (tcsetattr(arduino, TCSANOW, &cfg) < 0) {
         perror("serialConfig.tcsetattr");
         exit(1);
     }
 
     int status;
-    ioctl(fpga, TIOCMGET, &status);
+    ioctl(arduino, TIOCMGET, &status);
 
     status |= TIOCM_DTR;
     status |= TIOCM_RTS;
 
-    ioctl(fpga, TIOCMSET, &status);
+    ioctl(arduino, TIOCMSET, &status);
 
     usleep(10 * 1000);
 
     // Flush
     unsigned char trash[1024];
-    read(fpga, &trash, sizeof(trash));
+    read(arduino, &trash, sizeof(trash));
 
     printf("OK!\n");
 }
 
-void deconfigureFpga()
+void deconfigureArduino()
 {
-    close(fpga);
+    close(arduino);
     printf("Déconnecté\n");
 }
 
-void registerRxHandlerCF(unsigned char code, rxHandler handler)
+void registerRxHandlerCA(unsigned char code, rxHandler handler)
 {
-    rxHandlersAF[code] = handler;
+    rxHandlersAC[code] = handler;
 }
 
-void* TaskReaderAF(void* pdata)
+void* TaskReaderAC(void* pdata)
 {
     (void)pdata;
     unsigned char code;
     for (;;) {
-        code = readByteCF();
+        code = readByteCA();
 
 #ifdef PRINTRAWDATA
         printf("↓");
-        printDataCF(&code, sizeof(code));
+        printDataCA(&code, sizeof(code));
 #endif
-        rxHandler handler = rxHandlersAF[code];
+        rxHandler handler = rxHandlersAC[code];
         if (handler != NULL) {
             handler();
         } else {
@@ -116,109 +116,109 @@ void* TaskReaderAF(void* pdata)
     return NULL;
 }
 
-void onF2CD_ERR()
+void onA2CD_ERR()
 {
-    struct F2CD_ERRs s;
-    readCF(&s, sizeof(struct F2CD_ERRs));
+    struct A2CD_ERRs s;
+    readCA(&s, sizeof(struct A2CD_ERRs));
     printf("Erreur reçue : %c (%2x)\n", s.code, s.code);
 }
 
-void setPretCF()
+void setPretCA()
 {
     pret = true;
 }
 
-void doNothingCF()
+void doNothingCA()
 {
 }
 
-void configureCF()
+void configureCA()
 {
-    configureFpga();
+    configureArduino();
     for (int i = 0; i < 256; i++) {
-        rxHandlersAF[i] = NULL;
+        rxHandlersAC[i] = NULL;
     }
 
-    pthread_mutex_init(&sSendCF, NULL);
-    pthread_create(&tReaderAF, NULL, TaskReaderAF, NULL);
+    pthread_mutex_init(&sSendCA, NULL);
+    pthread_create(&tReaderAC, NULL, TaskReaderAC, NULL);
 
-    printf("Attente de réponse du Fpga... ");
+    printf("Attente de réponse du Arduino... ");
     fflush(stdout);
-    // Dans le cas où on aurait laissé l'Fpga en attente de donnée,
+    // Dans le cas où on aurait laissé l'Arduino en attente de donnée,
     // on envoie des pings en boucle jusqu'à ce qu'il nous réponde.
     pret = false;
-    registerRxHandlerCF(C2FD_PING, setPretCF);
+    registerRxHandlerCA(C2AD_PING, setPretCA);
     while (!pret) {
-        sendCF(C2FD_PING, NULL, 0);
+        sendCA(C2AD_PING, NULL, 0);
         usleep(100 * 1000);
     }
-    registerRxHandlerCF(C2FD_PING, doNothingCF); // TODO
-    registerRxHandlerCF(C2FD_PING, NULL);
+    registerRxHandlerCA(C2AD_PING, doNothingCA); // TODO
+    registerRxHandlerCA(C2AD_PING, NULL);
     printf("OK !\n");
 
-    registerRxHandlerCF(F2CD_ERR, onF2CD_ERR);
+    registerRxHandlerCA(A2CD_ERR, onA2CD_ERR);
 }
 
-void deconfigureCF()
+void deconfigureCA()
 {
-    deconfigureFpga();
+    deconfigureArduino();
 }
 
-void sendByteCF(unsigned char data)
+void sendByteCA(unsigned char data)
 {
-    write(fpga, &data, sizeof(data));
+    write(arduino, &data, sizeof(data));
 
 #ifdef PRINTRAWDATA
     printf("↑");
-    printDataCF(&data, sizeof(data));
+    printDataCA(&data, sizeof(data));
 #endif
 }
 
-void sendCF(unsigned char code, void* data, size_t size)
+void sendCA(unsigned char code, void* data, size_t size)
 {
-    pthread_mutex_lock(&sSendCF);
+    pthread_mutex_lock(&sSendCA);
 
-    sendByteCF(code);
+    sendByteCA(code);
     if (size > 0) {
         unsigned char* p = data;
         for (size_t i = 0; i < size; i++) {
-            write(fpga, p, sizeof(unsigned char));
+            write(arduino, p, sizeof(unsigned char));
             p++;
         }
         // Envoyer plus d'un octet d'un coup curieusement il aime pas ça du tout
     }
-    pthread_mutex_unlock(&sSendCF);
+    pthread_mutex_unlock(&sSendCA);
 
 #ifdef PRINTRAWDATA
     if (size > 0) {
         printf("↑");
-        printDataCF(data, size);
+        printDataCA(data, size);
     }
 #endif
 }
 
-unsigned char readByteCF()
+unsigned char readByteCA()
 {
     unsigned char c;
 
-    while (read(fpga, &c, sizeof(c)) < 1) {
+    while (read(arduino, &c, sizeof(c)) < 1) {
         sleep(0);
     }
     return c;
 
 #ifdef PRINTRAWDATA
     printf("↓");
-    printDataCF(&c, sizeof(c));
+    printDataCA(&c, sizeof(c));
 #endif
 }
 
-void readCF(void* data, size_t size)
+void readCA(void* data, size_t size)
 {
     size_t remaining = size;
     int justRead;
     char* p = data;
     do {
-        justRead = read(fpga, p, remaining);
+        justRead = read(arduino, p, remaining);
         if (justRead > 0) {
             p += justRead;
             remaining -= justRead;
@@ -227,6 +227,6 @@ void readCF(void* data, size_t size)
 
 #ifdef PRINTRAWDATA
     printf("↓");
-    printDataCF(data, size);
+    printDataCA(data, size);
 #endif
 }

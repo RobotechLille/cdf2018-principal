@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -5,7 +6,9 @@
 #include "diagnostics.h"
 #include "lcd.h"
 
+#include "CA.h"
 #include "CF.h"
+#include "actionneurs.h"
 #include "imu.h"
 #include "motor.h"
 #include "position.h"
@@ -38,7 +41,19 @@ bool diagFPGA(void* arg)
 bool diagArduino(void* arg)
 {
     (void)arg;
-    return false;
+
+    recu = false;
+    registerRxHandlerCA(C2AD_PING, setRecu);
+    sendCA(C2AD_PING, NULL, 0);
+
+    for (int i = 0; i <= DIAGNOSTIC_SERIAL_TIMEOUT; i += DIAGNOSTIC_POLL_INTERVAL) {
+        if (recu) {
+            break;
+        }
+        usleep(DIAGNOSTIC_POLL_INTERVAL * 1000);
+    }
+    registerRxHandlerCA(C2AD_PING, NULL);
+    return recu;
 }
 
 bool diagCodeuse(void* arg)
@@ -78,12 +93,48 @@ bool diagIMU(void* arg)
     return connectedIMU();
 }
 
-void execDiagnostic(char* name, bool (*diagnostic)(void* arg), void* arg)
+bool diagJustRun(void* arg)
+{
+    void (*fonction)(void) = arg;
+    fonction();
+    return true;
+}
+
+void diagSetLoquetOuvert()
+{
+    setLoquet(true);
+}
+void diagSetLoquetFerme()
+{
+    setLoquet(false);
+}
+void diagSetPositionBalleAttente()
+{
+    setPositionBalle(attente);
+}
+void diagSetPositionBalleEjection()
+{
+    setPositionBalle(ejection);
+}
+void diagSetPositionBalleEvacuation()
+{
+    setPositionBalle(evacuation);
+}
+void diagSetPropulsionOn()
+{
+    setPropulsion(true);
+}
+void diagSetPropulsionOff()
+{
+    setPropulsion(false);
+}
+
+void execDiagnostic(char* name, diagnosticFunc diag, void* arg)
 {
     clearLCD();
     printToLCD(LCD_LINE_1, name);
     printToLCD(LCD_LINE_2, "...");
-    bool res = diagnostic(arg);
+    bool res = diag(arg);
     if (res) {
         printToLCD(LCD_LINE_2, "Ok!");
         usleep(DIAGNOSTIC_INTERVAL * 1000);
@@ -96,7 +147,7 @@ void execDiagnostic(char* name, bool (*diagnostic)(void* arg), void* arg)
 void runDiagnostics()
 {
     execDiagnostic("Lien FPGA", diagFPGA, NULL);
-    /* execDiagnostic("Lien Arduino", diagArduino); */
+    execDiagnostic("Lien Arduino", diagArduino, NULL);
     execDiagnostic("Lien IMU", diagIMU, NULL);
     int i;
     i = 0;
@@ -107,4 +158,16 @@ void runDiagnostics()
     execDiagnostic("Mot+Cod R AV", diagCodeuse, &i);
     i = 3;
     execDiagnostic("Mot+Cod R AR", diagCodeuse, &i);
+
+    execDiagnostic("Ouverture loquet", diagJustRun, &diagSetLoquetOuvert);
+    execDiagnostic("Fermeture loquet", diagJustRun, &diagSetLoquetFerme);
+    execDiagnostic("Reset barillet", diagJustRun, &barilletReset);
+    execDiagnostic("T+1 barillet", diagJustRun, &barilletSuivant);
+    execDiagnostic("T+2 barillet", diagJustRun, &barilletSkip);
+    execDiagnostic("Pousser balle", diagJustRun, &pousserBalle);
+    execDiagnostic("Pos. attente", diagJustRun, &diagSetPositionBalleAttente);
+    execDiagnostic("Pos. ejection", diagJustRun, &diagSetPositionBalleEjection);
+    execDiagnostic("Pos. evacuation", diagJustRun, &diagSetPositionBalleEvacuation);
+    execDiagnostic("Propulsion off", diagJustRun, &diagSetPropulsionOn);
+    execDiagnostic("Propulsion on", diagJustRun, &diagSetPropulsionOff);
 }

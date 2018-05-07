@@ -12,10 +12,12 @@
 #define DIAGNOSTIC_CODEUSES_DIFF_MIN 100
 #define DIAGNOSTIC_TEMPS_ROTATION 250
 
+typedef bool (*diagnosticFunc)(void* arg);
+
 // Public
 void runDiagnostics();
 
 // Private
-void execDiagnostic(char *name, bool (*diagnostic)(void* arg), void* arg);
+void execDiagnostic(char* name, diagnosticFunc diag, void* arg);
 
 #endif

@@ -6,6 +6,7 @@
 #include <unistd.h> // sleep
 #include <wiringPi.h>
 
+#include "CA.h"
 #include "CF.h"
 #include "debug.h"
 #include "i2c.h"
@@ -35,9 +36,11 @@ int main()
     configureDebug();
     configureIHM();
     configureCF();
+    configureCA();
     configureIMU();
     configurePosition();
     configureMovement();
+    configureActionneurs();
     startDebug();
     startIHM();
 
@@ -49,9 +52,11 @@ int main()
     pthread_mutex_lock(&sRunning);
     pthread_mutex_lock(&sRunning);
 
+    deconfigureActionneurs();
     deconfigureMovement();
     deconfigurePosition();
     deconfigureIMU();
+    deconfigureCA();
     deconfigureCF();
     deconfigureIHM();
     deconfigureDebug();

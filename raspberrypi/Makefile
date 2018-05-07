@@ -112,9 +112,11 @@ chef:
 	../simu/mat2h.sh
 	make -C buildroot chef-rebuild
 
-upgrade-chef: chef
+upload-chef:
 	ssh -F sshconf principal true
 	rsync --rsh 'ssh -F sshconf' --archive --chown root:root buildroot/output/target/opt/chef principal:/opt/
+
+upgrade-chef: chef upload-chef
 
 run:
 	ssh -F sshconf principal true

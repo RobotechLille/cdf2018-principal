@@ -1,4 +1,5 @@
 #include "motor.h"
+#include "actionneurs.h"
 
 uint8_t tensionToPWM(float V)
 {
@@ -96,5 +97,5 @@ int freewheel()
 int stop()
 {
     brake();
-    // TODO Actionneurs
+    stopActionneurs();
 }

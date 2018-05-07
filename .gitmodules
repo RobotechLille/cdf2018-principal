@@ -7,3 +7,9 @@
 [submodule "raspberrypi/buildroot"]
 	path = raspberrypi/buildroot
 	url = /home/geoffrey/buildroot
+[submodule "arduino/lib/AX12A"]
+	path = arduino/lib/AX12A
+	url = https://github.com/ThingType/AX-12A-servo-library.git
+[submodule "Servo"]
+	path = arduino/lib/Servo
+	url = https://github.com/arduino-libraries/Servo.git
