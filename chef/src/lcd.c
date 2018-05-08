@@ -16,6 +16,15 @@ uint8_t pos;
 void initLCD()
 {
     lcdFd = openI2C(LCD_ADDR);
+    offLCD();
+    onLCD();
+    pinMode(LCD_ON_PIN, OUTPUT);
+}
+
+void onLCD()
+{
+    digitalWrite(LCD_ON_PIN, LOW);
+    delay(100);
 
     // TODO More details
     sendLCD(0x33, LCD_MODE_CMD); // Initialise
@@ -25,7 +34,25 @@ void initLCD()
     sendLCD(0x28, LCD_MODE_CMD); // Data length, number of lines, font size
     clearLCD();
 
-    delayMicroseconds(500);
+    delay(50);
+}
+
+void offLCD()
+{
+    digitalWrite(LCD_ON_PIN, HIGH);
+    delay(100);
+}
+
+void resetLCD()
+{
+    char line1bkp[LCD_NB_TOTAL];
+    char line2bkp[LCD_NB_TOTAL];
+    memcpy(line1bkp, virtual, LCD_NB_CHARS * sizeof(char));
+    memcpy(line2bkp, virtual + LCD_NB_CHARS, LCD_NB_CHARS * sizeof(char));
+    offLCD();
+    onLCD();
+    printToLCD(LCD_LINE_1, line1bkp);
+    printToLCD(LCD_LINE_2, line2bkp);
 }
 
 void clearLCD()

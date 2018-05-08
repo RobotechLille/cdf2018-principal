@@ -16,6 +16,6 @@ Ce document a pour but de recenser les connexions entre les différents composan
 
 - BCM 2 (SDA), BCM 3 (SCL) : liaison I2C (LCD, IMU, SRF08)
 - BCM 14 (TXD), BCM 15 (RXD) : liaison série (PC debug)
-- BCM 12 (PWM0), BCM 13 (PWM1) : contrôleur moteur
 - BCM 17, BCM 27 : bouton rouge, bouton jaune
 - BCM 22 : tirette
+- BCM 23 : LCD on/off

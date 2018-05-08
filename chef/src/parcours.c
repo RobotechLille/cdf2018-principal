@@ -74,6 +74,7 @@ void stopParcours()
     stop();
     disableConsigne();
 
+    resetLCD();
     updateTimeDisplay();
     printRightLCD(LCD_LINE_1, "FIN");
     showPoints();

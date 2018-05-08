@@ -22,15 +22,15 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    struct gyroRaw a;
-    struct gyroRaw t;
+    struct axesRaw a;
+    struct axesRaw g;
     for (;;) {
-        a = readGyroRaw();
-        t.x += a.x;
-        t.y += a.y;
-        t.z += a.z;
+        a = readAcelRaw();
+        printf("X:%5d Y:%5d Z:%5d\n", a.x, a.y, a.z);
+        g = readGyroRaw();
+        printf("X:%5d Y:%5d Z:%5d\n", g.x, g.y, g.z);
+        printf("\n");
         usleep(100*1000);
-        printf("X:%5d Y:%5d Z:%5d\n", t.x, t.y, t.z);
     }
 
     exit(0);

@@ -23,6 +23,8 @@
 
 #define LCD_MASK_ENABLE 0x04 // Enable bit
 
+#define LCD_ON_PIN 4
+
 // Public
 void initLCD();
 void clearLCD();
@@ -39,5 +41,8 @@ void printLCD(char* s);
 void displayLCD();
 void lockLCD();
 void unlockLCD();
+void onLCD();
+void offLCD();
+void resetLCD();
 
 #endif
