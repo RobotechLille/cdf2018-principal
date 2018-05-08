@@ -21,9 +21,11 @@ entity Principal is
              FRONTECHO: in std_logic;
              BACKTRIGGER: out std_logic;
              BACKECHO: in std_logic;
+             ENAREF: out std_logic;
              ENA: out std_logic;
              IN1ENC: out std_logic;
              IN2: out std_logic;
+             ENBREF: out std_logic;
              ENB: out std_logic;
              IN3END: out std_logic;
              IN4: out std_logic
@@ -225,6 +227,7 @@ begin
                             data => enAd,
                             pulse => ENA
                         );
+    ENAREF <= '1';
 
     in1enCp : PWM port map (
                                clk => pwmClk,
@@ -238,6 +241,7 @@ begin
                             data => enBd,
                             pulse => ENB
                         );
+    ENBREF <= '1';
 
     in3enDp : PWM port map (
                                clk => pwmClk,
