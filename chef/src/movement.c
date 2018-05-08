@@ -1,7 +1,7 @@
 #include <math.h>
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -15,6 +15,9 @@ pthread_mutex_t movCons;
 pthread_mutex_t movEnableMutex;
 pthread_cond_t movEnableCond;
 bool movEnableBool;
+pthread_mutex_t movDoneMutex;
+pthread_cond_t movDoneCond;
+bool movDoneBool;
 
 float xDiff;
 float yDiff;
@@ -47,6 +50,9 @@ void configureMovement()
     pthread_mutex_init(&movEnableMutex, NULL);
     pthread_cond_init(&movEnableCond, NULL);
     movEnableBool = false;
+    pthread_mutex_init(&movDoneMutex, NULL);
+    pthread_cond_init(&movDoneCond, NULL);
+    movDoneBool = false;
 
     pthread_create(&tMovement, NULL, TaskMovement, NULL);
 
@@ -76,6 +82,25 @@ void setDestination(struct position* pos)
     pthread_mutex_lock(&movCons);
     memcpy(&cons, pos, sizeof(struct position));
     pthread_mutex_unlock(&movCons);
+}
+
+void waitDestination()
+{
+    pthread_mutex_lock(&movDoneMutex);
+    while (!movDoneBool) {
+        pthread_cond_wait(&movDoneCond, &movDoneMutex);
+    }
+    pthread_mutex_unlock(&movDoneMutex);
+}
+
+void sendTo(float x, float y, float o)
+{
+    enableConsigne();
+    struct position pos = {x, y, o};
+    setDestination(&pos);
+    waitDestination();
+    brake();
+    disableConsigne();
 }
 
 float angleGap(float target, float actual)
@@ -135,7 +160,7 @@ void* TaskMovement(void* pData)
         // Si on est loin de la consigne, l'angle cible devient celui orienté vers la consigne
         if (dDirEcart > D_DIR_ECART_MAX) {
             oRetenu = true;
-        // Si on est proche de la consigne, l'angle cible devient celui voulu par la consigne
+            // Si on est proche de la consigne, l'angle cible devient celui voulu par la consigne
         } else if (dDirEcart < D_DIR_ECART_MIN) {
             oRetenu = false;
         }
@@ -146,12 +171,19 @@ void* TaskMovement(void* pData)
         // pour se réorienter vers l'angle de la consigne
         if (oDirEcartAbs > O_DIR_ECART_MAX) {
             dRetenu = true;
-        // Si l'écart avec l'angle orienté vers la consigne est petit, la distance cible devient
-        // la distance entre la position actuelle et la consigne
+            // Si l'écart avec l'angle orienté vers la consigne est petit, la distance cible devient
+            // la distance entre la position actuelle et la consigne
         } else if (oDirEcartAbs < O_DIR_ECART_MIN) {
             dRetenu = false;
         }
         dErr = dRetenu ? 0 : dDirEcart;
+
+        // Calcul si on est arrivé
+        pthread_mutex_lock(&movDoneMutex);
+        clock_gettime(CLOCK_REALTIME, &pidNow);
+        movDoneBool = !dRetenu && !oRetenu && dDirEcart < D_CONS_THRESOLD && oEcart < O_CONS_THRESOLD;
+        pthread_cond_signal(&movDoneCond);
+        pthread_mutex_unlock(&movDoneMutex);
 
         // Ordre → Volt
         // Nombre de rotation nécessaire sur les deux roues dans le même sens pour arriver à la distance voulue
