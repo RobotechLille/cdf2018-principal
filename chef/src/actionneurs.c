@@ -1,10 +1,14 @@
 // Robotech Lille 2017-2018
 
-#include "actionneurs.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "CA.h"
+#include "actionneurs.h"
 
 pthread_mutex_t receptionActionMutex;
 pthread_cond_t receptionActionCond;
+bool actionneursConfigured = false;
 
 // On fait un truc de malpropre : étant donné que l'Arduino
 // peut faire qu'une seule tache à la fois on suppose que le
@@ -12,6 +16,8 @@ pthread_cond_t receptionActionCond;
 
 void configureActionneurs()
 {
+    actionneursConfigured = true;
+    configureCA();
     pthread_mutex_init(&receptionActionMutex, NULL);
     pthread_cond_init(&receptionActionCond, NULL);
     resetActionneurs();
@@ -26,15 +32,15 @@ void setPositionBalle(enum positionBalle pos)
 {
     unsigned char code;
     switch (pos) {
-        case attente:
-            code = C2AD_POS_BALLE_ATTENTE;
-            break;
-        case ejection:
-            code = C2AD_POS_BALLE_EJECTION;
-            break;
-        case evacuation:
-            code = C2AD_POS_BALLE_EVACUATION;
-            break;
+    case attente:
+        code = C2AD_POS_BALLE_ATTENTE;
+        break;
+    case ejection:
+        code = C2AD_POS_BALLE_EJECTION;
+        break;
+    case evacuation:
+        code = C2AD_POS_BALLE_EVACUATION;
+        break;
     }
     attendAction(code);
 }
@@ -64,7 +70,6 @@ void setPropulsion(bool state)
     attendAction(state ? C2AD_PROPULSION_ON : C2AD_PROPULSION_OFF);
 }
 
-
 void resetActionneurs()
 {
     setLoquet(false);
@@ -87,14 +92,22 @@ void receptionAction()
 
 void attendAction(unsigned char code)
 {
-    pthread_mutex_lock(&receptionActionMutex);
-    registerRxHandlerCA(code, receptionAction);
-    sendCA(code, NULL, 0);
-    pthread_cond_wait(&receptionActionCond, &receptionActionMutex);
-    pthread_mutex_unlock(&receptionActionMutex);
+    if (actionneursConfigured) {
+        pthread_mutex_lock(&receptionActionMutex);
+        registerRxHandlerCA(code, receptionAction);
+        sendCA(code, NULL, 0);
+        pthread_cond_wait(&receptionActionCond, &receptionActionMutex);
+        pthread_mutex_unlock(&receptionActionMutex);
+    } else {
+        fprintf(stderr, "Action demandée sans Arduino configuré\n");
+    }
 }
 
 void deconfigureActionneurs()
 {
-    stopActionneurs();
+    if (actionneursConfigured) {
+        stopActionneurs();
+        deconfigureCA();
+        actionneursConfigured = false;
+    }
 }
