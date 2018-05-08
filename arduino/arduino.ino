@@ -66,9 +66,11 @@ void loop()
         switch (lettre) {
         case 'L': // Ouverture loquet
             servoLoquet.write(100);
+            delay(500);
             break;
         case 'F': // Fermeture loquet
             servoLoquet.write(0);
+            delay(500);
             break;
         case 'A': // Position attente balle
             servoPositionBalle.write(70);
@@ -120,3 +122,4 @@ void loop()
             Serial.write(lettre);
         }
     }
+}

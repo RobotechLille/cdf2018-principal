@@ -5,6 +5,7 @@
 
 start() {
 	printf "Starting hardware handling: "
+	modprobe cdc_acm # Arduino
 	modprobe pl2303 # USB↔Serial cable
 	# I2C
 	modprobe i2c-bcm2708 # RPi2

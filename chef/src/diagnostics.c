@@ -159,15 +159,15 @@ void runDiagnostics()
     i = 3;
     execDiagnostic("Mot+Cod R AR", diagCodeuse, &i);
 
-    execDiagnostic("Ouverture loquet", diagJustRun, &diagSetLoquetOuvert);
     execDiagnostic("Fermeture loquet", diagJustRun, &diagSetLoquetFerme);
+    execDiagnostic("Ouverture loquet", diagJustRun, &diagSetLoquetOuvert);
     execDiagnostic("Reset barillet", diagJustRun, &barilletReset);
     execDiagnostic("T+1 barillet", diagJustRun, &barilletSuivant);
     execDiagnostic("T+2 barillet", diagJustRun, &barilletSkip);
     execDiagnostic("Pousser balle", diagJustRun, &pousserBalle);
-    execDiagnostic("Pos. attente", diagJustRun, &diagSetPositionBalleAttente);
     execDiagnostic("Pos. ejection", diagJustRun, &diagSetPositionBalleEjection);
     execDiagnostic("Pos. evacuation", diagJustRun, &diagSetPositionBalleEvacuation);
-    execDiagnostic("Propulsion off", diagJustRun, &diagSetPropulsionOn);
+    execDiagnostic("Pos. attente", diagJustRun, &diagSetPositionBalleAttente);
     execDiagnostic("Propulsion on", diagJustRun, &diagSetPropulsionOff);
+    execDiagnostic("Propulsion off", diagJustRun, &diagSetPropulsionOn);
 }

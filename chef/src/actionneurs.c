@@ -14,6 +14,7 @@ void configureActionneurs()
 {
     pthread_mutex_init(&receptionActionMutex, NULL);
     pthread_cond_init(&receptionActionCond, NULL);
+    resetActionneurs();
 }
 
 void setLoquet(bool state)
@@ -66,8 +67,10 @@ void setPropulsion(bool state)
 
 void resetActionneurs()
 {
-    setPropulsion(false);
+    setLoquet(false);
     barilletReset();
+    setPositionBalle(attente);
+    setPropulsion(false);
 }
 
 void stopActionneurs()
