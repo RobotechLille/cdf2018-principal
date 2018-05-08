@@ -3,13 +3,13 @@ SIMULATION = 0;
 
 % Paramètres de lecture
 DIRNAME = "/home/geoffrey/CdF/cdf2018-principal/log/";
-FILENAME = "000232.csv";
+FILENAME = "000303.csv";
 PATH = DIRNAME + FILENAME;
 
 % Paramètres de simulation
 global SIMULATION_TIME SIMULATION_DT;
 SIMULATION_TIME = 10;
-SIMULATION_DT = 1e-6;
+SIMULATION_DT = 1e-15;
 
 %BEGIN DIMENSIONS
 
@@ -32,7 +32,7 @@ motorSpeedGain = (motorSpeedGainRPMpV / 60.0); % motor rev/s/V
 motorNominalTension = 24.0; % V (from datasheet)
 motorControllerAlimentation = 24.0; % V (from elec)
 motorControllerReference = 5; % V (from wiring)
-motorSaturationMin = 0.1; % V (from random)
+motorSaturationMin = 0; % V (from random)
 motorSaturationMax = 12.0; % V (from testing)
 pwmMax = 3.3; % V (from FPGA datasheet)
 coderResolution = 370.0; % cycles/motor rev
@@ -45,15 +45,17 @@ coderFullResolution = (coderDataResolution / reducRatio); % cycles / wheel rev
 avPerCycle = (wheelPerimeter / coderFullResolution); % mm
 
 % Constantes asservissement
-global dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oGain;
+global dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oGain dConsThresold oConsThresold;
 dDirEcartMin = 1.0; % mm
 dDirEcartMax = 5.0; % mm
-oDirEcartMin = (2.5 / 360.0 * 2.0 * pi); % rad
-oDirEcartMax = (7.5 / 360.0 * 2.0 * pi); % rad
-oGain = 1;
-P = 2;
-I = 0;
-D = 0;
+oDirEcartMin = (6.0 / 360.0 * 2.0 * pi); % rad
+oDirEcartMax = (45.0 / 360.0 * 2.0 * pi); % rad
+dConsThresold = 1.0; % mm
+oConsThresold = (6.0 / 360.0 * 2.0 * pi); % rad
+oGain = 3.0;
+P = 3.0;
+I = 0.0;
+D = 0.0;
 
 %END DIMENSIONS
 
@@ -64,8 +66,8 @@ if SIMULATION == 1
     yinit = 50;
     oinit = 4 * pi;
     d1t = 2;
-    d1x = 300;
-    d1y = -300;
+    d1x = -300;
+    d1y = 0;
     d1o = 2 * pi;
     dt = SIMULATION_DT;
 
@@ -76,7 +78,7 @@ if SIMULATION == 1
 
     % Simulation
     disp("Lancement de la simulation");
-    s = sim("modelisation", "StopTime", string(SIMULATION_TIME));%, "MinStep", string(SIMULATION_DT));
+    s = sim("modelisation", "StopTime", string(SIMULATION_TIME), "MinStep", string(SIMULATION_DT));
     fprintf("Simulation sampling rate: %f Hz\n", length(s.tout)/SIMULATION_TIME);
 else
     disp("Ouverture des données");
@@ -87,9 +89,6 @@ else
     T.x = T.xConnu;
     T.y = T.yConnu;
     T.o = T.oConnu;
-    
-    %T.lVolt = T.lCodTot;
-    %T.rVolt = T.rCodTot;
 
     disp("Enregistrement des données");
     s = containers.Map;
@@ -119,8 +118,10 @@ updateToTime(SIMULATION_DT);
 p = subplot(2, 2, 2);
 hold on;
 timeGraph(["lVolt", "rVolt", "lErr", "rErr"]);
-addLimitline(p, motorNominalTension);
-addLimitline(p, -motorNominalTension);
+addLimitline(p, -motorSaturationMin);
+addLimitline(p, -motorSaturationMax);
+addLimitline(p, motorSaturationMin);
+addLimitline(p, motorSaturationMax);
 addLimitline(p, 0);
 title("Roues");
 xlabel("Temps (s)");
@@ -285,7 +286,7 @@ function initGraph()
     global robotPath;
     robotPath = plot(0, 0, 'b');
     global dirQuiver;
-    dirQuiver = quiver(0, 0, 0, 0, 'Color', 'Blue', 'MaxHeadSize', height/4);
+    dirQuiver = quiver(0, 0, 0, 0, 'Color', 'Red', 'MaxHeadSize', height/4);
     global consQuiver;
     consQuiver = quiver(0, 0, 0, 0, 'Color', 'Green', 'MaxHeadSize', height/4);
     
