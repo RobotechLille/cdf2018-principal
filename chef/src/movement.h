@@ -5,6 +5,8 @@
 #ifndef __MOVEMENT_H_
 #define __MOVEMENT_H_
 
+#define ANGLE_INSIGNIFIANT NAN
+
 #include "position.h"
 
 void configureMovement();
@@ -13,5 +15,6 @@ void setDestination(struct position* pos);
 void* TaskMovement(void* pData);
 void enableConsigne();
 void disableConsigne();
+void waitDestination();
 
 #endif

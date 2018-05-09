@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "actionneurs.h"
 #include "debug.h"
 #include "lcd.h"
-#include "movement.h"
 #include "motor.h"
 #include "parcours.h"
 #include "points.h"
@@ -32,6 +32,8 @@ void prepareParcours(bool orange)
     resetPoints();
     showPoints();
     printRightLCD(LCD_LINE_2, isOrange ? "Org" : "Vrt");
+
+    resetActionneurs();
     enableConsigne();
 }
 
@@ -81,29 +83,88 @@ void stopParcours()
     debugSetActive(false);
 }
 
+void gotoPoint(float x, float y, float o)
+{
+    if (isOrange) {
+        x = M_PISTE_WIDTH - x;
+        if (!isnan(o)) {
+            o = M_PI - o;
+        }
+    }
+    enableConsigne();
+    struct position pos = { x, y, o };
+    setDestination(&pos);
+    waitDestination();
+    brake();
+    disableConsigne();
+}
+
+void recuperBalles()
+{
+    setLoquet(false);
+    for (int i = 0; i < NB_BALLES; i++) {
+        barilletSuivant();
+    }
+    setLoquet(true);
+}
+
 void* TaskParcours(void* pdata)
 {
     (void)pdata;
 
-    struct position dest1 = {0, 0, 0};
-    setDestination(&dest1);
+    // Récupération des balles
+    gotoPoint(X_RECUP_1, Y_RECUP_1, O_RECUP_1);
+    setLoquet(false);
+    recuperBalles();
 
-    sleep(1);
+    // Lancement des balles
+    gotoPoint(X_LANCER, Y_LANCER, O_LANCER);
+    setPositionBalle(ejection);
+    setPropulsion(true);
+    pousserBalle();
+    for (int i = 0; i < NB_BALLES - 1; i++) {
+        barilletSuivant();
+        pousserBalle();
+    }
+    setPropulsion(false);
+    setPositionBalle(attente);
 
-    struct position dest2 = {0, 0, M_PI_2};
-    setDestination(&dest2);
+    // Évitement des cubes
+    gotoPoint(X_EVIT, Y_EVIT, O_EVIT);
 
-    sleep(10);
+    // Aller à l'abeille
+    gotoPoint(X_ABEILLE, Y_ABEILLE, O_ABEILLE);
+
+    // Récupération des balles
+    gotoPoint(X_RECUP_2, Y_RECUP_2, O_RECUP_2);
+    recuperBalles();
+
+    // Dépot des balles adverses
+    gotoPoint(X_USE, Y_USE, O_USE);
+    setPositionBalle(evacuation);
+    barilletSuivant(); // TODO Peut-être pas utile en fonction
+    // de quelle balle arrive en premier
+    pousserBalle();
+    for (int i = 0; i < NB_BALLES / 2 - 1; i++) {
+        barilletSkip();
+        pousserBalle();
+    }
+    setPositionBalle(attente);
+
+    // Lancement des balles
+    gotoPoint(X_LANCER, Y_LANCER, O_LANCER);
+    setPositionBalle(ejection);
+    setPropulsion(true);
+    barilletSuivant();
+    pousserBalle();
+    for (int i = 0; i < NB_BALLES / 2 - 1; i++) {
+        barilletSkip();
+        pousserBalle();
+    }
+    setPropulsion(false);
+    setPositionBalle(attente);
 
     stop();
-
-    /*  */
-    /* struct position dest3 = {1000, 1000, 0}; */
-    /* setDestination(&dest3); */
-    /*  */
-    /* sleep(5); */
-
-
 
     return NULL;
 }

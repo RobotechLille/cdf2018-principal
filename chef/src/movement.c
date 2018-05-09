@@ -8,6 +8,7 @@
 #include "debug.h"
 #include "motor.h"
 #include "movement.h"
+#include "securite.h"
 
 pthread_t tMovement;
 struct position cons;
@@ -43,6 +44,8 @@ struct timespec pidEcoule;
 void configureMovement()
 {
     stop();
+
+    configureSecurite();
 
     nbCalcCons = 0;
     pthread_mutex_init(&movCons, NULL);
@@ -93,16 +96,6 @@ void waitDestination()
     pthread_mutex_unlock(&movDoneMutex);
 }
 
-void sendTo(float x, float y, float o)
-{
-    enableConsigne();
-    struct position pos = {x, y, o};
-    setDestination(&pos);
-    waitDestination();
-    brake();
-    disableConsigne();
-}
-
 float angleGap(float target, float actual)
 {
     return fmod(target - actual + M_PI, 2 * M_PI) - M_PI;
@@ -144,10 +137,11 @@ void* TaskMovement(void* pData)
         lastPosCalc = getPositionNewer(&connu, lastPosCalc);
 
         // Destination → ordre
+        bool angleInsignifiant = isnan(cons.o);
         pthread_mutex_lock(&movCons);
         xDiff = cons.x - connu.x;
         yDiff = cons.y - connu.y;
-        oEcart = angleGap(cons.o, connu.o);
+        oEcart = angleInsignifiant ? 0 : angleGap(cons.o, connu.o);
 
         // Distance d'écart entre la position actuelle et celle de consigne
         dDirEcart = hypotf(xDiff, yDiff);
@@ -178,11 +172,18 @@ void* TaskMovement(void* pData)
         }
         dErr = dRetenu ? 0 : dDirEcart;
 
+        // Limitation par les valeurs des capteurs
+        float avant, arriere;
+        getDistance(&avant, &arriere);
+        dErr = fmaxf(-arriere, fminf(avant, dErr));
+
         // Calcul si on est arrivé
         pthread_mutex_lock(&movDoneMutex);
         clock_gettime(CLOCK_REALTIME, &pidNow);
         movDoneBool = !dRetenu && !oRetenu && dDirEcart < D_CONS_THRESOLD && oEcart < O_CONS_THRESOLD;
-        pthread_cond_signal(&movDoneCond);
+        if (movDoneBool) {
+            pthread_cond_signal(&movDoneCond);
+        }
         pthread_mutex_unlock(&movDoneMutex);
 
         // Ordre → Volt
@@ -240,6 +241,7 @@ void deconfigureMovement()
 {
     stop();
     pthread_cancel(tMovement);
+    deconfigureSecurite();
 }
 
 void enableConsigne()
