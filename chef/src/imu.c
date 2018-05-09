@@ -93,7 +93,7 @@ void* TaskIMU(void* pData)
         }
         imuStart.tv_sec = imuNow.tv_sec;
         imuStart.tv_nsec = imuNow.tv_nsec;
-        float dt = imuEcoule.tv_sec + imuStart.tv_nsec * 1E-9;
+        float dt = imuEcoule.tv_sec + imuEcoule.tv_nsec * 1E-9;
 
         gyroNew = readGyro();
         gyro.x += gyroNew.x * dt;

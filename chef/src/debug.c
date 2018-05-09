@@ -11,6 +11,7 @@
 
 // Variables globales
 pthread_t tDebug;
+bool debugConfigured = false;
 
 struct debugArg* listeDebugArgs = NULL;
 
@@ -117,24 +118,28 @@ void configureDebug()
     printf("Writing log in file: %s\n", path);
 
     fprintf(debugFd, "time");
+
+    debugConfigured = true;
 }
 
 void registerDebugVar(char* name, enum debugArgTypes type, void* var)
 {
-    fprintf(debugFd, ",%s", name);
+    if (debugConfigured) {
+        fprintf(debugFd, ",%s", name);
 
-    struct debugArg* arg = NULL;
-    struct debugArg** addrArg = &listeDebugArgs;
-    while (*addrArg != NULL) {
-        addrArg = &((*addrArg)->next);
+        struct debugArg* arg = NULL;
+        struct debugArg** addrArg = &listeDebugArgs;
+        while (*addrArg != NULL) {
+            addrArg = &((*addrArg)->next);
+        }
+
+        arg = malloc(sizeof(struct debugArg));
+        arg->type = type;
+        arg->var = var;
+        arg->next = NULL;
+
+        *addrArg = arg;
     }
-
-    arg = malloc(sizeof(struct debugArg));
-    arg->type = type;
-    arg->var = var;
-    arg->next = NULL;
-
-    *addrArg = arg;
 }
 
 void startDebug()
@@ -144,7 +149,10 @@ void startDebug()
 
 void deconfigureDebug()
 {
-    pthread_cancel(tDebug);
-    fclose(debugFd);
-    // TODO Vider la liste des arguments
+    if (debugConfigured) {
+        pthread_cancel(tDebug);
+        fclose(debugFd);
+        debugConfigured = false;
+        // TODO Vider la liste des arguments
+    }
 }

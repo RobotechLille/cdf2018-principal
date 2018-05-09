@@ -97,6 +97,7 @@ bool diagJustRun(void* arg)
 {
     void (*fonction)(void) = arg;
     fonction();
+    usleep(1000*1000);
     return true;
 }
 

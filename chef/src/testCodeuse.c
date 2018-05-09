@@ -16,7 +16,7 @@
 
 pthread_mutex_t sRunning;
 
-#define VIT 1
+#define VIT 0
 
 void endRunning(int signal)
 {
@@ -30,6 +30,7 @@ int main()
     configureDebug();
     configureCF();
     configurePosition();
+    configureMotor();
 
     setPWMTension(VIT, VIT);
 

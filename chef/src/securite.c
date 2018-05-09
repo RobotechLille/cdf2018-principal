@@ -53,7 +53,7 @@ void configureSecurite()
 {
     pthread_mutex_init(&secPolling, NULL);
     pthread_mutex_init(&secData, NULL);
-    registerRxHandlerCF(F2CI_CODER, onF2CI_CAPT);
+    registerRxHandlerCF(F2CI_CAPT, onF2CI_CAPT);
     registerDebugVar("secFront", ld, &secFront);
     registerDebugVar("secBack", ld, &secBack);
     pthread_create(&tSecurite, NULL, TaskSecurite, NULL);

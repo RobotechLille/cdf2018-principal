@@ -7,6 +7,8 @@
 
 #define ANGLE_INSIGNIFIANT NAN
 
+// #define ENABLE_SECURITE
+
 #include "position.h"
 
 void configureMovement();

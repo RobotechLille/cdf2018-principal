@@ -40,7 +40,7 @@
 #define D_CONS_THRESOLD 1.0 // mm
 #define O_CONS_THRESOLD (6.0 / 360.0 * 2.0 * M_PI) // rad
 #define O_GAIN 3.0
-#define P 3.0
+#define P 5.0
 #define I 0.0
 #define D 0.0
 

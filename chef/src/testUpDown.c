@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
     initLCD();
     configureCF();
     configureButtons();
+    configureMotor();
 
     for (;;) {
         for (int i = 0; i < UP_TIME; i += INTERVAL) {
@@ -52,6 +53,22 @@ int main(int argc, char* argv[])
             float p = (float)i / (float)DOWN_TIME;
             p = 1 - p;
             changerMoteursWrapper(p * MAXI, p * MAXI);
+            delay(INTERVAL);
+        }
+        changerMoteursWrapper(0, 0);
+        delay(LOW_TIME);
+        for (int i = 0; i < UP_TIME; i += INTERVAL) {
+            float p = (float)i / (float)UP_TIME;
+            changerMoteursWrapper(-p * MAXI, -p * MAXI);
+            delay(INTERVAL);
+        }
+        changerMoteursWrapper(-MAXI, -MAXI);
+        delay(HIGH_TIME);
+
+        for (int i = 0; i < DOWN_TIME; i += INTERVAL) {
+            float p = (float)i / (float)DOWN_TIME;
+            p = 1 - p;
+            changerMoteursWrapper(-p * MAXI, -p * MAXI);
             delay(INTERVAL);
         }
         changerMoteursWrapper(0, 0);

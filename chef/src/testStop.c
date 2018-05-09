@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
     (void)argv;
 
     configureCF();
+    configureMotor();
     stop();
 
 }

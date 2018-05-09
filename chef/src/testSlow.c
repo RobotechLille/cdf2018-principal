@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
     initLCD();
     configureCF();
     configureButtons();
+    configureMotor();
 
     for (;;) {
         setPWMTensionWrapper(VITL, VITR);

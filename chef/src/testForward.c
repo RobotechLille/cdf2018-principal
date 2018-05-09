@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
     initLCD();
     configureCF();
     configureButtons();
+    configureMotor();
 
     for (;;) {
         clearLCD();

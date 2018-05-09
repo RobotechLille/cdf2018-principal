@@ -45,5 +45,6 @@ void startParcours();
 int updateParcours();
 void stopParcours();
 void* TaskParcours(void* pdata);
+void gotoPoint(float x, float y, float o);
 
 #endif

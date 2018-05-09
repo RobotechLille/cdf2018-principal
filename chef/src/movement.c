@@ -33,8 +33,6 @@ float lErr;
 float rErr;
 float lErrPrev;
 float rErrPrev;
-float lVolt;
-float rVolt;
 unsigned int nbCalcCons;
 
 struct timespec pidStart;
@@ -45,6 +43,7 @@ void configureMovement()
 {
     stop();
 
+    configureMotor();
     configureSecurite();
 
     nbCalcCons = 0;
@@ -73,8 +72,6 @@ void configureMovement()
     registerDebugVar("oRetenu", d, &oRetenu);
     registerDebugVar("lErr", f, &lErr);
     registerDebugVar("rErr", f, &rErr);
-    registerDebugVar("lVolt", f, &lVolt);
-    registerDebugVar("rVolt", f, &rVolt);
     registerDebugVar("nbCalcCons", d, &nbCalcCons);
 
     disableConsigne();
@@ -173,9 +170,11 @@ void* TaskMovement(void* pData)
         dErr = dRetenu ? 0 : dDirEcart;
 
         // Limitation par les valeurs des capteurs
+#ifdef ENABLE_SECURITE
         float avant, arriere;
         getDistance(&avant, &arriere);
         dErr = fmaxf(-arriere, fminf(avant, dErr));
+#endif
 
         // Calcul si on est arrivé
         pthread_mutex_lock(&movDoneMutex);
@@ -213,7 +212,7 @@ void* TaskMovement(void* pData)
         // Enregistrement de cette mesure comme la dernière mesure
         pidStart.tv_sec = pidNow.tv_sec;
         pidStart.tv_nsec = pidNow.tv_nsec;
-        float timeStep = pidEcoule.tv_sec + pidStart.tv_nsec * 1E-9;
+        float timeStep = pidEcoule.tv_sec + pidEcoule.tv_nsec * 1E-9;
 
         // Calcul des facteurs dérivé et intégrale
         lErrInteg += (lErr + lErrPrev) / 2 * timeStep;
@@ -225,8 +224,8 @@ void* TaskMovement(void* pData)
         rErrPrev = rErr;
 
         // Calcul de la commande
-        lVolt = P * lErr + I * lErrInteg + D * lErrDeriv;
-        rVolt = P * rErr + I * rErrInteg + D * rErrDeriv;
+        float lVolt = P * lErr + I * lErrInteg + D * lErrDeriv;
+        float rVolt = P * rErr + I * rErrInteg + D * rErrDeriv;
 
         // Envoi de la commande
         setMoteurTension(lVolt, rVolt);
@@ -242,6 +241,7 @@ void deconfigureMovement()
     stop();
     pthread_cancel(tMovement);
     deconfigureSecurite();
+    deconfigureMotor();
 }
 
 void enableConsigne()
