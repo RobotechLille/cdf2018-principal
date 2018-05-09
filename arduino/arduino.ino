@@ -13,7 +13,8 @@ Servo servoPoussoir;
 int pinservoLoquet = 7;
 int pinservoPositionBalle = 8;
 int pinservoPoussoir = 6;
-int relai = 10;
+int relai_IN1 = 9;
+int relai_IN2 = 10;
 int pos_initial = 512;
 int pos_max = 960;
 int pos_min = 40;
@@ -27,7 +28,8 @@ void setup()
     servoLoquet.attach(pinservoLoquet);
     servoPositionBalle.attach(pinservoPositionBalle);
     servoPoussoir.attach(pinservoPoussoir);
-    pinMode(relai, OUTPUT);
+    pinMode(relai_IN1, OUTPUT);
+    pinMode(relai_IN2, OUTPUT);
 }
 
 void barilletUnCran()
@@ -74,40 +76,45 @@ void loop()
             break;
         case 'A': // Position attente balle
             servoPositionBalle.write(70);
-            //delay(2000);
+            delay(500);
             break;
         case 'V': // Position évacuation balle
             servoPositionBalle.write(0);
-            //delay(2000);
-            break;
-        case 'J': // Position éjection balle
-            servoPositionBalle.write(180);
-            //delay(2000);
+           delay(500);
             break;
         case 'O': // Pousser balle
             // Position basse
             servoPoussoir.write(0);
-            delay(1000);
+            //delay(500);
             // Position haute
             servoPoussoir.write(120);
             delay(1000);
             break;
         case 'B': // Tourner barillet d'un cran
             barilletUnCran();
+            delay(500);
             break;
         case 'H': // Tourner de deux crans
             barilletDeuxCrans();
+            delay(500);
             break;
         case 'R': // Reset barillet
             // ax12a.setEndless(ID, OFF);
             ax12a.setEndless(ID, ON);
             ax12a.turn(ID, LEFT, 0);
+            ax12a.setEndless(ID, OFF);
+            ax12a.move(ID, pos_initial);
+            delay(500);
             break;
         case 'T': // Propulsion on
-            digitalWrite(relai, HIGH);
+            digitalWrite(relai_IN1, HIGH);
+            digitalWrite(relai_IN2, LOW);
+            //delay(4000);
             break;
         case 'U': // Propulsion off
-            digitalWrite(relai, LOW);
+            digitalWrite(relai_IN1, LOW);
+            digitalWrite(relai_IN2, HIGH);
+            //delay(4000);
             break;
         case 'P': // Ping
             break;

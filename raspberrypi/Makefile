@@ -97,7 +97,7 @@ upgrade-overlays: sshconf
 # ARDUINO
 upgrade-arduino:
 	make -C ../arduino/
-	scp -F sshconf -q "../arduino/principal.hex" principal:/tmp/principal.hex
+	scp -F sshconf -q "../arduino/build/main.hex" principal:/tmp/principal.hex
 	ssh -F sshconf principal "avrdude -p atmega2560 -P /dev/ttyACM0 -c stk500 -D -U flash:w:/tmp/principal.hex"
 
 # FPGA
