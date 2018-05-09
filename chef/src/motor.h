@@ -11,7 +11,7 @@
 // #define INVERSE_R_MOTOR
 
 // V/s
-#define RATE_LIMITER_UP 12
+#define RATE_LIMITER_UP 6
 #define RATE_LIMITER_DOWN 1
 
 #define TESTINATOR

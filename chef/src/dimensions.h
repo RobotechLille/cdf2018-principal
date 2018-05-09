@@ -33,14 +33,13 @@
 #define AV_PER_CYCLE (WHEEL_PERIMETER / CODER_FULL_RESOLUTION) // mm
 
 // Constantes asservissement
-#define D_DIR_ECART_MIN 1.0 // mm
-#define D_DIR_ECART_MAX 5.0 // mm
-#define O_DIR_ECART_MIN (6.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_DIR_ECART_MAX (45.0 / 360.0 * 2.0 * M_PI) // rad
-#define D_CONS_THRESOLD 1.0 // mm
-#define O_CONS_THRESOLD (6.0 / 360.0 * 2.0 * M_PI) // rad
+#define D_DIR_ECART_MIN 7.0 // mm
+#define D_DIR_ECART_MAX 10.0 // mm
+#define O_DIR_ECART_MIN (5.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_DIR_ECART_MAX (25.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_ECART_MAX (25.0 / 360.0 * 2.0 * M_PI) // rad
 #define O_GAIN 3.0
-#define P 5.0
+#define P 7.0
 #define I 0.0
 #define D 0.0
 

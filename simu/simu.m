@@ -3,7 +3,7 @@ SIMULATION = 0;
 
 % Paramètres de lecture
 DIRNAME = "/home/geoffrey/CdF/cdf2018-principal/log/";
-FILENAME = "000303.csv";
+FILENAME = "000471.csv";
 PATH = DIRNAME + FILENAME;
 
 % Paramètres de simulation
@@ -45,15 +45,14 @@ coderFullResolution = (coderDataResolution / reducRatio); % cycles / wheel rev
 avPerCycle = (wheelPerimeter / coderFullResolution); % mm
 
 % Constantes asservissement
-global dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oGain dConsThresold oConsThresold;
-dDirEcartMin = 1.0; % mm
-dDirEcartMax = 5.0; % mm
-oDirEcartMin = (6.0 / 360.0 * 2.0 * pi); % rad
-oDirEcartMax = (45.0 / 360.0 * 2.0 * pi); % rad
-dConsThresold = 1.0; % mm
-oConsThresold = (6.0 / 360.0 * 2.0 * pi); % rad
+global dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oGain oEcartMax;
+dDirEcartMin = 7.0; % mm
+dDirEcartMax = 10.0; % mm
+oDirEcartMin = (5.0 / 360.0 * 2.0 * pi); % rad
+oDirEcartMax = (25.0 / 360.0 * 2.0 * pi); % rad
+oEcartMax = (25.0 / 360.0 * 2.0 * pi); % rad
 oGain = 3.0;
-P = 3.0;
+P = 7.0;
 I = 0.0;
 D = 0.0;
 
@@ -195,7 +194,7 @@ function timeGraph(series)
     end
     xlim([0 SIMULATION_TIME]);
     if (abs(m) ~= inf) && (abs(M) ~= inf)
-        ylim([m M]);
+        ylim([m M+1E-9]);
     end
     addTimeline(p);
 end

@@ -161,10 +161,14 @@ void* TaskMotor(void* pData)
 
 void rawBrake()
 {
+    lVolt = 0;
+    rVolt = 0;
     sendCF(C2FD_PWM, &msgBrake, sizeof(struct C2FD_PWMs));
 }
 void rawFreewheel()
 {
+    lVolt = 0;
+    rVolt = 0;
     sendCF(C2FD_PWM, &msgFree, sizeof(struct C2FD_PWMs));
 }
 
@@ -189,6 +193,7 @@ int brake()
     pthread_mutex_lock(&motCons);
     motState = braking;
     pthread_mutex_unlock(&motCons);
+    printf("192 Brake\n");
     rawBrake();
 }
 

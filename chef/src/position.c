@@ -23,6 +23,23 @@ pthread_t tPosition;
 unsigned int nbCalcPos;
 long lCodTot, rCodTot;
 
+void onF2CI_CODER()
+{
+    readCF(&deltaCoders, sizeof(struct F2CI_CODERs));
+    pthread_mutex_unlock(&posPolling);
+}
+
+void updateDelta()
+{
+    // Sending
+    pthread_mutex_lock(&posPolling);
+    sendCF(F2CI_CODER, NULL, 0);
+
+    // Waiting for reception
+    pthread_mutex_lock(&posPolling);
+    pthread_mutex_unlock(&posPolling);
+}
+
 void* TaskPosition(void* pData)
 {
     (void)pData;
@@ -32,15 +49,11 @@ void* TaskPosition(void* pData)
     lCodTot = 0;
     rCodTot = 0;
 
+    updateDelta();
+
     for (;;) {
 
-        // Sending
-        pthread_mutex_lock(&posPolling);
-        sendCF(F2CI_CODER, NULL, 0);
-
-        // Waiting for reception
-        pthread_mutex_lock(&posPolling);
-        pthread_mutex_unlock(&posPolling);
+        updateDelta();
 
         // Calculation
 #ifdef INVERSE_L_CODER
@@ -67,17 +80,9 @@ void* TaskPosition(void* pData)
         nbCalcPos++;
         pthread_cond_signal(&newPos);
         pthread_mutex_unlock(&posConnu);
-
-
     }
 
     return NULL;
-}
-
-void onF2CI_CODER()
-{
-    readCF(&deltaCoders, sizeof(struct F2CI_CODERs));
-    pthread_mutex_unlock(&posPolling);
 }
 
 void configurePosition()
@@ -137,6 +142,6 @@ void setPosition(struct position* pos)
 
 void resetPosition()
 {
-    struct position pos = {0, 0, 0};
+    struct position pos = { 0, 0, 0 };
     setPosition(&pos);
 }

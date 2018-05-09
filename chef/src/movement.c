@@ -95,15 +95,16 @@ void waitDestination()
 
 float angleGap(float target, float actual)
 {
-    return fmod(target - actual + M_PI, 2 * M_PI) - M_PI;
+    float ret = fmodf(target - actual + M_PI, 2 * M_PI) - M_PI;
+    return ret;
 }
 
 float angleGap180(float target, float actual, float* dist)
 {
-    if (fabs(fmod(target - actual + M_PI, 2 * M_PI) - M_PI) > M_PI_2) {
+    if (fabs(fmodf(target - actual + M_PI, 2 * M_PI) - M_PI) > M_PI_2) {
         *dist = -*dist;
     }
-    return fmod(target - actual + M_PI_2, M_PI) - M_PI_2;
+    return fmodf(target - actual + M_PI_2, M_PI) - M_PI_2;
 }
 
 void* TaskMovement(void* pData)
@@ -128,7 +129,6 @@ void* TaskMovement(void* pData)
         while (!movEnableBool) {
             pthread_cond_wait(&movEnableCond, &movEnableMutex);
         }
-        pthread_mutex_unlock(&movEnableMutex);
 
         // Wait for new calculation if not calculated yet
         lastPosCalc = getPositionNewer(&connu, lastPosCalc);
@@ -145,19 +145,21 @@ void* TaskMovement(void* pData)
         // Écart entre l'angle actuel et celui orienté vers la position de consigne
         // Si l'angle se trouve à gauche du cercle trigo, on le remet à droite
         // et on inverse la direction
-        oDirEcart = angleGap180(atan2(yDiff, xDiff), connu.o, &dDirEcart);
+        /* oDirEcart = angleGap180(atan2(yDiff, xDiff), connu.o, &dDirEcart); */
+        oDirEcart = angleGap(atan2(yDiff, xDiff), connu.o);
         pthread_mutex_unlock(&movCons);
 
         // Si on est loin de la consigne, l'angle cible devient celui orienté vers la consigne
-        if (dDirEcart > D_DIR_ECART_MAX) {
+        float dDirEcartAbs = fabsf(dDirEcart);
+        if (dDirEcartAbs > D_DIR_ECART_MAX) {
             oRetenu = true;
             // Si on est proche de la consigne, l'angle cible devient celui voulu par la consigne
-        } else if (dDirEcart < D_DIR_ECART_MIN) {
+        } else if (dDirEcartAbs < D_DIR_ECART_MIN) {
             oRetenu = false;
         }
         oErr = oRetenu ? oDirEcart : oEcart;
 
-        float oDirEcartAbs = fabs(oDirEcart);
+        float oDirEcartAbs = fabsf(oDirEcart);
         // Si l'écart avec l'angle orienté vers la consigne est grand, la distance cible devient 0
         // pour se réorienter vers l'angle de la consigne
         if (oDirEcartAbs > O_DIR_ECART_MAX) {
@@ -179,7 +181,7 @@ void* TaskMovement(void* pData)
         // Calcul si on est arrivé
         pthread_mutex_lock(&movDoneMutex);
         clock_gettime(CLOCK_REALTIME, &pidNow);
-        movDoneBool = !dRetenu && !oRetenu && dDirEcart < D_CONS_THRESOLD && oEcart < O_CONS_THRESOLD;
+        movDoneBool = !oRetenu && fabs(oEcart) < O_ECART_MAX;
         if (movDoneBool) {
             pthread_cond_signal(&movDoneCond);
         }
@@ -231,6 +233,7 @@ void* TaskMovement(void* pData)
         setMoteurTension(lVolt, rVolt);
 
         nbCalcCons++;
+        pthread_mutex_unlock(&movEnableMutex);
     }
 
     return NULL;
@@ -246,6 +249,7 @@ void deconfigureMovement()
 
 void enableConsigne()
 {
+    printf("251 enableConsigne\n");
     pthread_mutex_lock(&movEnableMutex);
     clock_gettime(CLOCK_REALTIME, &pidNow);
     movEnableBool = true;
@@ -255,6 +259,7 @@ void enableConsigne()
 
 void disableConsigne()
 {
+    printf("261 disableConsigne\n");
     pthread_mutex_lock(&movEnableMutex);
     movEnableBool = false;
     // No signal here, will be disabled on next run

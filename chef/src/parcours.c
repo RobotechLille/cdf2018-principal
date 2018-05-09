@@ -73,8 +73,8 @@ int updateParcours()
 void stopParcours()
 {
     pthread_cancel(tParcours);
-    stop();
     disableConsigne();
+    stop();
 
     resetLCD();
     updateTimeDisplay();
@@ -95,8 +95,8 @@ void gotoPoint(float x, float y, float o)
     struct position pos = { x, y, o };
     setDestination(&pos);
     waitDestination();
-    brake();
     disableConsigne();
+    brake();
 }
 
 void recuperBalles()
