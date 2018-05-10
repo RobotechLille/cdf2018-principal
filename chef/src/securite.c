@@ -19,15 +19,22 @@ void onF2CI_CAPT()
     pthread_mutex_unlock(&secPolling);
 }
 
+struct timespec maxDelaySecu = { 0, 10000000 };
+
 void* TaskSecurite(void* pData)
 {
     (void)pData;
 
     for (;;) {
+
+        int ret = -1;
         pthread_mutex_lock(&secPolling);
-        sendCF(F2CI_CAPT, NULL, 0);
-        // Waiting for reception
-        pthread_mutex_lock(&secPolling);
+        while (ret != 0) {
+            // Sending
+            sendCF(F2CI_CAPT, NULL, 0);
+            // Waiting for reception
+            ret = pthread_mutex_timedlock(&secPolling, &maxDelaySecu);
+        }
         pthread_mutex_unlock(&secPolling);
 
         pthread_mutex_lock(&secData);
@@ -54,8 +61,8 @@ void configureSecurite()
     pthread_mutex_init(&secPolling, NULL);
     pthread_mutex_init(&secData, NULL);
     registerRxHandlerCF(F2CI_CAPT, onF2CI_CAPT);
-    registerDebugVar("secFront", ld, &secFront);
-    registerDebugVar("secBack", ld, &secBack);
+    registerDebugVar("secFront", f, &secFront);
+    registerDebugVar("secBack", f, &secBack);
     pthread_create(&tSecurite, NULL, TaskSecurite, NULL);
 }
 
@@ -63,4 +70,3 @@ void deconfigureSecurite()
 {
     pthread_cancel(tSecurite);
 }
-

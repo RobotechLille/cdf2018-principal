@@ -66,60 +66,64 @@ void loop()
         bool codeInconnu = false;
 
         switch (lettre) {
-        case 'L': // Ouverture loquet
-            servoLoquet.write(100);
-            delay(500);
-            break;
-        case 'F': // Fermeture loquet
-            servoLoquet.write(0);
-            delay(500);
-            break;
-        case 'A': // Position attente balle
-            servoPositionBalle.write(70);
-            delay(500);
-            break;
-        case 'V': // Position évacuation balle
-            servoPositionBalle.write(0);
-           delay(500);
-            break;
-        case 'O': // Pousser balle
-            // Position basse
-            servoPoussoir.write(0);
-            //delay(500);
-            // Position haute
-            servoPoussoir.write(120);
-            delay(1000);
-            break;
-        case 'B': // Tourner barillet d'un cran
-            barilletUnCran();
-            delay(500);
-            break;
-        case 'H': // Tourner de deux crans
-            barilletDeuxCrans();
-            delay(500);
-            break;
-        case 'R': // Reset barillet
-            // ax12a.setEndless(ID, OFF);
-            ax12a.setEndless(ID, ON);
-            ax12a.turn(ID, LEFT, 0);
-            ax12a.setEndless(ID, OFF);
-            ax12a.move(ID, pos_initial);
-            delay(500);
-            break;
-        case 'T': // Propulsion on
-            digitalWrite(relai_IN1, HIGH);
-            digitalWrite(relai_IN2, LOW);
-            //delay(4000);
-            break;
-        case 'U': // Propulsion off
-            digitalWrite(relai_IN1, LOW);
-            digitalWrite(relai_IN2, HIGH);
-            //delay(4000);
-            break;
-        case 'P': // Ping
-            break;
-        default:
-            codeInconnu = true;
+            case 'L': // Ouverture loquet
+                servoLoquet.write(100);
+                delay(500);
+                break;
+            case 'F': // Fermeture loquet
+                servoLoquet.write(0);
+                delay(500);
+                break;
+            case 'A': // Position attente balle
+                servoPositionBalle.write(70);
+                delay(500);
+                break;
+            case 'V': // Position évacuation balle
+                servoPositionBalle.write(0);
+                delay(500);
+                break;
+            case 'J': // Position ejection balle
+                servoPositionBalle.write(180);
+                delay(500);
+                break;
+            case 'O': // Pousser balle
+                // Position basse
+                servoPoussoir.write(0);
+                delay(500);
+                // Position haute
+                servoPoussoir.write(120);
+                delay(1000);
+                break;
+            case 'B': // Tourner barillet d'un cran
+                barilletUnCran();
+                delay(500);
+                break;
+            case 'H': // Tourner de deux crans
+                barilletDeuxCrans();
+                delay(500);
+                break;
+            case 'R': // Reset barillet
+                // ax12a.setEndless(ID, OFF);
+                ax12a.setEndless(ID, ON);
+                ax12a.turn(ID, LEFT, 0);
+                ax12a.setEndless(ID, OFF);
+                ax12a.move(ID, pos_initial);
+                delay(500);
+                break;
+            case 'T': // Propulsion on
+                digitalWrite(relai_IN1, HIGH);
+                digitalWrite(relai_IN2, LOW);
+                //delay(4000);
+                break;
+            case 'U': // Propulsion off
+                digitalWrite(relai_IN1, LOW);
+                digitalWrite(relai_IN2, HIGH);
+                //delay(4000);
+                break;
+            case 'P': // Ping
+                break;
+            default:
+                codeInconnu = true;
         }
 
         if (codeInconnu) {

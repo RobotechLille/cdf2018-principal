@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "debug.h"
@@ -29,14 +30,20 @@ void onF2CI_CODER()
     pthread_mutex_unlock(&posPolling);
 }
 
+struct timespec maxDelayDelta = { 0, 10000000 };
+
 void updateDelta()
 {
-    // Sending
+    int ret = -1;
     pthread_mutex_lock(&posPolling);
-    sendCF(F2CI_CODER, NULL, 0);
 
-    // Waiting for reception
-    pthread_mutex_lock(&posPolling);
+    while (ret != 0) {
+        // Sending
+        sendCF(F2CI_CODER, NULL, 0);
+        // Waiting for reception
+        ret = pthread_mutex_timedlock(&posPolling, &maxDelayDelta);
+    }
+
     pthread_mutex_unlock(&posPolling);
 }
 
