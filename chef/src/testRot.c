@@ -37,21 +37,26 @@ int main()
     configureDebug();
     configureCF();
     configureIMU();
+    printf("40\n");
     configureActionneurs();
+    printf("41\n");
     configurePosition();
+    printf("44\n");
     configureMovement();
+    printf("46\n");
     startDebug();
+    printf("48\n");
 
     debugSetActive(true);
     sleep(1);
-    /* struct position pos = {350, 0, -0.95*M_PI/3.0 }; */
-    struct position pos = {100000, 0, 0 };
+    printf("46\n");
+    struct position pos = { 0, 0, M_PI_2 };
     setDestination(&pos);
+    printf("50\n");
     waitDestination();
-    for (;;) {
-        setLoquet(false);
-        setLoquet(true);
-    }
+    printf("52\n");
+    printf("54\n");
+    brake();
     printf("Done\n");
 
     // Bloque jusqu'à l'arrivée d'un signal

@@ -127,6 +127,7 @@ void* TaskMotor(void* pData)
                 r = MOTOR_SATURATION_MAX;
             }
 
+#ifdef ENABLE_RATE_LIMITER
             // Rate limiter pour éviter que l'accélération soit trop brusque
             float maxUp = RATE_LIMITER_UP * dt;
             float maxDown = RATE_LIMITER_UP * dt;
@@ -141,6 +142,7 @@ void* TaskMotor(void* pData)
             } else if (rVolt - r > maxDown) {
                 r = rVolt - maxDown;
             }
+#endif
 
             setMoteurTensionRaw(l, r, lFor, rFor);
             break;
@@ -193,7 +195,6 @@ int brake()
     pthread_mutex_lock(&motCons);
     motState = braking;
     pthread_mutex_unlock(&motCons);
-    printf("192 Brake\n");
     rawBrake();
 }
 

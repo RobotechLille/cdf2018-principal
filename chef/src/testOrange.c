@@ -44,10 +44,9 @@ int main()
 
     debugSetActive(true);
     sleep(1);
-    /* struct position pos = {350, 0, -0.95*M_PI/3.0 }; */
-    struct position pos = {100000, 0, 0 };
+    struct position pos = {350, 0, -0.95*M_PI/3.0 };
     setDestination(&pos);
-    waitDestination();
+    sleep(3);
     for (;;) {
         setLoquet(false);
         setLoquet(true);

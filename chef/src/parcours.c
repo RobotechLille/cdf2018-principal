@@ -8,6 +8,7 @@
 #include "motor.h"
 #include "parcours.h"
 #include "points.h"
+#include "securite.h"
 #include "position.h"
 
 pthread_t tParcours;
@@ -34,7 +35,6 @@ void prepareParcours(bool orange)
     printRightLCD(LCD_LINE_2, isOrange ? "Org" : "Vrt");
 
     resetActionneurs();
-    enableConsigne();
 }
 
 void startParcours()
@@ -73,7 +73,6 @@ int updateParcours()
 void stopParcours()
 {
     pthread_cancel(tParcours);
-    disableConsigne();
     stop();
 
     resetLCD();
@@ -85,17 +84,18 @@ void stopParcours()
 
 void gotoPoint(float x, float y, float o)
 {
-    if (isOrange) {
-        x = M_PISTE_WIDTH - x;
-        if (!isnan(o)) {
-            o = M_PI - o;
-        }
+    /* if (isOrange) { */
+    /*     x = M_PISTE_WIDTH - x; */
+    /*     if (!isnan(o)) { */
+    /*         o = M_PI - o; */
+    /*     } */
+    /* } */
+    if (!isOrange) {
+        o = -o;
     }
-    enableConsigne();
     struct position pos = { x, y, o };
     setDestination(&pos);
     waitDestination();
-    disableConsigne();
     brake();
 }
 
@@ -109,6 +109,40 @@ void recuperBalles()
 }
 
 void* TaskParcours(void* pdata)
+{
+    (void)pdata;
+
+    float vitBase = 1.5;
+    float secuBase = 500;
+
+    for (int i = 0; i <= 3000; i++) {
+        float av, ar;
+        getDistance(&av, &ar);
+        if (av < secuBase || ar < secuBase) {
+            brake();
+        } else {
+            setMoteurTension(vitBase, vitBase);
+        }
+        usleep(1000);
+    }
+
+    return NULL;
+}
+
+void* TaskParcoursLoquet(void* pdata)
+{
+    (void)pdata;
+
+    gotoPoint(350, 0, 1.05*M_PI/3.0);
+    for (int i = 0; i < 5; i++) {
+        setLoquet(false);
+        setLoquet(true);
+    }
+    gotoPoint(0, 0, 0);
+    return NULL;
+}
+
+void* TaskParcoursVrai(void* pdata)
 {
     (void)pdata;
 

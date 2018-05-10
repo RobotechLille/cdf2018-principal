@@ -1,6 +1,7 @@
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <unistd.h>
 
 #include "CF.h"
 #include "securite.h"
@@ -19,6 +20,6 @@ int main(int argc, char* argv[])
     for (;;) {
         getDistance(&f, &b);
         printf("Av: %6f Ar: %6f\n", f, b);
-        sleep(1);
+        usleep(60 * 1000);
     }
 }

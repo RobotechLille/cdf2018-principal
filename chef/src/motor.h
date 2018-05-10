@@ -10,9 +10,11 @@
 #define INVERSE_L_MOTOR
 // #define INVERSE_R_MOTOR
 
+#define ENABLE_RATE_LIMITER
+
 // V/s
 #define RATE_LIMITER_UP 6
-#define RATE_LIMITER_DOWN 1
+#define RATE_LIMITER_DOWN 24
 
 #define TESTINATOR
 // #define TLE5206
