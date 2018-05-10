@@ -18,9 +18,11 @@ entity Principal is
              RIGHTCHA: in std_logic;
              RIGHTCHB: in std_logic;
              FRONTTRIGGER: out std_logic;
-             FRONTECHO: in std_logic;
              BACKTRIGGER: out std_logic;
-             BACKECHO: in std_logic;
+             FRONTLECHO: in std_logic;
+             BACKLECHO: in std_logic;
+             FRONTRECHO: in std_logic;
+             BACKRECHO: in std_logic;
              ENAREF: out std_logic;
              ENA: out std_logic;
              IN1ENC: out std_logic;
@@ -53,12 +55,20 @@ architecture Behavioral of Principal is
     end component;
 
     -- Distance sensors
-    signal front : integer := 0;
-    signal frontRaw : integer := 0;
-    signal frontFinished : std_logic;
-    signal back : integer := 0;
-    signal backRaw : integer := 0;
-    signal backFinished : std_logic;
+    signal frontMin : integer := 0;
+    signal backMin : integer := 0;
+    signal frontL : integer := 0;
+    signal frontLRaw : integer := 0;
+    signal frontLFinished : std_logic;
+    signal backL : integer := 0;
+    signal backLRaw : integer := 0;
+    signal backLFinished : std_logic;
+    signal frontR : integer := 0;
+    signal frontRRaw : integer := 0;
+    signal frontRFinished : std_logic;
+    signal backR : integer := 0;
+    signal backRRaw : integer := 0;
+    signal backRFinished : std_logic;
     component hcsr04 IS
         generic(
                    fFpga : INTEGER := fFpga
@@ -187,39 +197,74 @@ begin
                                   counts => right
                               );
 
-    frontCapt: hcsr04 port map (
+    frontLCapt: hcsr04 port map (
                                    clk => CLK,
                                    reset => reset,
-                                   echo => FRONTECHO,
-                                   distance => frontRaw,
+                                   echo => FRONTLECHO,
+                                   distance => frontLRaw,
                                    trigger => FRONTTRIGGER,
                                    start => '1',
-                                   finished => frontFinished
+                                   finished => frontLFinished
                                );
-    frontFilter : FIR port map (
+    frontLFilter : FIR port map (
                                    clock     => CLK,
                                    reset     => reset,
-                                   signalIn  => frontRaw,
-                                   signalOut => front,
-                                   start     => frontFinished
+                                   signalIn  => frontLRaw,
+                                   signalOut => frontL,
+                                   start     => frontLFinished
                                -- done      => done
                                );
 
-    backCapt: hcsr04 port map (
+    frontRCapt: hcsr04 port map (
+                                   clk => CLK,
+                                   reset => reset,
+                                   echo => FRONTRECHO,
+                                   distance => frontRRaw,
+                                   -- trigger => FRONTTRIGGER,
+                                   start => '1',
+                                   finished => frontRFinished
+                               );
+    frontRFilter : FIR port map (
+                                   clock     => CLK,
+                                   reset     => reset,
+                                   signalIn  => frontRRaw,
+                                   signalOut => frontR,
+                                   start     => frontRFinished
+                               -- done      => done
+                               );
+
+    backLCapt: hcsr04 port map (
                                   clk => CLK,
                                   reset => reset,
-                                  echo => BACKECHO,
-                                  distance => backRaw,
+                                  echo => BACKLECHO,
+                                  distance => backLRaw,
                                   trigger => BACKTRIGGER,
                                   start => '1',
-                                  finished => backFinished
+                                  finished => backLFinished
                               );
-    backFilter : FIR port map (
+    backLFilter : FIR port map (
                                   clock     => CLK,
                                   reset     => reset,
-                                  signalIn  => backRaw,
-                                  signalOut => back,
-                                  start     => backFinished
+                                  signalIn  => backLRaw,
+                                  signalOut => backL,
+                                  start     => backLFinished
+                              -- done      => done
+                              );
+    backRCapt: hcsr04 port map (
+                                  clk => CLK,
+                                  reset => reset,
+                                  echo => BACKRECHO,
+                                  distance => backRRaw,
+                                  -- trigger => BACKTRIGGER,
+                                  start => '1',
+                                  finished => backRFinished
+                              );
+    backRFilter : FIR port map (
+                                  clock     => CLK,
+                                  reset     => reset,
+                                  signalIn  => backRRaw,
+                                  signalOut => backR,
+                                  start     => backRFinished
                               -- done      => done
                               );
     enAp : PWM port map (
@@ -263,14 +308,17 @@ begin
                          rx                  => RX
                      );
 
+    frontMin <= frontLRaw when frontLRaw < frontRRaw else frontRRaw;
+    backMin <= backLRaw when backLRaw < backRRaw else backRRaw;
+
     com: communication port map(
                                    clock => CLK,
                                    reset  => reset,
                                    left  => left,
                                    right  => right,
                                    zerocoder  => zerocoder,
-                                   front  => front,
-                                   back  => back,
+                                   front  => frontMin,
+                                   back  => backMin,
                                    txData  => txData,
                                    txStb  => txStb,
                                    txAck  => txAck,
