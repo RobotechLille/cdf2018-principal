@@ -11,7 +11,7 @@
 #define FPGA_PORTNAME "/dev/ttyUSB0"
 #define CF_BAUDRATE B115200
 // #define PRINTRAWDATA
-//
+
 typedef void (*rxHandler)(void);
 
 void registerRxHandlerCF(unsigned char code, rxHandler handler); // À utiliser après configureCF();

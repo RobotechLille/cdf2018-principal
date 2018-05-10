@@ -97,7 +97,7 @@ bool diagJustRun(void* arg)
 {
     void (*fonction)(void) = arg;
     fonction();
-    usleep(1000*1000);
+    usleep(300*1000);
     return true;
 }
 
@@ -160,8 +160,8 @@ void runDiagnostics()
     i = 3;
     execDiagnostic("Mot+Cod R AR", diagCodeuse, &i);
 
-    execDiagnostic("Fermeture loquet", diagJustRun, &diagSetLoquetFerme);
     execDiagnostic("Ouverture loquet", diagJustRun, &diagSetLoquetOuvert);
+    execDiagnostic("Fermeture loquet", diagJustRun, &diagSetLoquetFerme);
     execDiagnostic("Reset barillet", diagJustRun, &barilletReset);
     execDiagnostic("T+1 barillet", diagJustRun, &barilletSuivant);
     execDiagnostic("T+2 barillet", diagJustRun, &barilletSkip);

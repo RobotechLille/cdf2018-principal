@@ -21,7 +21,7 @@
 #define MOTOR_CONTROLLER_ALIMENTATION 24.0 // V (from elec)
 #define MOTOR_CONTROLLER_REFERENCE 5 // V (from wiring)
 #define MOTOR_SATURATION_MIN 0 // V (from random)
-#define MOTOR_SATURATION_MAX 12.0 // V (from testing)
+#define MOTOR_SATURATION_MAX 3.0 // V (from testing)
 #define PWM_MAX 3.3 // V (from FPGA datasheet)
 #define CODER_RESOLUTION 370.0 // cycles/motor rev
 #define CODER_DATA_FACTOR 4.0 // increments/motor cycles
@@ -38,8 +38,8 @@
 #define O_DIR_ECART_MIN (5.0 / 360.0 * 2.0 * M_PI) // rad
 #define O_DIR_ECART_MAX (25.0 / 360.0 * 2.0 * M_PI) // rad
 #define O_ECART_MAX (25.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_GAIN 3.0
-#define P 7.0
+#define O_GAIN 5.0
+#define P 5.0
 #define I 0.0
 #define D 0.0
 

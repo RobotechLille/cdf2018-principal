@@ -10,7 +10,7 @@
 
 #define DIAGNOSTIC_TENSION_TEST 3
 #define DIAGNOSTIC_CODEUSES_DIFF_MIN 100
-#define DIAGNOSTIC_TEMPS_ROTATION 250
+#define DIAGNOSTIC_TEMPS_ROTATION 500
 
 typedef bool (*diagnosticFunc)(void* arg);
 

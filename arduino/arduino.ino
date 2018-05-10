@@ -36,24 +36,26 @@ void barilletUnCran()
 {
 
     ax12a.setEndless(ID, ON);
-    ax12a.turn(ID, LEFT, 1220);
+    ax12a.turn(ID, LEFT, 1224);
     delay(978);
     ax12a.turn(ID, LEFT, 200);
     delay(100);
     ax12a.turn(ID, LEFT, 1224);
     delay(100);
+    ax12a.turn(ID, LEFT, 0);
 }
 
 void barilletDeuxCrans()
 {
 
     ax12a.setEndless(ID, ON);
-    ax12a.turn(ID, LEFT, 1220);
+    ax12a.turn(ID, LEFT, 1224);
     delay(1955);
     ax12a.turn(ID, LEFT, 200);
     delay(100);
     ax12a.turn(ID, LEFT, 1224);
     delay(100);
+    ax12a.turn(ID, LEFT, 0);
 }
 
 void loop()
@@ -96,11 +98,9 @@ void loop()
                 break;
             case 'B': // Tourner barillet d'un cran
                 barilletUnCran();
-                delay(500);
                 break;
             case 'H': // Tourner de deux crans
                 barilletDeuxCrans();
-                delay(500);
                 break;
             case 'R': // Reset barillet
                 // ax12a.setEndless(ID, OFF);

@@ -3,7 +3,7 @@ SIMULATION = 0;
 
 % Paramètres de lecture
 DIRNAME = "/home/geoffrey/CdF/cdf2018-principal/log/";
-FILENAME = "000471.csv";
+FILENAME = "000655.csv";
 PATH = DIRNAME + FILENAME;
 
 % Paramètres de simulation
@@ -33,7 +33,7 @@ motorNominalTension = 24.0; % V (from datasheet)
 motorControllerAlimentation = 24.0; % V (from elec)
 motorControllerReference = 5; % V (from wiring)
 motorSaturationMin = 0; % V (from random)
-motorSaturationMax = 12.0; % V (from testing)
+motorSaturationMax = 3.0; % V (from testing)
 pwmMax = 3.3; % V (from FPGA datasheet)
 coderResolution = 370.0; % cycles/motor rev
 coderDataFactor = 4.0; % increments/motor cycles
@@ -51,8 +51,8 @@ dDirEcartMax = 10.0; % mm
 oDirEcartMin = (5.0 / 360.0 * 2.0 * pi); % rad
 oDirEcartMax = (25.0 / 360.0 * 2.0 * pi); % rad
 oEcartMax = (25.0 / 360.0 * 2.0 * pi); % rad
-oGain = 3.0;
-P = 7.0;
+oGain = 5.0;
+P = 5.0;
 I = 0.0;
 D = 0.0;
 
@@ -130,13 +130,15 @@ legend("Gauche", "Droite", "Err. gauche", "Err. droite");
 % Distance
 p = subplot(2, 2, 3);
 hold on;
-timeGraph(["dDirEcart", "dErr"]);
+%timeGraph(["dDirEcart", "dErr"]);
+timeGraph(["dDirEcart", "dErr", "secFront", "secBack"]);
 addLimitline(p, dDirEcartMin);
 addLimitline(p, dDirEcartMax);
 title("Distance");
 xlabel("Temps (s)");
 ylabel("Distance (mm)");
-legend("Ecart direction", "Err. retenue");
+%legend("Ecart direction", "Err. retenue");
+legend("Ecart direction", "Err. retenue", "Distance avant", "Distance arrière");
 
 % Rotation
 p = subplot(2, 2, 4);

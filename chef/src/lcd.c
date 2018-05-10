@@ -21,6 +21,19 @@ void initLCD()
     pinMode(LCD_ON_PIN, OUTPUT);
 }
 
+void eraseLCD()
+{
+    lockLCD();
+    sendLCD(0x01, LCD_MODE_CMD);
+    sendLCD(0x02, LCD_MODE_CMD);
+
+    for (int i = 0; i < LCD_NB_TOTAL; i++) {
+        virtual[i] = ' ';
+    }
+    unlockLCD();
+}
+
+
 void onLCD()
 {
     digitalWrite(LCD_ON_PIN, LOW);
@@ -32,7 +45,7 @@ void onLCD()
     sendLCD(0x06, LCD_MODE_CMD); // Cursor move direction
     sendLCD(0x0C, LCD_MODE_CMD); // Blink Off
     sendLCD(0x28, LCD_MODE_CMD); // Data length, number of lines, font size
-    clearLCD();
+    eraseLCD();
 
     delay(50);
 }
@@ -57,14 +70,8 @@ void resetLCD()
 
 void clearLCD()
 {
-    lockLCD();
-    sendLCD(0x01, LCD_MODE_CMD);
-    sendLCD(0x02, LCD_MODE_CMD);
-
-    for (int i = 0; i < LCD_NB_TOTAL; i++) {
-        virtual[i] = ' ';
-    }
-    unlockLCD();
+    offLCD();
+    onLCD();
 }
 
 void gotoLCD(uint8_t line)
