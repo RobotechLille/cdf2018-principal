@@ -137,7 +137,7 @@ void runDiagnostics()
 {
     execDiagnostic("Lien FPGA", diagFPGA, NULL);
     execDiagnostic("Lien Arduino", diagArduino, NULL);
-    execDiagnostic("Lien IMU", diagIMU, NULL);
+    /* execDiagnostic("Lien IMU", diagIMU, NULL); */
     int i;
     i = 0;
     execDiagnostic("Mot+Cod L AV", diagCodeuse, &i);

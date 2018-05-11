@@ -13,6 +13,7 @@
 #include "dimensions.h"
 #include "fpga.h"
 #include "position.h"
+#include "common.h"
 
 // Globales
 struct position connu;
@@ -24,16 +25,34 @@ pthread_t tPosition;
 unsigned int nbCalcPos;
 long lCodTot, rCodTot;
 
-int16_t oldL, oldR;
-int16_t newL, newR;
+uint16_t oldL, oldR;
+uint16_t newL, newR;
 int16_t deltaL, deltaR;
+int newLdbg, newRdbg;
+
+struct timespec lastCoderRead;
 
 void updateDelta()
 {
-    newL = (readI2C(fdFPGA(), CODER_LEFT_H) << 8 | readI2C(fdFPGA(), CODER_LEFT_L));
-    newR = (readI2C(fdFPGA(), CODER_RIGHT_H) << 8 | readI2C(fdFPGA(), CODER_RIGHT_L));
-    deltaL = (abs(oldL - newL) < UINT16_MAX/2) ? newL - oldL : UINT16_MAX - oldL + newL;
-    deltaR = (abs(oldR - newR) < UINT16_MAX/2) ? newR - oldR : UINT16_MAX - oldR + newR;
+    newL = (readI2C(fdFPGA(), CODER_LEFT_H) << 8 | readI2C(fdFPGA(), CODER_LEFT_L)) & 0xFFFF;
+    newR = (readI2C(fdFPGA(), CODER_RIGHT_H) << 8 | readI2C(fdFPGA(), CODER_RIGHT_L)) & 0xFFFF;
+    newLdbg = newL;
+    newRdbg = newR;
+    deltaL = (abs(oldL - newL) < UINT16_MAX / 2) ? newL - oldL : UINT16_MAX - oldL + newL;
+    deltaR = (abs(oldR - newR) < UINT16_MAX / 2) ? newR - oldR : UINT16_MAX - oldR + newR;
+
+    // Verification de valeur abbérante
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME, &now);
+    float maxDelta = diffTimeSec(&lastCoderRead, &now) * ABSOLUTE_MAX_VITESSE_ROBOT_CYCP_S;
+    if (abs(deltaL) > maxDelta) {
+        deltaL = 0;
+    }
+    if (abs(deltaR) > maxDelta) {
+        deltaR = 0;
+    }
+    lastCoderRead = now;
+
     oldL = newL;
     oldR = newR;
 }
@@ -46,8 +65,6 @@ void* TaskPosition(void* pData)
     nbCalcPos = 0;
     lCodTot = 0;
     rCodTot = 0;
-    oldL = 0;
-    oldR = 0;
 
     updateDelta();
 
@@ -80,6 +97,8 @@ void* TaskPosition(void* pData)
         nbCalcPos++;
         pthread_cond_signal(&newPos);
         pthread_mutex_unlock(&posConnu);
+
+        usleep(POSITION_INTERVAL * 1000);
     }
 
     return NULL;
@@ -87,19 +106,17 @@ void* TaskPosition(void* pData)
 
 void configurePosition()
 {
-    pthread_mutex_init(&posConnu, NULL);
-    pthread_cond_init(&newPos, NULL);
+    resetPosition();
     registerDebugVar("lCodTot", ld, &lCodTot);
     registerDebugVar("rCodTot", ld, &rCodTot);
-    registerDebugVar("newL", ld, &newL);
-    registerDebugVar("newR", ld, &newR);
-    connu.x = 0;
-    connu.y = 0;
-    connu.o = 0;
+    registerDebugVar("newL", d, &newLdbg);
+    registerDebugVar("newR", d, &newRdbg);
     registerDebugVar("xConnu", f, &connu.x);
     registerDebugVar("yConnu", f, &connu.y);
     registerDebugVar("oConnu", f, &connu.o);
     registerDebugVar("nbCalcPos", d, &nbCalcPos);
+    pthread_mutex_init(&posConnu, NULL);
+    pthread_cond_init(&newPos, NULL);
     pthread_create(&tPosition, NULL, TaskPosition, NULL);
 }
 

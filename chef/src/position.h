@@ -8,6 +8,8 @@
 // #define INVERSE_L_CODER
 #define INVERSE_R_CODER
 
+#define POSITION_INTERVAL 10
+
 // Structures
 struct __attribute__ ((packed)) position {
     float x;

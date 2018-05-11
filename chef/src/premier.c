@@ -10,7 +10,6 @@
 #include "debug.h"
 #include "i2c.h"
 #include "ihm.h"
-#include "imu.h"
 #include "movement.h"
 #include "position.h"
 
@@ -34,7 +33,6 @@ int main()
 
     configureDebug();
     configureIHM();
-    configureIMU();
     configureActionneurs();
     configurePosition();
     configureMovement();
@@ -52,7 +50,6 @@ int main()
     deconfigureMovement();
     deconfigurePosition();
     deconfigureActionneurs();
-    deconfigureIMU();
     deconfigureIHM();
     deconfigureDebug();
     return EXIT_SUCCESS;

@@ -3,7 +3,7 @@ SIMULATION = 0;
 
 % Paramètres de lecture
 DIRNAME = "/home/geoffrey/CdF/cdf2018-principal/log/";
-FILENAME = "000655.csv";
+FILENAME = "last.csv";
 PATH = DIRNAME + FILENAME;
 
 % Paramètres de simulation
@@ -31,9 +31,9 @@ motorSpeedGainRPMpV = 233.0; % rpm/V (from datasheet)
 motorSpeedGain = (motorSpeedGainRPMpV / 60.0); % motor rev/s/V
 motorNominalTension = 24.0; % V (from datasheet)
 motorControllerAlimentation = 24.0; % V (from elec)
-motorControllerReference = 5; % V (from wiring)
-motorSaturationMin = 0; % V (from random)
-motorSaturationMax = 3.0; % V (from testing)
+motorControllerReference = 5.0; % V (from wiring)
+motorSaturationMin = 0.0; % V (from random)
+motorSaturationMax = 4.0; % V (from testing)
 pwmMax = 3.3; % V (from FPGA datasheet)
 coderResolution = 370.0; % cycles/motor rev
 coderDataFactor = 4.0; % increments/motor cycles
@@ -44,17 +44,37 @@ reducRatio = (cranReducIn / cranReducOut); % reduction ratio
 coderFullResolution = (coderDataResolution / reducRatio); % cycles / wheel rev
 avPerCycle = (wheelPerimeter / coderFullResolution); % mm
 
+% Pour éviter les pics de codeuse liées à la communication I2C
+absoluteMaxVitesseRobot = 10.0; % km/h
+absoluteMaxVitesseRobotMMpS = (absoluteMaxVitesseRobot * 10000.0 / 36.0); % mm/s
+absoluteMaxVitesseRobotRevpS = (absoluteMaxVitesseRobotMMpS / wheelPerimeter); % rev/s
+absoluteMaxVitesseRobotCycpS = (absoluteMaxVitesseRobotRevpS * coderFullResolution); % cycle/s
+
 % Constantes asservissement
-global dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oGain oEcartMax;
-dDirEcartMin = 7.0; % mm
-dDirEcartMax = 10.0; % mm
-oDirEcartMin = (5.0 / 360.0 * 2.0 * pi); % rad
-oDirEcartMax = (25.0 / 360.0 * 2.0 * pi); % rad
-oEcartMax = (25.0 / 360.0 * 2.0 * pi); % rad
-oGain = 5.0;
-P = 5.0;
-I = 0.0;
-D = 0.0;
+global dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oEcartMin oEcartMax targetTensionRatio targetTension carotteDistance dKP dKI dKD oKP oKI oKD margeSecurite;
+
+
+% Asservissement en distance
+dDirEcartMin = 30.0; % mm
+dDirEcartMax = 50.0; % mm
+dKP = 0.05;
+dKI = 0.0;
+dKD = 0.0;
+targetTensionRatio = 0.75;
+targetTension = (targetTensionRatio * motorSaturationMax); % V
+carotteDistance = (targetTension / dKP); % mm
+
+% Asservissement en angle
+oDirEcartMin = (25.0 / 360.0 * 2.0 * pi); % rad
+oDirEcartMax = (45.0 / 360.0 * 2.0 * pi); % rad
+oEcartMin = (25.0 / 360.0 * 2.0 * pi); % rad
+oEcartMax = (45.0 / 360.0 * 2.0 * pi); % rad
+oKP = (motorSaturationMax / (wheelPerimeter * pi)); % au max peut dérivier de pi
+oKI = 0.0;
+oKD = 0.0;
+carotteAngle = (targetTension / oKP); % mm
+
+margeSecurite = 300.0; % mm
 
 %END DIMENSIONS
 
@@ -88,6 +108,9 @@ else
     T.x = T.xConnu;
     T.y = T.yConnu;
     T.o = T.oConnu;
+    
+    T.secBackL = -T.secBackL;
+    T.secBackR = -T.secBackR;
 
     disp("Enregistrement des données");
     s = containers.Map;
@@ -109,14 +132,26 @@ clf
 global p;
 
 % Évolution spatiale
-subplot(2, 2, 1);
+subplot(2, 3, 1);
 initGraph
 updateToTime(SIMULATION_DT);
 
-% Roues
-p = subplot(2, 2, 2);
+% Codeuses
+p = subplot(2, 3, 3);
 hold on;
-timeGraph(["lVolt", "rVolt", "lErr", "rErr"]);
+timeGraph(["lCodTot", "rCodTot", "newL", "newR"]);
+addLimitline(p, 2^16-1);
+addLimitline(p, 0);
+title("Codeuses");
+xlabel("Temps (s)");
+ylabel("Crans");
+legend("Total gauche", "Total droite", "Brut gauche", "Brut droite");
+
+
+% Roues
+p = subplot(2, 3, 2);
+hold on;
+timeGraph(["lVolt", "rVolt", "dVolt", "oVolt"]);
 addLimitline(p, -motorSaturationMin);
 addLimitline(p, -motorSaturationMax);
 addLimitline(p, motorSaturationMin);
@@ -125,25 +160,26 @@ addLimitline(p, 0);
 title("Roues");
 xlabel("Temps (s)");
 ylabel("Tension (V)");
-legend("Gauche", "Droite", "Err. gauche", "Err. droite");
+legend("Tension gauche", "Tension droite", "Dont distance", "Dont direction");
 
 % Distance
-p = subplot(2, 2, 3);
+p = subplot(2, 3, 4);
 hold on;
-%timeGraph(["dDirEcart", "dErr"]);
-timeGraph(["dDirEcart", "dErr", "secFront", "secBack"]);
+timeGraph(["dDirEcart", "dEcart", "oErr"]);
+addLimitline(p, 0);
 addLimitline(p, dDirEcartMin);
 addLimitline(p, dDirEcartMax);
+addLimitline(p, -dDirEcartMin);
+addLimitline(p, -dDirEcartMax);
 title("Distance");
 xlabel("Temps (s)");
 ylabel("Distance (mm)");
-%legend("Ecart direction", "Err. retenue");
-legend("Ecart direction", "Err. retenue", "Distance avant", "Distance arrière");
+legend("Err. distance", "Err. retenue", "Err rotation");
 
 % Rotation
-p = subplot(2, 2, 4);
+p = subplot(2, 3, 5);
 hold on;
-timeGraph(["oDirEcart", "oEcart", "oErr"]);
+timeGraph(["oDirEcart", "oConsEcart", "oEcart"]);
 addLimitline(p, oDirEcartMax);
 addLimitline(p, oDirEcartMin);
 addLimitline(p, -oDirEcartMax);
@@ -151,7 +187,19 @@ addLimitline(p, -oDirEcartMin);
 title("Rotation");
 xlabel("Temps (s)");
 ylabel("Angle (rad)");
-legend("Ecart direction", "Ecart orientation", "Err. retenue");
+legend("Err. direction", "Err. consigne", "Err. retenue");
+
+% Securité
+p = subplot(2, 3, 6);
+hold on;
+timeGraph(["dDirEcart", "secFrontL", "secFrontR", "secBackL", "secBackR", "dErr"]);
+addLimitline(p, 0);
+addLimitline(p, margeSecurite);
+addLimitline(p, -margeSecurite);
+title("Distances de sécurité");
+xlabel("Temps (s)");
+ylabel("Distance (mm)");
+legend("Err. distance", "Avant gauche", "Avant droite", "Arrière gauche", "Arrière droite", "Err. retenue");
 
 % Fonctions
 
@@ -202,7 +250,7 @@ function timeGraph(series)
 end
 
 function addLimitline(p, x)
-    line(p.XLim, [x x], 'Color', [0.8 0.8 0.8]);
+    line(p.XLim, [x x], 'Color', [0.8 0.8 0.8], 'LineStyle', '--');
 end
 
 function addTimeline(p)
@@ -287,9 +335,9 @@ function initGraph()
     global robotPath;
     robotPath = plot(0, 0, 'b');
     global dirQuiver;
-    dirQuiver = quiver(0, 0, 0, 0, 'Color', 'Red', 'MaxHeadSize', height/4);
+    dirQuiver = quiver(0, 0, 0, 0, 'Color', 'Red', 'MaxHeadSize', height/2);
     global consQuiver;
-    consQuiver = quiver(0, 0, 0, 0, 'Color', 'Green', 'MaxHeadSize', height/4);
+    consQuiver = quiver(0, 0, 0, 0, 'Color', 'Green', 'MaxHeadSize', height/2);
     
     % Draw track
     global pisteWidth;

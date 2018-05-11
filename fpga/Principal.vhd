@@ -5,14 +5,13 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity Principal is
     Generic(
-               fFpga : INTEGER := 50_000_000;
-               fBaud : INTEGER := 115200
+               fFpga : INTEGER := 50_000_000
            );
     Port (
              CLK : in  std_logic;
              BTN: in std_logic;
-             RX: in std_logic;
-             TX: out std_logic;
+             SDA: inout std_logic;
+             SCL: inout std_logic;
              LEFTCHA: in std_logic;
              LEFTCHB: in std_logic;
              RIGHTCHA: in std_logic;
@@ -25,11 +24,11 @@ entity Principal is
              BACKRECHO: in std_logic;
              ENAREF: out std_logic;
              ENA: out std_logic;
-             IN1ENC: out std_logic;
+             IN1: out std_logic;
              IN2: out std_logic;
              ENBREF: out std_logic;
              ENB: out std_logic;
-             IN3END: out std_logic;
+             IN3: out std_logic;
              IN4: out std_logic
          );
 end Principal;
@@ -41,7 +40,6 @@ architecture Behavioral of Principal is
     -- Encoder
     signal left : integer;
     signal right : integer;
-    signal zerocoder : std_logic;
 
     component hedm is
         Port (
@@ -101,11 +99,9 @@ architecture Behavioral of Principal is
 
     -- Motor controller
     signal enAd : std_logic_vector(7 downto 0);
-    signal in1enCd : std_logic_vector(7 downto 0);
-    signal in2d : std_logic;
     signal enBd : std_logic_vector(7 downto 0);
-    signal in3enDd : std_logic_vector(7 downto 0);
-    signal in4d : std_logic;
+    signal ind : std_logic_vector(7 downto 0);
+
     component PWM is
         port (
                  clk : in std_logic;
@@ -115,54 +111,46 @@ architecture Behavioral of Principal is
     end component;
 
     -- CF
-    component uart is
-        generic (
-                    baud                : positive := fBaud;
-                    clock_frequency     : positive := fFpga
-                );
-        port (
-                 clock               :   in  std_logic;
-                 reset               :   in  std_logic;
-                 data_stream_in      :   in  std_logic_vector(7 downto 0);
-                 data_stream_in_stb  :   in  std_logic;
-                 data_stream_in_ack  :   out std_logic;
-                 data_stream_out     :   out std_logic_vector(7 downto 0);
-                 data_stream_out_stb :   out std_logic;
-                 tx                  :   out std_logic;
-                 rx                  :   in  std_logic
-             );
+    component I2CSLAVE
+        generic(
+                   DEVICE: std_logic_vector(7 downto 0) := x"42"
+               );
+        port(
+                MCLK        : in    std_logic;
+                nRST        : in    std_logic;
+                SDA_IN      : in    std_logic;
+                SCL_IN      : in    std_logic;
+                SDA_OUT     : out   std_logic;
+                SCL_OUT     : out   std_logic;
+                ADDRESS     : out   std_logic_vector(7 downto 0);
+                DATA_OUT    : out   std_logic_vector(7 downto 0);
+                DATA_IN     : in    std_logic_vector(7 downto 0);
+                WR          : out   std_logic;
+                RD          : out   std_logic
+            );
     end component;
+    signal sdaIn : std_logic;
+    signal sclIn : std_logic;
+    signal sdaOut : std_logic;
+    signal sclOut : std_logic;
+    signal address : std_logic_vector(7 downto 0);
+    signal dataOut : std_logic_vector(7 downto 0);
+    signal dataIn : std_logic_vector(7 downto 0);
+    signal wr : std_logic;
+    signal rd : std_logic;
+    signal rdP : std_logic;
 
-    signal txData : std_logic_vector(7 downto 0);
-    signal txStb : std_logic := '0';
-    signal txAck : std_logic := '0';
 
-    signal rxData : std_logic_vector(7 downto 0);
-    signal rxStb : std_logic := '0';
-
-    -- Handling
-    component communication is
-        Port (
-                 clock : in  std_logic;
-                 reset : in std_logic;
-                 left : in integer;
-                 right : in integer;
-                 zerocoder : out std_logic;
-                 front : in integer;
-                 back : in integer;
-                 txData : out std_logic_vector(7 downto 0);
-                 txStb : out std_logic;
-                 txAck : in std_logic;
-                 rxData : in std_logic_vector(7 downto 0);
-                 rxStb : in std_logic;
-                 enA : out std_logic_vector(7 downto 0);
-                 in1enC : out std_logic_vector(7 downto 0);
-                 in2 : out std_logic;
-                 enB : out std_logic_vector(7 downto 0);
-                 in3enD : out std_logic_vector(7 downto 0);
-                 in4 : out std_logic
-             );
-    end component;
+    signal leftB : std_logic_vector(15 downto 0);
+    signal rightB : std_logic_vector(15 downto 0);
+    signal frontLRawB : std_logic_vector(15 downto 0);
+    signal frontRRawB : std_logic_vector(15 downto 0);
+    signal backLRawB : std_logic_vector(15 downto 0);
+    signal backRRawB : std_logic_vector(15 downto 0);
+    signal frontLB : std_logic_vector(15 downto 0);
+    signal frontRB : std_logic_vector(15 downto 0);
+    signal backLB : std_logic_vector(15 downto 0);
+    signal backRB : std_logic_vector(15 downto 0);
 
 begin
 
@@ -184,7 +172,7 @@ begin
                                  chA => LEFTCHA,
                                  chB => LEFTCHB,
                                  reset => reset,
-                                 zero => zerocoder,
+                                 zero => '0',
                                  counts => left
                              );
 
@@ -193,80 +181,80 @@ begin
                                   chA => RIGHTCHA,
                                   chB => RIGHTCHB,
                                   reset => reset,
-                                  zero => zerocoder,
+                                  zero => '0',
                                   counts => right
                               );
 
     frontLCapt: hcsr04 port map (
-                                   clk => CLK,
-                                   reset => reset,
-                                   echo => FRONTLECHO,
-                                   distance => frontLRaw,
-                                   trigger => FRONTTRIGGER,
-                                   start => '1',
-                                   finished => frontLFinished
-                               );
+                                    clk => CLK,
+                                    reset => reset,
+                                    echo => FRONTLECHO,
+                                    distance => frontLRaw,
+                                    trigger => FRONTTRIGGER,
+                                    start => '1',
+                                    finished => frontLFinished
+                                );
     frontLFilter : FIR port map (
-                                   clock     => CLK,
-                                   reset     => reset,
-                                   signalIn  => frontLRaw,
-                                   signalOut => frontL,
-                                   start     => frontLFinished
-                               -- done      => done
-                               );
+                                    clock     => CLK,
+                                    reset     => reset,
+                                    signalIn  => frontLRaw,
+                                    signalOut => frontL,
+                                    start     => frontLFinished
+                                -- done      => done
+                                );
 
     frontRCapt: hcsr04 port map (
-                                   clk => CLK,
-                                   reset => reset,
-                                   echo => FRONTRECHO,
-                                   distance => frontRRaw,
-                                   -- trigger => FRONTTRIGGER,
-                                   start => '1',
-                                   finished => frontRFinished
-                               );
+                                    clk => CLK,
+                                    reset => reset,
+                                    echo => FRONTRECHO,
+                                    distance => frontRRaw,
+                                    -- trigger => FRONTTRIGGER,
+                                    start => '1',
+                                    finished => frontRFinished
+                                );
     frontRFilter : FIR port map (
-                                   clock     => CLK,
-                                   reset     => reset,
-                                   signalIn  => frontRRaw,
-                                   signalOut => frontR,
-                                   start     => frontRFinished
-                               -- done      => done
-                               );
+                                    clock     => CLK,
+                                    reset     => reset,
+                                    signalIn  => frontRRaw,
+                                    signalOut => frontR,
+                                    start     => frontRFinished
+                                -- done      => done
+                                );
 
     backLCapt: hcsr04 port map (
-                                  clk => CLK,
-                                  reset => reset,
-                                  echo => BACKLECHO,
-                                  distance => backLRaw,
-                                  trigger => BACKTRIGGER,
-                                  start => '1',
-                                  finished => backLFinished
-                              );
+                                   clk => CLK,
+                                   reset => reset,
+                                   echo => BACKLECHO,
+                                   distance => backLRaw,
+                                   trigger => BACKTRIGGER,
+                                   start => '1',
+                                   finished => backLFinished
+                               );
     backLFilter : FIR port map (
-                                  clock     => CLK,
-                                  reset     => reset,
-                                  signalIn  => backLRaw,
-                                  signalOut => backL,
-                                  start     => backLFinished
-                              -- done      => done
-                              );
+                                   clock     => CLK,
+                                   reset     => reset,
+                                   signalIn  => backLRaw,
+                                   signalOut => backL,
+                                   start     => backLFinished
+                               -- done      => done
+                               );
     backRCapt: hcsr04 port map (
-                                  clk => CLK,
-                                  reset => reset,
-                                  echo => BACKRECHO,
-                                  distance => backRRaw,
-                                  -- trigger => BACKTRIGGER,
-                                  start => '1',
-                                  finished => backRFinished
-                              );
+                                   clk => CLK,
+                                   reset => reset,
+                                   echo => BACKRECHO,
+                                   distance => backRRaw,
+                                   -- trigger => BACKTRIGGER,
+                                   start => '1',
+                                   finished => backRFinished
+                               );
     backRFilter : FIR port map (
-                                  clock     => CLK,
-                                  reset     => reset,
-                                  signalIn  => backRRaw,
-                                  signalOut => backR,
-                                  start     => backRFinished
-                              -- done      => done
-                              );
+                                   clock     => CLK,
+                                   reset     => reset,
+                                   signalIn  => backRRaw,
+                                   signalOut => backR,
+                                   start     => backRFinished
+                               -- done      => done
+                               );
     enAp : PWM port map (
                             clk => pwmClk,
                             data => enAd,
@@ -274,12 +262,8 @@ begin
                         );
     ENAREF <= '1';
 
-    in1enCp : PWM port map (
-                               clk => pwmClk,
-                               data => in1enCd,
-                               pulse => IN1ENC
-                           );
-    IN2 <= in2d;
+    IN1 <= ind(0);
+    IN2 <= ind(1);
 
     enBp : PWM port map (
                             clk => pwmClk,
@@ -288,48 +272,69 @@ begin
                         );
     ENBREF <= '1';
 
-    in3enDp : PWM port map (
-                               clk => pwmClk,
-                               data => in3enDd,
-                               pulse => IN3END
+    IN3 <= ind(2);
+    IN4 <= ind(3);
+
+    FA : i2cslave port map (
+                               MCLK        => clk,
+                               nRST        => not reset,
+                               SDA_IN      => sdaIn,
+                               SCL_IN      => sclIn,
+                               SDA_OUT     => sdaOut,
+                               SCL_OUT     => sclOut,
+                               ADDRESS     => address,
+                               DATA_OUT    => dataOut,
+                               DATA_IN     => dataIn,
+                               WR          => wr,
+                               RD          => rd
                            );
-    IN4 <= in4d;
+
+    SCL <= 'Z' when sclOut = '1' else '0';
+    sclIn <= to_UX01(SCL);
+    SDA <= 'Z' when sdaOut = '1' else '0';
+    sdaIn <= to_UX01(SDA);
+
+    leftB <= std_logic_vector(to_signed(left, 16));
+    rightB <= std_logic_vector(to_signed(right, 16));
+    frontLRawB <= std_logic_vector(to_unsigned(frontLRaw, 16));
+    frontRRawB <= std_logic_vector(to_unsigned(frontRRaw, 16));
+    backLRawB <= std_logic_vector(to_unsigned(backLRaw, 16));
+    backRRawB <= std_logic_vector(to_unsigned(backRRaw, 16));
+    frontLB <= std_logic_vector(to_unsigned(frontL, 16));
+    frontRB <= std_logic_vector(to_unsigned(frontR, 16));
+    backLB <= std_logic_vector(to_unsigned(backL, 16));
+    backRB <= std_logic_vector(to_unsigned(backR, 16));
+
+    dataIn <=  x"50" when address = x"00" else
+               leftB(15 downto 8) when address = x"10" else
+               leftB(7 downto 0) when address = x"11" else
+               rightB(15 downto 8) when address = x"12" else
+               rightB(7 downto 0) when address = x"13" else
+               frontLRawB(15 downto 8) when address = x"20" else
+               frontLRawB(7 downto 0) when address = x"21" else
+               frontRRawB(15 downto 8) when address = x"22" else
+               frontRRawB(7 downto 0) when address = x"23" else
+               backLRawB(15 downto 8) when address = x"24" else
+               backLRawB(7 downto 0) when address = x"25" else
+               backRRawB(15 downto 8) when address = x"26" else
+               backRRawB(7 downto 0) when address = x"27" else
+               frontLB(15 downto 8) when address = x"30" else
+               frontLB(7 downto 0) when address = x"31" else
+               frontRB(15 downto 8) when address = x"32" else
+               frontRB(7 downto 0) when address = x"33" else
+               backLB(15 downto 8) when address = x"34" else
+               backLB(7 downto 0) when address = x"35" else
+               backRB(15 downto 8) when address = x"36" else
+               backRB(7 downto 0) when address = x"37" else
+               ind when address = x"60" else
+               enAd when address = x"61" else
+               enBd when address = x"62" else
+               (others => '0');
+
+    ind <= dataOut when (address = x"60" and wr = '1') else ind;
+    enAd <= dataOut when (address = x"61" and wr = '1') else enAd;
+    enBd <= dataOut when (address = x"62" and wr = '1') else enBd;
 
 
-    FA: uart port map(
-                         clock               => CLK,
-                         reset               => reset,
-                         data_stream_in      => txData,
-                         data_stream_in_stb  => txStb,
-                         data_stream_in_ack  => txAck,
-                         data_stream_out     => rxData,
-                         data_stream_out_stb => rxStb,
-                         tx                  => TX,
-                         rx                  => RX
-                     );
-
-    frontMin <= frontLRaw when frontLRaw < frontRRaw else frontRRaw;
-    backMin <= backLRaw when backLRaw < backRRaw else backRRaw;
-
-    com: communication port map(
-                                   clock => CLK,
-                                   reset  => reset,
-                                   left  => left,
-                                   right  => right,
-                                   zerocoder  => zerocoder,
-                                   front  => frontMin,
-                                   back  => backMin,
-                                   txData  => txData,
-                                   txStb  => txStb,
-                                   txAck  => txAck,
-                                   rxData  => rxData,
-                                   rxStb  => rxStb,
-                                   enA    => enAd,
-                                   in1enC => in1enCd,
-                                   in2    => in2d,
-                                   enB    => enBd,
-                                   in3enD => in3enDd,
-                                   in4    => in4d
-                               );
 end Behavioral;
 

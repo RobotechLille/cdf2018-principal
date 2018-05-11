@@ -97,6 +97,12 @@ begin
             txStb <= '0';
             zerocoder <= '0';
             txData <= x"00";
+            enA <= (others => '0');
+            in1enC <= (others => '0');
+            enB <= (others => '0');
+            in3enD <= (others => '0');
+            in2 <= '0';
+            in4 <= '0';
         else
             if rising_edge(clock) then
                 zerocoder <= '0';

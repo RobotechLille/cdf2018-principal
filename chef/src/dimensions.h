@@ -21,7 +21,7 @@
 #define MOTOR_CONTROLLER_ALIMENTATION 24.0 // V (from elec)
 #define MOTOR_CONTROLLER_REFERENCE 5.0 // V (from wiring)
 #define MOTOR_SATURATION_MIN 0.0 // V (from random)
-#define MOTOR_SATURATION_MAX 3.0 // V (from testing)
+#define MOTOR_SATURATION_MAX 4.0 // V (from testing)
 #define PWM_MAX 3.3 // V (from FPGA datasheet)
 #define CODER_RESOLUTION 370.0 // cycles/motor rev
 #define CODER_DATA_FACTOR 4.0 // increments/motor cycles
@@ -32,16 +32,35 @@
 #define CODER_FULL_RESOLUTION (CODER_DATA_RESOLUTION / REDUC_RATIO) // cycles / wheel rev
 #define AV_PER_CYCLE (WHEEL_PERIMETER / CODER_FULL_RESOLUTION) // mm
 
+// Pour éviter les pics de codeuse liées à la communication I2C
+#define ABSOLUTE_MAX_VITESSE_ROBOT 10.0 // km/h
+#define ABSOLUTE_MAX_VITESSE_ROBOT_MMP_S (ABSOLUTE_MAX_VITESSE_ROBOT * 10000.0 / 36.0) // mm/s
+#define ABSOLUTE_MAX_VITESSE_ROBOT_REVP_S (ABSOLUTE_MAX_VITESSE_ROBOT_MMP_S / WHEEL_PERIMETER) // rev/s
+#define ABSOLUTE_MAX_VITESSE_ROBOT_CYCP_S (ABSOLUTE_MAX_VITESSE_ROBOT_REVP_S * CODER_FULL_RESOLUTION) // cycle/s
+
 // Constantes asservissement
-#define D_DIR_ECART_MIN 7.0 // mm
-#define D_DIR_ECART_MAX 10.0 // mm
-#define O_DIR_ECART_MIN (5.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_DIR_ECART_MAX (25.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_ECART_MAX (25.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_GAIN 5.0
-#define P 5.0
-#define I 0.0
-#define D 0.0
-#define M 0.0
+
+
+// Asservissement en distance
+#define D_DIR_ECART_MIN 30.0 // mm
+#define D_DIR_ECART_MAX 50.0 // mm
+#define D_KP 0.05
+#define D_KI 0.0
+#define D_KD 0.0
+#define TARGET_TENSION_RATIO 0.75
+#define TARGET_TENSION (TARGET_TENSION_RATIO * MOTOR_SATURATION_MAX) // V
+#define CAROTTE_DISTANCE (TARGET_TENSION / D_KP) // mm
+
+// Asservissement en angle
+#define O_DIR_ECART_MIN (25.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_DIR_ECART_MAX (45.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_ECART_MIN (25.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_ECART_MAX (45.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_KP (MOTOR_SATURATION_MAX / (WHEEL_PERIMETER * M_PI)) // au max peut dérivier de pi
+#define O_KI 0.0
+#define O_KD 0.0
+#define CAROTTE_ANGLE (TARGET_TENSION / O_KP) // mm
+
+#define MARGE_SECURITE 300.0 // mm
 
 #endif

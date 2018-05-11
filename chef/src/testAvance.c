@@ -10,9 +10,8 @@
 #include "debug.h"
 #include "i2c.h"
 #include "ihm.h"
-#include "imu.h"
-#include "movement.h"
 #include "motor.h"
+#include "movement.h"
 #include "position.h"
 
 pthread_mutex_t sRunning;
@@ -23,7 +22,7 @@ void endRunning(int signal)
     pthread_mutex_unlock(&sRunning);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 
     if (wiringPiSetup() < 0) {
@@ -33,15 +32,29 @@ int main()
     initI2C();
     srand(time(NULL));
 
+    float x = 0;
+    float y = 0;
+    float o = 0;
+    if (argc >= 2) {
+        sscanf(argv[1], "%f", &x);
+        if (argc >= 3) {
+            sscanf(argv[2], "%f", &y);
+            if (argc >= 4) {
+                sscanf(argv[3], "%f", &o);
+            }
+        }
+    }
+
     configureDebug();
     configurePosition();
     configureMovement();
+    debugSetActive(true);
     startDebug();
 
-    debugSetActive(true);
-    sleep(1);
-    struct position pos = {100000, 0, 0 };
+    struct position pos = { x, y, o };
+    printf("Go\n");
     setDestination(&pos);
+    enableAsservissement();
     waitDestination();
     brake();
     printf("Done\n");

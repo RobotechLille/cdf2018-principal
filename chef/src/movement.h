@@ -7,17 +7,19 @@
 
 #define ANGLE_INSIGNIFIANT NAN
 
-#define ENABLE_SECURITE
-
-#define SECURITE_MARGE 300
-
+// #define ENABLE_SECURITE
 
 #include "position.h"
 
+// Public
 void configureMovement();
 void deconfigureMovement();
 void setDestination(struct position* pos);
-void* TaskMovement(void* pData);
 void waitDestination();
+void enableAsservissement();
+void disableAsservissement();
+
+// Private
+void* TaskMovement(void* pData);
 
 #endif

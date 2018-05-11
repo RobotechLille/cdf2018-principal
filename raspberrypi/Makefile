@@ -130,6 +130,7 @@ restart:
 getlogs:
 	ssh -F sshconf principal true
 	rsync --rsh 'ssh -F sshconf' --archive principal:/opt/chef/log/* ../log/
+	rm -f ../log/last.csv; ln -s $$(ls ../log/ | tail -1) ../log/last.csv
 
 gdbcommands:
 	echo "set sysroot $(TARGET_DIR)" > "$@"

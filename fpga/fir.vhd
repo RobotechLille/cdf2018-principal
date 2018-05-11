@@ -23,7 +23,7 @@ architecture Behavioral of fir is
     constant N : INTEGER := 4; -- Nombre de coefficients
     constant M : INTEGER := 2**6; -- Facteur multiplicatif
     type INT_ARRAY is array (N-1 downto 0) of integer;
-    constant coefficients : INT_ARRAY := (16,16,16,16);
+    constant coefficients : INT_ARRAY := (32,16,8,8);
     -- ↑ Coefficients du fir multipliés par M
 
     signal echantillons : INT_ARRAY := (others => 0); -- stockage des entrées retardées

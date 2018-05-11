@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define I2C_DRIVEN_HIGH_RETRIES 3
+
 void initI2C();
 int openI2C(uint8_t address);
 uint8_t readI2C(int fd, uint8_t reg);

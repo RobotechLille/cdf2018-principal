@@ -1,8 +1,8 @@
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdbool.h>
 #include <wiringPiI2C.h>
 
 #include "i2c.h"
@@ -34,7 +34,20 @@ int openI2C(uint8_t address)
 uint8_t readI2C(int fd, uint8_t reg)
 {
     lockI2C();
-    uint8_t res = wiringPiI2CReadReg8(fd, reg);
+    int res;
+    int delay = 1;
+    static char errBuffer[1024];
+    for (int i = 0; i < I2C_DRIVEN_HIGH_RETRIES; i++) {
+        while ((res = wiringPiI2CReadReg8(fd, reg)) < 0) {
+            snprintf(errBuffer, 1024, "wiringPiI2CReadReg8 @%3d %2x %9d", fd, reg, delay);
+            perror(errBuffer);
+            usleep(delay);
+            delay *= 2;
+        }
+        if (res != 0xFF) {
+            break;
+        }
+    }
     unlockI2C();
     return res;
 }
@@ -43,8 +56,10 @@ void writeI2C(int fd, uint8_t reg, uint8_t data)
 {
     lockI2C();
     int delay = 1;
+    static char errBuffer[1024];
     while (wiringPiI2CWriteReg8(fd, reg, data) < 0) {
-        perror("wiringPiI2CWriteReg8");
+        snprintf(errBuffer, 1024, "wiringPiI2CWriteReg8 @%3d %2x←%2x %9d", fd, reg, data, delay);
+        perror(errBuffer);
         usleep(delay);
         delay *= 2;
     }

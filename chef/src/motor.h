@@ -10,7 +10,9 @@
 #define INVERSE_L_MOTOR
 // #define INVERSE_R_MOTOR
 
-#define ENABLE_RATE_LIMITER
+// #define ENABLE_RATE_LIMITER
+
+#define MOTOR_INTERVAL 10
 
 // V/s
 #define RATE_LIMITER_UP 6
@@ -45,5 +47,8 @@ uint8_t moteurTensionToPWM(float V);
 void setMoteurTensionRaw(float lVolt, float rVolt, bool lFor, bool rFor);
 void rawFreewheel();
 void rawBrake();
+void setEnA(uint8_t val);
+void setEnB(uint8_t val);
+void setIn(uint8_t val);
 
 #endif

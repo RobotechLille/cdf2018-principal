@@ -7,10 +7,12 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
+#include "buttons.h"
+#include "debug.h"
+#include "dimensions.h"
 #include "lcd.h"
 #include "motor.h"
-#include "buttons.h"
-#include "dimensions.h"
+#include "position.h"
 
 #define UP_TIME 1000
 #define HIGH_TIME 3000
@@ -19,7 +21,8 @@
 #define MAXI MOTOR_SATURATION_MAX
 #define INTERVAL 10
 
-void changerMoteursWrapper(float l, float r) {
+void changerMoteursWrapper(float l, float r)
+{
     /* clearLCD(); */
     printfToLCD(LCD_LINE_1, "L: %f", l);
     printfToLCD(LCD_LINE_2, "R: %f", r);
@@ -36,8 +39,12 @@ int main(int argc, char* argv[])
 
     initI2C();
     initLCD();
+    configureDebug();
     configureButtons();
     configureMotor();
+    configurePosition();
+    startDebug();
+    debugSetActive(true);
 
     for (;;) {
         for (int i = 0; i < UP_TIME; i += INTERVAL) {
@@ -73,5 +80,4 @@ int main(int argc, char* argv[])
         changerMoteursWrapper(0, 0);
         delay(LOW_TIME);
     }
-
 }

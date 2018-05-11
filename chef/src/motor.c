@@ -7,6 +7,8 @@
 
 float lVolt;
 float rVolt;
+float lVoltDbg;
+float rVoltDbg;
 float lVoltCons;
 float rVoltCons;
 struct timespec motStart;
@@ -18,8 +20,8 @@ enum motorState motState = braking;
 
 void configureMotor()
 {
-    registerDebugVar("lVolt", f, &lVolt);
-    registerDebugVar("rVolt", f, &rVolt);
+    registerDebugVar("lVolt", f, &lVoltDbg);
+    registerDebugVar("rVolt", f, &rVoltDbg);
     pthread_mutex_init(&motCons, NULL);
     pthread_create(&tMotor, NULL, TaskMotor, NULL);
 }
@@ -54,6 +56,8 @@ void setMoteurTensionRaw(float l, float r, bool lFor, bool rFor)
 {
     lVolt = l;
     rVolt = r;
+    lVoltDbg = (lFor ? -1 : 1) * l;
+    rVoltDbg = (rFor ? -1 : 1) * r;
 
     uint8_t enA = 0;
     uint8_t enB = 0;
@@ -79,9 +83,33 @@ void setMoteurTensionRaw(float l, float r, bool lFor, bool rFor)
         // Stay at 0 : brake mode
     }
 
-    writeI2C(fdFPGA(), MOTOR_IN, in);
-    writeI2C(fdFPGA(), MOTOR_ENA, enA);
-    writeI2C(fdFPGA(), MOTOR_ENB, enB);
+    setIn(in);
+    setEnA(enA);
+    setEnB(enB);
+}
+
+uint8_t enAbuff = 0x80;
+void setEnA(uint8_t val) {
+    if (val != enAbuff) {
+        writeI2C(fdFPGA(), MOTOR_ENA, val);
+        enAbuff = val;
+    }
+}
+
+uint8_t enBbuff = 0x80;
+void setEnB(uint8_t val) {
+    if (val != enBbuff) {
+        writeI2C(fdFPGA(), MOTOR_ENB, val);
+        enBbuff = val;
+    }
+}
+
+uint8_t inbuff = 0xFF;
+void setIn(uint8_t val) {
+    if (val != inbuff) {
+        writeI2C(fdFPGA(), MOTOR_IN, val);
+        inbuff = val;
+    }
 }
 
 void* TaskMotor(void* pData)
@@ -156,7 +184,7 @@ void* TaskMotor(void* pData)
             break;
         }
 
-        usleep(1000);
+        usleep(MOTOR_INTERVAL * 1000);
     }
 
     return NULL;
@@ -166,17 +194,21 @@ void rawBrake()
 {
     lVolt = 0;
     rVolt = 0;
-    writeI2C(fdFPGA(), MOTOR_IN, 0);
-    writeI2C(fdFPGA(), MOTOR_ENA, UINT8_MAX);
-    writeI2C(fdFPGA(), MOTOR_ENB, UINT8_MAX);
+    lVoltDbg = 0;
+    rVoltDbg = 0;
+    setIn(0);
+    setEnA(UINT8_MAX);
+    setEnB(UINT8_MAX);
 }
 void rawFreewheel()
 {
     lVolt = 0;
     rVolt = 0;
-    writeI2C(fdFPGA(), MOTOR_IN, (1 << IN1) | (1 << IN2) | (1 << IN3) | (1 << IN4));
-    writeI2C(fdFPGA(), MOTOR_ENA, 0);
-    writeI2C(fdFPGA(), MOTOR_ENA, 0);
+    lVoltDbg = 0;
+    rVoltDbg = 0;
+    setIn((1 << IN1) | (1 << IN2) | (1 << IN3) | (1 << IN4));
+    setEnA(0);
+    setEnB(0);
 }
 
 void setMoteurTension(float l, float r)
