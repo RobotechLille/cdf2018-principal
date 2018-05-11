@@ -4,18 +4,18 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
 
 #include "debug.h"
 #include "dimensions.h"
+#include "fpga.h"
 #include "position.h"
 
 // Globales
 struct position connu;
-struct F2CI_CODERs deltaCoders;
-pthread_mutex_t posPolling;
 pthread_mutex_t posConnu;
 pthread_cond_t newPos;
 pthread_t tPosition;
@@ -24,27 +24,18 @@ pthread_t tPosition;
 unsigned int nbCalcPos;
 long lCodTot, rCodTot;
 
-void onF2CI_CODER()
-{
-    readCF(&deltaCoders, sizeof(struct F2CI_CODERs));
-    pthread_mutex_unlock(&posPolling);
-}
-
-struct timespec maxDelayDelta = { 0, 10000000 };
+int16_t oldL, oldR;
+int16_t newL, newR;
+int16_t deltaL, deltaR;
 
 void updateDelta()
 {
-    int ret = -1;
-    pthread_mutex_lock(&posPolling);
-
-    while (ret != 0) {
-        // Sending
-        sendCF(F2CI_CODER, NULL, 0);
-        // Waiting for reception
-        ret = pthread_mutex_timedlock(&posPolling, &maxDelayDelta);
-    }
-
-    pthread_mutex_unlock(&posPolling);
+    newL = (readI2C(fdFPGA(), CODER_LEFT_H) << 8 | readI2C(fdFPGA(), CODER_LEFT_L));
+    newR = (readI2C(fdFPGA(), CODER_RIGHT_H) << 8 | readI2C(fdFPGA(), CODER_RIGHT_L));
+    deltaL = (abs(oldL - newL) < UINT16_MAX/2) ? newL - oldL : UINT16_MAX - oldL + newL;
+    deltaR = (abs(oldR - newR) < UINT16_MAX/2) ? newR - oldR : UINT16_MAX - oldR + newR;
+    oldL = newL;
+    oldR = newR;
 }
 
 void* TaskPosition(void* pData)
@@ -55,6 +46,8 @@ void* TaskPosition(void* pData)
     nbCalcPos = 0;
     lCodTot = 0;
     rCodTot = 0;
+    oldL = 0;
+    oldR = 0;
 
     updateDelta();
 
@@ -64,16 +57,16 @@ void* TaskPosition(void* pData)
 
         // Calculation
 #ifdef INVERSE_L_CODER
-        deltaCoders.dL = -deltaCoders.dL;
+        deltaL = -deltaL;
 #endif
 #ifdef INVERSE_R_CODER
-        deltaCoders.dR = -deltaCoders.dR;
+        deltaR = -deltaR;
 #endif
-        lCodTot += deltaCoders.dL;
-        rCodTot += deltaCoders.dR;
+        lCodTot += deltaL;
+        rCodTot += deltaR;
 
-        float dR = deltaCoders.dR * AV_PER_CYCLE;
-        float dL = deltaCoders.dL * AV_PER_CYCLE;
+        float dR = deltaR * AV_PER_CYCLE;
+        float dL = deltaL * AV_PER_CYCLE;
 
         float deltaO = atan2(dR - dL, DISTANCE_BETWEEN_WHEELS);
         float deltaD = (dL + dR) / 2;
@@ -94,12 +87,12 @@ void* TaskPosition(void* pData)
 
 void configurePosition()
 {
-    pthread_mutex_init(&posPolling, NULL);
     pthread_mutex_init(&posConnu, NULL);
     pthread_cond_init(&newPos, NULL);
-    registerRxHandlerCF(F2CI_CODER, onF2CI_CODER);
     registerDebugVar("lCodTot", ld, &lCodTot);
     registerDebugVar("rCodTot", ld, &rCodTot);
+    registerDebugVar("newL", ld, &newL);
+    registerDebugVar("newR", ld, &newR);
     connu.x = 0;
     connu.y = 0;
     connu.o = 0;

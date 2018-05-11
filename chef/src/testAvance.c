@@ -6,7 +6,6 @@
 #include <unistd.h> // sleep
 #include <wiringPi.h>
 
-#include "CF.h"
 #include "actionneurs.h"
 #include "debug.h"
 #include "i2c.h"
@@ -35,23 +34,16 @@ int main()
     srand(time(NULL));
 
     configureDebug();
-    configureCF();
-    configureIMU();
-    configureActionneurs();
     configurePosition();
     configureMovement();
     startDebug();
 
     debugSetActive(true);
     sleep(1);
-    /* struct position pos = {350, 0, -0.95*M_PI/3.0 }; */
     struct position pos = {100000, 0, 0 };
     setDestination(&pos);
     waitDestination();
-    for (;;) {
-        setLoquet(false);
-        setLoquet(true);
-    }
+    brake();
     printf("Done\n");
 
     // Bloque jusqu'à l'arrivée d'un signal
@@ -64,9 +56,6 @@ int main()
 
     deconfigureMovement();
     deconfigurePosition();
-    deconfigureActionneurs();
-    deconfigureIMU();
-    deconfigureCF();
     deconfigureDebug();
     return EXIT_SUCCESS;
 }

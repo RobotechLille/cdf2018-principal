@@ -6,7 +6,6 @@
 #include <unistd.h> // sleep
 #include <wiringPi.h>
 
-#include "CF.h"
 #include "actionneurs.h"
 #include "debug.h"
 #include "i2c.h"
@@ -35,7 +34,6 @@ int main()
     srand(time(NULL));
 
     configureDebug();
-    configureCF();
     configureIMU();
     configureActionneurs();
     configurePosition();
@@ -43,9 +41,7 @@ int main()
     startDebug();
 
     debugSetActive(true);
-    sleep(1);
-    /* struct position pos = {350, 0, -0.95*M_PI/3.0 }; */
-    struct position pos = {100000, 0, 0 };
+    struct position pos = {1000, 0, 0 };
     setDestination(&pos);
     waitDestination();
     for (;;) {
@@ -66,7 +62,6 @@ int main()
     deconfigurePosition();
     deconfigureActionneurs();
     deconfigureIMU();
-    deconfigureCF();
     deconfigureDebug();
     return EXIT_SUCCESS;
 }

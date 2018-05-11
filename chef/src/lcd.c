@@ -37,7 +37,7 @@ void eraseLCD()
 void onLCD()
 {
     digitalWrite(LCD_ON_PIN, LOW);
-    delay(100);
+    delay(50);
 
     // TODO More details
     sendLCD(0x33, LCD_MODE_CMD); // Initialise
@@ -47,13 +47,13 @@ void onLCD()
     sendLCD(0x28, LCD_MODE_CMD); // Data length, number of lines, font size
     eraseLCD();
 
-    delay(50);
+    delay(25);
 }
 
 void offLCD()
 {
     digitalWrite(LCD_ON_PIN, HIGH);
-    delay(100);
+    delay(50);
 }
 
 void resetLCD()

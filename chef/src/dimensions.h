@@ -19,8 +19,8 @@
 #define MOTOR_SPEED_GAIN (MOTOR_SPEED_GAIN_RPMP_V / 60.0) // motor rev/s/V
 #define MOTOR_NOMINAL_TENSION 24.0 // V (from datasheet)
 #define MOTOR_CONTROLLER_ALIMENTATION 24.0 // V (from elec)
-#define MOTOR_CONTROLLER_REFERENCE 5 // V (from wiring)
-#define MOTOR_SATURATION_MIN 0 // V (from random)
+#define MOTOR_CONTROLLER_REFERENCE 5.0 // V (from wiring)
+#define MOTOR_SATURATION_MIN 0.0 // V (from random)
 #define MOTOR_SATURATION_MAX 3.0 // V (from testing)
 #define PWM_MAX 3.3 // V (from FPGA datasheet)
 #define CODER_RESOLUTION 370.0 // cycles/motor rev
@@ -42,5 +42,6 @@
 #define P 5.0
 #define I 0.0
 #define D 0.0
+#define M 0.0
 
 #endif

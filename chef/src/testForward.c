@@ -8,11 +8,8 @@
 #include <wiringPiI2C.h>
 
 #include "lcd.h"
-#include "CF.h"
 #include "motor.h"
 #include "buttons.h"
-
-#define PATATE 2
 
 int main(int argc, char* argv[])
 {
@@ -20,33 +17,37 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
+    float patate = 2;
+    if (argc == 2) {
+        sscanf(argv[1], "%f", &patate);
+    }
+
     wiringPiSetup();
 
     initI2C();
     initLCD();
-    configureCF();
     configureButtons();
     configureMotor();
 
     for (;;) {
         clearLCD();
         printToLCD(LCD_LINE_1, "Forward");
-        setMoteurTension(PATATE, PATATE);
+        setMoteurTension(patate, patate);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Right");
-        setMoteurTension(-PATATE, PATATE);
+        setMoteurTension(-patate, patate);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Left");
-        setMoteurTension(PATATE, -PATATE);
+        setMoteurTension(patate, -patate);
         pressedButton(BUT_BLOCK);
 
         clearLCD();
         printToLCD(LCD_LINE_1, "Backward");
-        setMoteurTension(-PATATE, -PATATE);
+        setMoteurTension(-patate, -patate);
         pressedButton(BUT_BLOCK);
 
         clearLCD();

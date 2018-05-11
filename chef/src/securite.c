@@ -4,22 +4,14 @@
 #include <unistd.h>
 
 #include "debug.h"
+#include "fpga.h"
 #include "securite.h"
 
 // Globales
 pthread_t tSecurite;
-pthread_mutex_t secPolling;
 pthread_mutex_t secData;
-struct F2CI_CAPTs secRaw;
+float secFrontL, secFrontR, secBackL, secBackR;
 float secFront, secBack;
-
-void onF2CI_CAPT()
-{
-    readCF(&secRaw, sizeof(struct F2CI_CAPTs));
-    pthread_mutex_unlock(&secPolling);
-}
-
-struct timespec maxDelaySecu = { 0, 10000000 };
 
 void* TaskSecurite(void* pData)
 {
@@ -27,25 +19,33 @@ void* TaskSecurite(void* pData)
 
     for (;;) {
 
-        int ret = -1;
-        pthread_mutex_lock(&secPolling);
-        while (ret != 0) {
-            // Sending
-            sendCF(F2CI_CAPT, NULL, 0);
-            // Waiting for reception
-            ret = pthread_mutex_timedlock(&secPolling, &maxDelaySecu);
-        }
-        pthread_mutex_unlock(&secPolling);
-
         pthread_mutex_lock(&secData);
-        secFront = (float)secRaw.front * SOUND_MM_P_MS;
-        secBack = (float)secRaw.back * SOUND_MM_P_MS;
+        uint16_t secFrontLB = (readI2C(fdFPGA(), CAPT_FRONT_LEFT_H) << 8 | readI2C(fdFPGA(), CAPT_FRONT_LEFT_L));
+        uint16_t secFrontRB = (readI2C(fdFPGA(), CAPT_FRONT_RIGHT_H) << 8 | readI2C(fdFPGA(), CAPT_FRONT_RIGHT_L));
+        uint16_t secBackLB = (readI2C(fdFPGA(), CAPT_BACK_LEFT_H) << 8 | readI2C(fdFPGA(), CAPT_BACK_LEFT_L));
+        uint16_t secBackRB = (readI2C(fdFPGA(), CAPT_BACK_RIGHT_H) << 8 | readI2C(fdFPGA(), CAPT_BACK_RIGHT_L));
+        secFrontL = secFrontLB * SOUND_MM_P_MS;
+        secFrontR = secFrontRB * SOUND_MM_P_MS;
+        secBackL = secBackLB * SOUND_MM_P_MS;
+        secBackR = secBackRB * SOUND_MM_P_MS;
+        secFront = fmin(secFrontL, secFrontR);
+        secBack = fmin(secBackL, secBackR);
         pthread_mutex_unlock(&secData);
 
         usleep(SENSOR_SAMPLING_INTERVAL * 1000);
     }
 
     return NULL;
+}
+
+void getAllDistance(float* frontL, float* frontR, float* backL, float* backR)
+{
+    pthread_mutex_lock(&secData);
+    *frontR = secFrontR;
+    *frontL = secFrontL;
+    *backL = secBackL;
+    *backR = secBackR;
+    pthread_mutex_unlock(&secData);
 }
 
 void getDistance(float* front, float* back)
@@ -58,11 +58,13 @@ void getDistance(float* front, float* back)
 
 void configureSecurite()
 {
-    pthread_mutex_init(&secPolling, NULL);
-    pthread_mutex_init(&secData, NULL);
-    registerRxHandlerCF(F2CI_CAPT, onF2CI_CAPT);
     registerDebugVar("secFront", f, &secFront);
     registerDebugVar("secBack", f, &secBack);
+    registerDebugVar("secFrontL", f, &secFrontL);
+    registerDebugVar("secBackL", f, &secBackL);
+    registerDebugVar("secFrontR", f, &secFrontR);
+    registerDebugVar("secBackR", f, &secBackR);
+    pthread_mutex_init(&secData, NULL);
     pthread_create(&tSecurite, NULL, TaskSecurite, NULL);
 }
 

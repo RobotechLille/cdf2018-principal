@@ -112,28 +112,9 @@ void* TaskParcours(void* pdata)
 {
     (void)pdata;
 
-    float vitBase = 1.5;
-    float secuBase = 500;
-
-    for (int i = 0; i <= 3000; i++) {
-        float av, ar;
-        getDistance(&av, &ar);
-        if (av < secuBase || ar < secuBase) {
-            brake();
-        } else {
-            setMoteurTension(vitBase, vitBase);
-        }
-        usleep(1000);
-    }
-
-    return NULL;
-}
-
-void* TaskParcoursLoquet(void* pdata)
-{
-    (void)pdata;
-
-    gotoPoint(350, 0, 1.05*M_PI/3.0);
+    /* gotoPoint(350, 0, 1.05*M_PI/3.0); */
+    gotoPoint(500, 0, 0);
+    waitDestination();
     for (int i = 0; i < 5; i++) {
         setLoquet(false);
         setLoquet(true);

@@ -3,6 +3,7 @@
 #include "actionneurs.h"
 #include "debug.h"
 #include "motor.h"
+#include "fpga.h"
 
 float lVolt;
 float rVolt;
@@ -14,9 +15,6 @@ struct timespec motEcoule;
 pthread_mutex_t motCons;
 pthread_t tMotor;
 enum motorState motState = braking;
-
-static struct C2FD_PWMs msgBrake = { 0, 0, UINT8_MAX };
-static struct C2FD_PWMs msgFree = { 0, 0, (1 << IN1) | (1 << IN2) | (1 << IN3) | (1 << IN4) };
 
 void configureMotor()
 {
@@ -57,29 +55,33 @@ void setMoteurTensionRaw(float l, float r, bool lFor, bool rFor)
     lVolt = l;
     rVolt = r;
 
+    uint8_t enA = 0;
+    uint8_t enB = 0;
+    uint8_t in = 0;
+
 #ifdef INVERSE_L_MOTOR
     lFor = !lFor;
 #endif
-    static struct C2FD_PWMs msg;
-    msg.in = 0x00;
     if (l > 0) {
-        msg.in |= 1 << (lFor ? IN1 : IN2);
-        msg.ena = moteurTensionToPWM(l);
+        in |= 1 << (lFor ? IN1 : IN2);
+        enA = moteurTensionToPWM(l);
     } else {
-        // Nothing needs to be changed for this motor controller
+        // Stay at 0 : brake mode
     }
 
 #ifdef INVERSE_R_MOTOR
     rFor = !rFor;
 #endif
     if (r > 0) {
-        msg.in |= 1 << (rFor ? IN3 : IN4);
-        msg.enb = moteurTensionToPWM(r);
+        in |= 1 << (rFor ? IN3 : IN4);
+        enB = moteurTensionToPWM(r);
     } else {
-        // Nothing needs to be changed for this motor controller
+        // Stay at 0 : brake mode
     }
 
-    sendCF(C2FD_PWM, &msg, sizeof(struct C2FD_PWMs));
+    writeI2C(fdFPGA(), MOTOR_IN, in);
+    writeI2C(fdFPGA(), MOTOR_ENA, enA);
+    writeI2C(fdFPGA(), MOTOR_ENB, enB);
 }
 
 void* TaskMotor(void* pData)
@@ -151,7 +153,6 @@ void* TaskMotor(void* pData)
             break;
         case freewheeling:
             rawFreewheel();
-            sendCF(C2FD_PWM, &msgFree, sizeof(struct C2FD_PWMs));
             break;
         }
 
@@ -165,13 +166,17 @@ void rawBrake()
 {
     lVolt = 0;
     rVolt = 0;
-    sendCF(C2FD_PWM, &msgBrake, sizeof(struct C2FD_PWMs));
+    writeI2C(fdFPGA(), MOTOR_IN, 0);
+    writeI2C(fdFPGA(), MOTOR_ENA, UINT8_MAX);
+    writeI2C(fdFPGA(), MOTOR_ENB, UINT8_MAX);
 }
 void rawFreewheel()
 {
     lVolt = 0;
     rVolt = 0;
-    sendCF(C2FD_PWM, &msgFree, sizeof(struct C2FD_PWMs));
+    writeI2C(fdFPGA(), MOTOR_IN, (1 << IN1) | (1 << IN2) | (1 << IN3) | (1 << IN4));
+    writeI2C(fdFPGA(), MOTOR_ENA, 0);
+    writeI2C(fdFPGA(), MOTOR_ENA, 0);
 }
 
 void setMoteurTension(float l, float r)

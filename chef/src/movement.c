@@ -38,7 +38,9 @@ void configureMovement()
     stop();
 
     configureMotor();
+#ifdef ENABLE_SECURITE
     configureSecurite();
+#endif
 
     nbCalcCons = 0;
 
@@ -123,8 +125,8 @@ void* TaskMovement(void* pData)
             yDiff = cons.y - connu.y;
             oDirEcart = angleGap(atan2(yDiff, xDiff), connu.o);
             float oErrRev = oDirEcart * DISTANCE_BETWEEN_WHEELS / WHEEL_PERIMETER;
-            float lVolt = -oErrRev * P;
-            float rVolt = oErrRev * P;
+            float lVolt = -oErrRev * P + (oErrRev > 0 ? -M : M);
+            float rVolt = oErrRev * P + (oErrRev > 0 ? M : -M);
             setMoteurTension(lVolt, rVolt);
 
             nbCalcCons++;
@@ -158,8 +160,8 @@ void* TaskMovement(void* pData)
 
             lErr = dErrRev - oErrRev;
             rErr = dErrRev + oErrRev;
-            float lVolt = lErr * P;
-            float rVolt = rErr * P;
+            float lVolt = lErr * P + (lErr > 0 ? M : -M);
+            float rVolt = rErr * P + (rErr > 0 ? M : -M);
             setMoteurTension(lVolt, rVolt);
 
             nbCalcCons++;
@@ -175,8 +177,8 @@ void* TaskMovement(void* pData)
                 lastPosCalc = getPositionNewer(&connu, lastPosCalc);
                 oDirEcart = angleGap(cons.o, connu.o);
                 float oErrRev = oDirEcart * DISTANCE_BETWEEN_WHEELS / WHEEL_PERIMETER;
-                float lVolt = -oErrRev * P;
-                float rVolt = oErrRev * P;
+                float lVolt = -oErrRev * P + (oErrRev > 0 ? -M : M);
+                float rVolt = oErrRev * P + (oErrRev > 0 ? M : -M);
                 setMoteurTension(lVolt, rVolt);
 
                 nbCalcCons++;

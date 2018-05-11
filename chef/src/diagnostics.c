@@ -7,7 +7,7 @@
 #include "lcd.h"
 
 #include "CA.h"
-#include "CF.h"
+#include "fpga.h"
 #include "actionneurs.h"
 #include "imu.h"
 #include "motor.h"
@@ -18,24 +18,6 @@ bool recu;
 void setRecu()
 {
     recu = true;
-}
-
-bool diagFPGA(void* arg)
-{
-    (void)arg;
-
-    recu = false;
-    registerRxHandlerCF(C2FD_PING, setRecu);
-    sendCF(C2FD_PING, NULL, 0);
-
-    for (int i = 0; i <= DIAGNOSTIC_SERIAL_TIMEOUT; i += DIAGNOSTIC_POLL_INTERVAL) {
-        if (recu) {
-            break;
-        }
-        usleep(DIAGNOSTIC_POLL_INTERVAL * 1000);
-    }
-    registerRxHandlerCF(C2FD_PING, NULL);
-    return recu;
 }
 
 bool diagArduino(void* arg)
@@ -85,6 +67,12 @@ bool diagCodeuse(void* arg)
     } else { // Arrière
         return (-diff > DIAGNOSTIC_CODEUSES_DIFF_MIN);
     }
+}
+
+bool diagFPGA(void* arg)
+{
+    (void)arg;
+    return connectedFPGA();
 }
 
 bool diagIMU(void* arg)

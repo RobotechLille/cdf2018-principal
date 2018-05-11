@@ -3,8 +3,8 @@
 
 #include <math.h>
 #include <stdint.h>
+#include <stdbool.h>
 
-#include "CF.h"
 #include "dimensions.h"
 
 #define INVERSE_L_MOTOR

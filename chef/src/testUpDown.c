@@ -8,15 +8,15 @@
 #include <wiringPiI2C.h>
 
 #include "lcd.h"
-#include "CF.h"
 #include "motor.h"
 #include "buttons.h"
+#include "dimensions.h"
 
 #define UP_TIME 1000
 #define HIGH_TIME 3000
 #define DOWN_TIME 1000
 #define LOW_TIME 2000
-#define MAXI 12
+#define MAXI MOTOR_SATURATION_MAX
 #define INTERVAL 10
 
 void changerMoteursWrapper(float l, float r) {
@@ -36,7 +36,6 @@ int main(int argc, char* argv[])
 
     initI2C();
     initLCD();
-    configureCF();
     configureButtons();
     configureMotor();
 

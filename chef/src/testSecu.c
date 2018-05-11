@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <unistd.h>
 
-#include "CF.h"
+#include "i2c.h"
 #include "securite.h"
 
 int main(int argc, char* argv[])
@@ -12,14 +12,14 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
-    configureCF();
+    initI2C();
     configureSecurite();
 
-    float f, b;
+    float fl, fr, bl, br;
 
     for (;;) {
-        getDistance(&f, &b);
-        printf("Av: %6f Ar: %6f\n", f, b);
+        getAllDistance(&fl, &fr, &bl, &br);
+        printf("FL: %9f FR: %9f BL: %9f BR: %9f\n", fl, fr, bl, br);
         usleep(60 * 1000);
     }
 }

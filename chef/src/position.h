@@ -5,9 +5,6 @@
 #ifndef __POSITION_H_
 #define __POSITION_H_
 
-#include "CF.h"
-#include <pthread.h>
-
 // #define INVERSE_L_CODER
 #define INVERSE_R_CODER
 

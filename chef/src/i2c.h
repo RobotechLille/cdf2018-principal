@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 void initI2C();
-int openI2C(int8_t address);
-int8_t readI2C(int fd, int8_t reg);
-void writeI2C(int fd, int8_t reg, int8_t data);
+int openI2C(uint8_t address);
+uint8_t readI2C(int fd, uint8_t reg);
+void writeI2C(int fd, uint8_t reg, uint8_t data);
 
 // Get full control over the I2C communication
 // Note: Don't use methods from this library

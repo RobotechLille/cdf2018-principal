@@ -1,18 +1,25 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <stdbool.h>
 #include <wiringPiI2C.h>
 
 #include "i2c.h"
 
 pthread_mutex_t sI2C;
 
+bool i2cInited = false;
+
 void initI2C()
 {
-    pthread_mutex_init(&sI2C, NULL);
+    if (!i2cInited) {
+        pthread_mutex_init(&sI2C, NULL);
+        i2cInited = true;
+    }
 }
 
-int openI2C(int8_t address)
+int openI2C(uint8_t address)
 {
     lockI2C();
     int fd = wiringPiI2CSetup(address);
@@ -24,24 +31,24 @@ int openI2C(int8_t address)
     return fd;
 }
 
-int8_t readI2C(int fd, int8_t reg)
+uint8_t readI2C(int fd, uint8_t reg)
 {
     lockI2C();
-    int8_t res = wiringPiI2CReadReg8(fd, reg);
+    uint8_t res = wiringPiI2CReadReg8(fd, reg);
     unlockI2C();
     return res;
 }
 
-void writeI2C(int fd, int8_t reg, int8_t data)
+void writeI2C(int fd, uint8_t reg, uint8_t data)
 {
-
     lockI2C();
-    int res = wiringPiI2CWriteReg8(fd, reg, data);
-    unlockI2C();
-    if (res < 0) {
+    int delay = 1;
+    while (wiringPiI2CWriteReg8(fd, reg, data) < 0) {
         perror("wiringPiI2CWriteReg8");
-        exit(EXIT_FAILURE);
+        usleep(delay);
+        delay *= 2;
     }
+    unlockI2C();
 }
 
 void lockI2C()

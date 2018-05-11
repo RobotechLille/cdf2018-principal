@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 
-#include "CF.h"
 #include "motor.h"
 
 int main(int argc, char* argv[])
@@ -11,8 +10,8 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
-    configureCF();
     configureMotor();
-    stop();
+
+    brake();
 
 }

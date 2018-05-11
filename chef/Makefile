@@ -11,7 +11,7 @@ CFLAGS_CUSTOM += -g
 ## Générateurs de drapeaux pour les bibliothèques
 PKG_CONFIG=pkg-config
 ## Nom des objets communs
-OBJS=actionneurs buttons CA CF debug diagnostics i2c imu ihm lcd motor movement parcours points position securite
+OBJS=actionneurs buttons CA debug diagnostics fpga i2c imu ihm lcd motor movement parcours points position securite
 OBJS_O=$(addprefix obj/,$(addsuffix .o,$(OBJS)))
 
 # VARIABLES AUTOMATIQUES
@@ -32,7 +32,7 @@ default: bin/premier bin/local $(subst src,bin,$(subst .c,,$(wildcard src/test*.
 # Génération des fichiers éxecutables
 bin/%: obj/%.o $(OBJS_O)
 	$(CC) $(LDFLAGS) $(LDFLAGS_CUSTOM) $^ -o $@
-	$(OBJCOPY) --only-keep-debug $@ $@.debug
+	# $(OBJCOPY) --only-keep-debug $@ $@.debug
 	$(STRIP) --strip-debug --strip-unneeded $@
 
 # Binaires (dont il faut spécifier les objets explicitement)

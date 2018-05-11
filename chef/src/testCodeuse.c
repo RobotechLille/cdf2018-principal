@@ -6,17 +6,14 @@
 #include <unistd.h> // sleep
 #include <wiringPi.h>
 
-#include "CF.h"
 #include "debug.h"
 #include "i2c.h"
-#include "ihm.h"
-#include "imu.h"
 #include "motor.h"
 #include "position.h"
 
 pthread_mutex_t sRunning;
 
-#define VIT 0
+#define VIT 1
 
 void endRunning(int signal)
 {
@@ -28,11 +25,13 @@ int main()
 {
 
     configureDebug();
-    configureCF();
     configurePosition();
     configureMotor();
+    startDebug();
+    debugSetActive(true);
 
-    setPWMTension(VIT, VIT);
+    setMoteurTension(VIT, VIT);
+    /* freewheel(); */
 
     long lCod, rCod;
     for (;;) {
