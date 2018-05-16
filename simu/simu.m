@@ -3,7 +3,7 @@ SIMULATION = 0;
 
 % Paramètres de lecture
 DIRNAME = "/home/geoffrey/CdF/cdf2018-principal/log/";
-FILENAME = "last.csv";
+FILENAME = "001418.csv";
 PATH = DIRNAME + FILENAME;
 
 % Paramètres de simulation
@@ -51,32 +51,36 @@ absoluteMaxVitesseRobotRevpS = (absoluteMaxVitesseRobotMMpS / wheelPerimeter); %
 absoluteMaxVitesseRobotCycpS = (absoluteMaxVitesseRobotRevpS * coderFullResolution); % cycle/s
 
 % Constantes asservissement
-global dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oEcartMin oEcartMax targetTensionRatio targetTension carotteDistance dKP dKI dKD oKP oKI oKD margeSecurite;
+global oTensionMin dTensionMin oVitMin dVitMin dDirEcartMin dDirEcartMax oDirEcartMin oDirEcartMax oEcartMin oEcartMax targetTensionRatio targetTension carotteDistance carotteAngle dKP dKI dKD oKP oKI oKD margeSecurite;
 
+% Asservissement en angle
+oVitMin = 0.5; % rad/s
+oTensionMin = 1; % V
+oDirEcartMin = (20.0 / 360.0 * 2.0 * pi); % rad
+oEcartMin = (10.0 / 360.0 * 2.0 * pi); % rad
+oEcartMax = (20.0 / 360.0 * 2.0 * pi); % rad
+derivPi = (motorSaturationMax / (wheelPerimeter * pi));
+oKP = (3.0 * derivPi); % au max peut dérivier de pi
+oKI = 0.0;
+oKD = 0.0;
+carotteAngle = (targetTension / oKP); % mm
 
 % Asservissement en distance
-dDirEcartMin = 30.0; % mm
-dDirEcartMax = 50.0; % mm
-dKP = 0.05;
+dVitMin = 10.0; % mm/s
+dTensionMin = 1; % V
+dDirEcartMin = 20.0; % mm
+dDirEcartMax = 70.0; % mm
+dKP = 0.1;
 dKI = 0.0;
 dKD = 0.0;
 targetTensionRatio = 0.75;
 targetTension = (targetTensionRatio * motorSaturationMax); % V
 carotteDistance = (targetTension / dKP); % mm
 
-% Asservissement en angle
-oDirEcartMin = (25.0 / 360.0 * 2.0 * pi); % rad
-oDirEcartMax = (45.0 / 360.0 * 2.0 * pi); % rad
-oEcartMin = (25.0 / 360.0 * 2.0 * pi); % rad
-oEcartMax = (45.0 / 360.0 * 2.0 * pi); % rad
-oKP = (motorSaturationMax / (wheelPerimeter * pi)); % au max peut dérivier de pi
-oKI = 0.0;
-oKD = 0.0;
-carotteAngle = (targetTension / oKP); % mm
-
 margeSecurite = 300.0; % mm
 
 %END DIMENSIONS
+
 
 global s;
 if SIMULATION == 1
@@ -128,80 +132,27 @@ end
 
 % Graphes
 
-clf
-global p;
+global curGraph graphWidth graphHeight;
+curGraph = 1;
+graphWidth = 3;
+graphHeight = 2;
 
-% Évolution spatiale
-subplot(2, 3, 1);
-initGraph
+clf
+graphSpatiale();
+graphRoues();
+graphCodeuses();
+graphDistance();
+graphRotation();
+graphSecurite();
+%graphVitesseDist();
+%graphVitesseAngl();
+%graphEtat();
+
 updateToTime(SIMULATION_DT);
 
-% Codeuses
-p = subplot(2, 3, 3);
-hold on;
-timeGraph(["lCodTot", "rCodTot", "newL", "newR"]);
-addLimitline(p, 2^16-1);
-addLimitline(p, 0);
-title("Codeuses");
-xlabel("Temps (s)");
-ylabel("Crans");
-legend("Total gauche", "Total droite", "Brut gauche", "Brut droite");
+% FONCTIONS
 
-
-% Roues
-p = subplot(2, 3, 2);
-hold on;
-timeGraph(["lVolt", "rVolt", "dVolt", "oVolt"]);
-addLimitline(p, -motorSaturationMin);
-addLimitline(p, -motorSaturationMax);
-addLimitline(p, motorSaturationMin);
-addLimitline(p, motorSaturationMax);
-addLimitline(p, 0);
-title("Roues");
-xlabel("Temps (s)");
-ylabel("Tension (V)");
-legend("Tension gauche", "Tension droite", "Dont distance", "Dont direction");
-
-% Distance
-p = subplot(2, 3, 4);
-hold on;
-timeGraph(["dDirEcart", "dEcart", "oErr"]);
-addLimitline(p, 0);
-addLimitline(p, dDirEcartMin);
-addLimitline(p, dDirEcartMax);
-addLimitline(p, -dDirEcartMin);
-addLimitline(p, -dDirEcartMax);
-title("Distance");
-xlabel("Temps (s)");
-ylabel("Distance (mm)");
-legend("Err. distance", "Err. retenue", "Err rotation");
-
-% Rotation
-p = subplot(2, 3, 5);
-hold on;
-timeGraph(["oDirEcart", "oConsEcart", "oEcart"]);
-addLimitline(p, oDirEcartMax);
-addLimitline(p, oDirEcartMin);
-addLimitline(p, -oDirEcartMax);
-addLimitline(p, -oDirEcartMin);
-title("Rotation");
-xlabel("Temps (s)");
-ylabel("Angle (rad)");
-legend("Err. direction", "Err. consigne", "Err. retenue");
-
-% Securité
-p = subplot(2, 3, 6);
-hold on;
-timeGraph(["dDirEcart", "secFrontL", "secFrontR", "secBackL", "secBackR", "dErr"]);
-addLimitline(p, 0);
-addLimitline(p, margeSecurite);
-addLimitline(p, -margeSecurite);
-title("Distances de sécurité");
-xlabel("Temps (s)");
-ylabel("Distance (mm)");
-legend("Err. distance", "Avant gauche", "Avant droite", "Arrière gauche", "Arrière droite", "Err. retenue");
-
-% Fonctions
+% Données
 
 function ts = getTS(name)
     global SIMULATION s;
@@ -226,6 +177,33 @@ function pt = getTimePoints()
         ts = getTS('time');
         pt = ts.Time;
     end
+end
+
+function d = getTSData(name, i)
+    ts = getTS(name);
+    if isempty(ts.Data)
+        d = 0;
+    else
+        d = ts.Data(i);
+    end
+end
+
+% Dessin
+
+function [x, y] = pointArround(xC, yC, xD, yD, o)
+    D = xD + yD * 1i;
+    F = abs(D) .* exp(1i * (angle(D) + o - pi/2));
+    x = xC + real(F);
+    y = yC + imag(F);
+end
+
+function drawRect(p, x, y, o, w, h)
+    [x1, y1] = pointArround(x, y, - w/2, + h/2, o);
+    [x2, y2] = pointArround(x, y, + w/2, + h/2, o);
+    [x3, y3] = pointArround(x, y, + w/2, - h/2, o);
+    [x4, y4] = pointArround(x, y, - w/2, - h/2, o);
+    p.XData = [x1, x2, x3, x4, x1];
+    p.YData = [y1, y2, y3, y4, y1];
 end
 
 function timeGraph(series)
@@ -259,55 +237,18 @@ function addTimeline(p)
     timelines = [timelines timeline];
 end
 
-function play()
-    global SIMULATION_TIME speed t playing;
-    if playing == 1
-        return
-    end
-    startCpu=cputime;
-    startT=t;
-    n=0;
-    playing=1;
-    while t<SIMULATION_TIME && playing == 1
-        updateToTime((cputime-startCpu)*speed + startT);
-        drawnow limitrate;
-        n = n + 1;
-    end
-    playing=0;
-    fprintf("Refresh rate : %f Hz\n", n/(cputime-startCpu));
+% Graphiques
+
+function p = newGraph()
+    global curGraph graphWidth graphHeight p;
+    fprintf("Graphe %d/%d\n", curGraph, graphWidth * graphHeight);
+    p = subplot(graphHeight, graphWidth, curGraph);
+    hold on;
+    curGraph = curGraph + 1;
 end
 
-function sliderCallback(hObject, ~)
-    updateToTime(get(hObject, 'Value'));
-end
-
-function playCallback(~, ~)
-    play();
-end
-
-function pauseCallback(~, ~)
-    global playing;
-    playing=0;
-end
-
-function [x, y] = pointArround(xC, yC, xD, yD, o)
-    D = xD + yD * 1i;
-    F = abs(D) .* exp(1i * (angle(D) + o - pi/2));
-    x = xC + real(F);
-    y = yC + imag(F);
-end
-
-function drawRect(p, x, y, o, w, h)
-    [x1, y1] = pointArround(x, y, - w/2, + h/2, o);
-    [x2, y2] = pointArround(x, y, + w/2, + h/2, o);
-    [x3, y3] = pointArround(x, y, + w/2, - h/2, o);
-    [x4, y4] = pointArround(x, y, - w/2, - h/2, o);
-    p.XData = [x1, x2, x3, x4, x1];
-    p.YData = [y1, y2, y3, y4, y1];
-end
-
-function initGraph()
-    cla;
+function graphSpatiale()
+    p = newGraph();
     global SIMULATION_TIME;
     global t speed playing timelines;
     t = 0;
@@ -356,13 +297,133 @@ function initGraph()
     ylabel("Y (mm)");
 end
 
-function d = getTSData(name, i)
-    ts = getTS(name);
-    if isempty(ts.Data)
-        d = 0;
-    else
-        d = ts.Data(i);
+function graphRoues()
+    p = newGraph();
+    timeGraph(["lVolt", "rVolt", "dVolt", "oVolt"]);
+    global motorSaturationMin motorSaturationMax;
+    addLimitline(p, -motorSaturationMin);
+    addLimitline(p, -motorSaturationMax);
+    addLimitline(p, motorSaturationMin);
+    addLimitline(p, motorSaturationMax);
+    addLimitline(p, 0);
+    title("Roues");
+    xlabel("Temps (s)");
+    ylabel("Tension (V)");
+    legend("Tension gauche", "Tension droite", "Dont distance", "Dont direction");
+end
+
+function graphCodeuses()
+    p = newGraph();
+    timeGraph(["lCodTot", "rCodTot", "newL", "newR"]);
+    addLimitline(p, 2^16-1);
+    addLimitline(p, 0);
+    title("Codeuses");
+    xlabel("Temps (s)");
+    ylabel("Crans");
+    legend("Total gauche", "Total droite", "Brut gauche", "Brut droite");
+end
+
+function graphDistance()
+    p = newGraph();
+    timeGraph(["dDirEcart", "dEcart", "oErr"]);
+    global dDirEcartMin dDirEcartMax;
+    addLimitline(p, 0);
+    addLimitline(p, dDirEcartMin);
+    addLimitline(p, dDirEcartMax);
+    addLimitline(p, -dDirEcartMin);
+    addLimitline(p, -dDirEcartMax);
+    title("Distance");
+    xlabel("Temps (s)");
+    ylabel("Distance (mm)");
+    legend("Err. distance", "Err. retenue", "Err rotation");
+end
+
+function graphRotation()
+    p = newGraph();
+    timeGraph(["oDirEcart", "oConsEcart", "oEcart"]);
+    global oDirEcartMin;
+    addLimitline(p, oDirEcartMin);
+    addLimitline(p, -oDirEcartMin);
+    title("Rotation");
+    xlabel("Temps (s)");
+    ylabel("Angle (rad)");
+    legend("Err. direction", "Err. consigne", "Err. retenue");
+end
+
+function graphSecurite()
+    p = newGraph();
+    timeGraph(["dDirEcart", "secFrontL", "secFrontR", "secBackL", "secBackR", "dErr"]);
+    global margeSecurite;
+    addLimitline(p, 0);
+    addLimitline(p, margeSecurite);
+    addLimitline(p, -margeSecurite);
+    title("Distances de sécurité");
+    xlabel("Temps (s)");
+    ylabel("Distance (mm)");
+    legend("Err. distance", "Avant gauche", "Avant droite", "Arrière gauche", "Arrière droite", "Err. retenue");
+end
+
+function graphVitesseDist()
+    p = newGraph();
+    timeGraph(["xVit", "yVit"]);
+    addLimitline(p, 0);
+    title("Vitesse");
+    xlabel("Temps (s)");
+    ylabel("Vitesse (mm/s)");
+    legend("X", "Y");
+end
+
+function graphEtat()
+    p = newGraph();
+    timeGraph(["etat"]);
+    addLimitline(p, 0);
+    title("Etat");
+    xlabel("Temps (s)");
+    %ylabel("Vitesse (mm/s)");
+    %legend("X", "Y");
+end
+
+function graphVitesseAngl()
+    p = newGraph();
+    timeGraph(["oVit"]);
+    addLimitline(p, 0);
+    title("Vitesse");
+    xlabel("Temps (s)");
+    ylabel("Vitesse (rad/s)");
+    legend("O");
+end
+
+% Playback
+
+function play()
+    global SIMULATION_TIME speed t playing;
+    if playing == 1
+        return
     end
+    startCpu=cputime;
+    startT=t;
+    n=0;
+    playing=1;
+    while t<SIMULATION_TIME && playing == 1
+        updateToTime((cputime-startCpu)*speed + startT);
+        drawnow limitrate;
+        n = n + 1;
+    end
+    playing=0;
+    fprintf("Refresh rate : %f Hz\n", n/(cputime-startCpu));
+end
+
+function sliderCallback(hObject, ~)
+    updateToTime(get(hObject, 'Value'));
+end
+
+function playCallback(~, ~)
+    play();
+end
+
+function pauseCallback(~, ~)
+    global playing;
+    playing=0;
 end
 
 function updateToTime(newT)

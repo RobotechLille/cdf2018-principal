@@ -44,3 +44,25 @@ float updatePID(struct PID *pid, float err)
     return pid->KP * err + pid->KI * pid->integErr + pid->KP * derivErr;
 }
 
+void initMovAvg(struct movAvg *movavg, size_t size)
+{
+    movavg->size = size;
+    movavg->actuel = 0;
+    movavg->table = malloc(movavg->size * sizeof(float));
+    for (size_t i = 0; i < movavg->size; i++) {
+        movavg->table[i] = 0.0;
+    }
+    movavg->total = 0.0;
+}
+
+void addMovAvg(struct movAvg *movavg, float val)
+{
+    movavg->total -= movavg->table[movavg->actuel];
+    movavg->table[movavg->actuel] = val;
+    movavg->total += movavg->table[movavg->actuel];
+    movavg->actuel++;
+    movavg->current = movavg->total / (double) movavg->size;
+    if (movavg->actuel >= movavg->size) {
+        movavg->actuel = 0;
+    }
+}

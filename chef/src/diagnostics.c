@@ -150,13 +150,13 @@ void runDiagnostics()
 
     execDiagnostic("Ouverture loquet", diagJustRun, &diagSetLoquetOuvert);
     execDiagnostic("Fermeture loquet", diagJustRun, &diagSetLoquetFerme);
-    execDiagnostic("Reset barillet", diagJustRun, &barilletReset);
-    execDiagnostic("T+1 barillet", diagJustRun, &barilletSuivant);
-    execDiagnostic("T+2 barillet", diagJustRun, &barilletSkip);
-    execDiagnostic("Pousser balle", diagJustRun, &pousserBalle);
-    execDiagnostic("Pos. ejection", diagJustRun, &diagSetPositionBalleEjection);
-    execDiagnostic("Pos. evacuation", diagJustRun, &diagSetPositionBalleEvacuation);
-    execDiagnostic("Pos. attente", diagJustRun, &diagSetPositionBalleAttente);
-    execDiagnostic("Propulsion on", diagJustRun, &diagSetPropulsionOff);
-    execDiagnostic("Propulsion off", diagJustRun, &diagSetPropulsionOn);
+    /* execDiagnostic("Reset barillet", diagJustRun, &barilletReset); */
+    /* execDiagnostic("T+1 barillet", diagJustRun, &barilletSuivant); */
+    /* execDiagnostic("T+2 barillet", diagJustRun, &barilletSkip); */
+    /* execDiagnostic("Pousser balle", diagJustRun, &pousserBalle); */
+    /* execDiagnostic("Pos. ejection", diagJustRun, &diagSetPositionBalleEjection); */
+    /* execDiagnostic("Pos. evacuation", diagJustRun, &diagSetPositionBalleEvacuation); */
+    /* execDiagnostic("Pos. attente", diagJustRun, &diagSetPositionBalleAttente); */
+    /* execDiagnostic("Propulsion on", diagJustRun, &diagSetPropulsionOff); */
+    /* execDiagnostic("Propulsion off", diagJustRun, &diagSetPropulsionOn); */
 }

@@ -73,6 +73,7 @@ int updateParcours()
 void stopParcours()
 {
     pthread_cancel(tParcours);
+    disableAsservissement();
     stop();
 
     resetLCD();
@@ -90,12 +91,15 @@ void gotoPoint(float x, float y, float o)
     /*         o = M_PI - o; */
     /*     } */
     /* } */
-    if (!isOrange) {
+    if (isOrange) {
         o = -o;
+        y = -y;
     }
     struct position pos = { x, y, o };
     setDestination(&pos);
+    printf("New dest : %f %f %f\n", pos.x, pos.y, pos.o);
     waitDestination();
+    printf("Done.\n");
     brake();
 }
 
@@ -112,14 +116,23 @@ void* TaskParcours(void* pdata)
 {
     (void)pdata;
 
-    /* gotoPoint(350, 0, 1.05*M_PI/3.0); */
-    gotoPoint(500, 0, 0);
-    waitDestination();
-    for (int i = 0; i < 5; i++) {
-        setLoquet(false);
+    float x = 306 + (isOrange ? 170 : 0);
+
+    setSecurite(true, false);
+    gotoPoint(x, 200, -M_PI_2);
+    setSecurite(false, true);
+    gotoPoint(x, 20, -M_PI_2);
+    brake();
+    for (int i = 0; i < 3; i++) {
         setLoquet(true);
+        setLoquet(false);
     }
-    gotoPoint(0, 0, 0);
+    addPoints(10);
+    gotoPoint(x, 200, ANGLE_INSIGNIFIANT);
+    setSecurite(true, false);
+    gotoPoint(600, 50, ANGLE_INSIGNIFIANT);
+    disableAsservissement();
+    stop();
     return NULL;
 }
 

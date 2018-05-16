@@ -11,7 +11,7 @@ CFLAGS_CUSTOM += -g
 ## Générateurs de drapeaux pour les bibliothèques
 PKG_CONFIG=pkg-config
 ## Nom des objets communs
-OBJS=actionneurs buttons CA common debug diagnostics dimensions fpga i2c imu ihm lcd motor movement parcours points position securite
+OBJS=actionneurs buttons CA calibrage common debug diagnostics dimensions fpga i2c imu ihm lcd motor movement parcours points position securite
 OBJS_O=$(addprefix obj/,$(addsuffix .o,$(OBJS)))
 
 # VARIABLES AUTOMATIQUES

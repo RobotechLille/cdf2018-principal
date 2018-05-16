@@ -40,26 +40,29 @@
 
 // Constantes asservissement
 
+// Asservissement en angle
+#define O_VIT_MIN 0.5 // rad/s
+#define O_TENSION_MIN 1 // V
+#define O_DIR_ECART_MIN (20.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_ECART_MIN (10.0 / 360.0 * 2.0 * M_PI) // rad
+#define O_ECART_MAX (20.0 / 360.0 * 2.0 * M_PI) // rad
+#define DERIV_M_PI (MOTOR_SATURATION_MAX / (WHEEL_PERIMETER * M_PI))
+#define O_KP (3.0 * DERIV_M_PI) // au max peut dérivier de pi
+#define O_KI 0.0
+#define O_KD 0.0
+#define CAROTTE_ANGLE (TARGET_TENSION / O_KP) // mm
 
 // Asservissement en distance
-#define D_DIR_ECART_MIN 30.0 // mm
-#define D_DIR_ECART_MAX 50.0 // mm
-#define D_KP 0.05
+#define D_VIT_MIN 10.0 // mm/s
+#define D_TENSION_MIN 1 // V
+#define D_DIR_ECART_MIN 20.0 // mm
+#define D_DIR_ECART_MAX 70.0 // mm
+#define D_KP 0.1
 #define D_KI 0.0
 #define D_KD 0.0
 #define TARGET_TENSION_RATIO 0.75
 #define TARGET_TENSION (TARGET_TENSION_RATIO * MOTOR_SATURATION_MAX) // V
 #define CAROTTE_DISTANCE (TARGET_TENSION / D_KP) // mm
-
-// Asservissement en angle
-#define O_DIR_ECART_MIN (25.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_DIR_ECART_MAX (45.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_ECART_MIN (25.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_ECART_MAX (45.0 / 360.0 * 2.0 * M_PI) // rad
-#define O_KP (MOTOR_SATURATION_MAX / (WHEEL_PERIMETER * M_PI)) // au max peut dérivier de pi
-#define O_KI 0.0
-#define O_KD 0.0
-#define CAROTTE_ANGLE (TARGET_TENSION / O_KP) // mm
 
 #define MARGE_SECURITE 300.0 // mm
 

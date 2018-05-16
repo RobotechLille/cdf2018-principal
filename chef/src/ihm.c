@@ -2,12 +2,13 @@
 #include <signal.h>
 #include <time.h>
 
-#include "position.h"
 #include "buttons.h"
+#include "calibrage.h"
 #include "diagnostics.h"
 #include "ihm.h"
 #include "lcd.h"
 #include "parcours.h"
+#include "position.h"
 
 // Globales
 pthread_t tIHM;
@@ -116,7 +117,7 @@ void* TaskIHM(void* pdata)
             if (bout == rouge) {
                 clearLCD();
                 printToLCD(LCD_LINE_1, "Calibrage...");
-                resetPosition();
+                calibrer(isOrange);
                 clock_gettime(CLOCK_REALTIME, &calibrageLast);
             } else if (bout == jaune) {
                 break;
@@ -191,7 +192,7 @@ void* TaskIHM(void* pdata)
             if (bout == rouge) {
                 clearLCD();
                 printToLCD(LCD_LINE_1, "Remise a zero...");
-                delay(3000); // TODO
+                resetPosition();
             } else if (bout == jaune) {
                 break;
             }

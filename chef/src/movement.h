@@ -9,7 +9,19 @@
 
 // #define ENABLE_SECURITE
 
+#include <stdbool.h>
+
 #include "position.h"
+
+enum movStates {
+    quelconque,  // 0
+    direction,   // 1
+    approche,    // 2
+    arret,       // 3
+    orientation, // 4
+    oriente,     // 5
+    fini         // 6
+};
 
 // Public
 void configureMovement();
@@ -18,6 +30,7 @@ void setDestination(struct position* pos);
 void waitDestination();
 void enableAsservissement();
 void disableAsservissement();
+void setSecurite(bool av, bool ar);
 
 // Private
 void* TaskMovement(void* pData);

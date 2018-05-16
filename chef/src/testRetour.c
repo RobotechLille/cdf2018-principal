@@ -39,8 +39,11 @@ int main()
     disableAsservissement();
     freewheel();
 
+    enum boutons but = pressedButton(BUT_BLOCK);
+    clearLCD();
+
     for (;;) {
-        switch (pressedButton(BUT_BLOCK)) {
+        switch (but) {
         case jaune:
             isFree = !isFree;
             if (isFree) {
@@ -56,12 +59,13 @@ int main()
         default:
             break;
         }
-        clearLCD();
-        if (isFree) {
-            printToLCD(LCD_LINE_1, "Freewheel");
-        } else {
-            printToLCD(LCD_LINE_1, "Asservi");
-        }
+
+        struct position pos;
+        getPosition(&pos);
+
+        printfToLCD(LCD_LINE_1, "X% 4g Y% 4g ", pos.x, pos.y);
+        printfToLCD(LCD_LINE_2, "O% 10g %s", pos.o, (isFree ? "FREE" : "ASRV"));
+        but = pressedButton(100);
     }
 
     deconfigureMovement();
